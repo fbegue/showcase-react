@@ -13,6 +13,8 @@ import ContainerDimensions from 'react-container-dimensions';
 import useAsync from './useAsync';
 import { useDB, useNormalizedApi } from './db'
 
+import {getUserPlaylists } from './playlists.js'
+
 import 'brace/mode/json';
 import 'brace/theme/monokai';
 
@@ -100,7 +102,8 @@ function GithubCommit() {
     )
       .then(res => res.json())
       .then(response => {
-        console.log("$test============");
+        console.warn("using fake data");
+        response = getUserPlaylists;
         console.log(response);
         // setCommitHistory(response.items);
         // setIsLoading(false);
