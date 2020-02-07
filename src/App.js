@@ -88,25 +88,34 @@ function GithubCommit() {
     setPage(page + 1);
   };
 
+  //every time the component renders, we will call useEffect
+
+  var fakeFetch = function(){
+      return new Promise(function(done, fail) {
+        done(getUserPlaylists)
+      })
+  };
+
   useEffect(() => {
-    fetch(
-      // `https://api.github.com/search/commits?q=repo:facebook/react+css&page=${page}`,
-      'http://localhost:8888/getUserPlaylists',
-      {
-        method: "POST",
-        // mode: "no-cors"
-        // headers: new Headers({
-        //   Accept: "application/vnd.github.cloak-preview"
-        // })
-      }
-    )
-      .then(res => res.json())
+    // fetch(
+    //   // `https://api.github.com/search/commits?q=repo:facebook/react+css&page=${page}`,
+    //   'http://localhost:8888/getUserPlaylists',
+    //   {
+    //     method: "POST",
+    //     // mode: "no-cors"
+    //     // headers: new Headers({
+    //     //   Accept: "application/vnd.github.cloak-preview"
+    //     // })
+    //   }
+    // )
+    fakeFetch()
+      // .then(res => res.json())
       .then(response => {
         console.warn("using fake data");
         response = getUserPlaylists;
         console.log(response);
-        // setCommitHistory(response.items);
-        // setIsLoading(false);
+        setCommitHistory(response.items);
+        setIsLoading(false);
       })
       .catch(error => console.log(error));
   }, [page]);
@@ -122,12 +131,13 @@ function GithubCommit() {
 
       {commitHistory.map((c, index) => (
         <div key={index}>
-          {c.commit && (
+          {c.name && (
               <div>
                 <h2 style={{ textDecoration: "Underline" }}>
-                  {c.commit.committer.name}
+                  {c.name}
+                  ({c.tracks.total})
                 </h2>
-                <p>{c.commit.message}</p>
+                <p>{c.owner.display_name}</p>
               </div>
           )}
         </div>
@@ -145,6 +155,7 @@ function App(props) {
   let db = useDB();
 
   let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
+
 
   useEffect(() => {
     fetchTodos(filter)
@@ -183,25 +194,25 @@ function App(props) {
           </div>
           <div className={classes.storeInspectors}>
             <div className={classes.storeInspector}>
-            <ContainerDimensions>
-                { ({ height, width }) => (
-                    <React.Fragment>
-                      <div className={classes.storeInspectorHeader}>
-                        Entity Store
-                      </div>
-                      <AceEditor
-                        value={JSON.stringify(db.entities, 2, 2)}
-                        mode="json"
-                        theme="monokai"
-                        width={width}
-                        height={320}
-                        readOnly
-                        name="entities-json"
-                        editorProps={{$blockScrolling: true}}
-                      />
-                    </React.Fragment>
-                ) }
-            </ContainerDimensions>
+            {/*<ContainerDimensions>*/}
+            {/*    { ({ height, width }) => (*/}
+            {/*        <React.Fragment>*/}
+            {/*          <div className={classes.storeInspectorHeader}>*/}
+            {/*            Entity Store*/}
+            {/*          </div>*/}
+            {/*          <AceEditor*/}
+            {/*            value={JSON.stringify(db.entities, 2, 2)}*/}
+            {/*            mode="json"*/}
+            {/*            theme="monokai"*/}
+            {/*            width={width}*/}
+            {/*            height={320}*/}
+            {/*            readOnly*/}
+            {/*            name="entities-json"*/}
+            {/*            editorProps={{$blockScrolling: true}}*/}
+            {/*          />*/}
+            {/*        </React.Fragment>*/}
+            {/*    ) }*/}
+            {/*</ContainerDimensions>*/}
             </div>
             <div className={classes.storeInspector}>
               <ContainerDimensions>

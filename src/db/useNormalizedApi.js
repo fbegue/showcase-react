@@ -38,6 +38,32 @@ const useNormalizedApi = () => {
         schema: apiSchemas.fetchTodosResponseSchema
       };
     },
+    fetchPlaylists: async (filter) => {
+      let playlists = await api.fetchPlaylists(filter);
+      console.log("fetchPlaylists",playlists);
+
+      //todo: i don't really understand what happening here
+
+      let { result, entities } = normalize(
+          playlists,
+          apiSchemas.fetchTodosResponseSchema
+      );
+      db.mergeEntities(entities);
+      db.updateStoredQuery(filterQueries[filter], result);
+
+      //testing what happened in store
+
+      // let allTodosQuery = db.getStoredQuery('ALL_TODOS');
+      // let todos = db.executeQuery(allTodosQuery);
+      // todos.then(function(res){
+      //   console.log(res);
+      // })
+
+      return {
+        value: result,
+        schema: apiSchemas.fetchTodosResponseSchema
+      };
+    },
     updateTodo: async (id, payload) => {
       let todo = await api.updateTodo(id, payload);
       let { result, entities } = normalize(
@@ -53,12 +79,16 @@ const useNormalizedApi = () => {
         db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.addId(prev, id));
         db.updateStoredQuery('COMPLETED_TODOS', (prev) => immutableOps.removeId(prev, id));
       }
+
       return {
         value: result,
         schema: apiSchemas.updateTodoResponseSchema
       };
     },
     addTodo: async (text) => {
+
+      //this goes and hits a fake api service and fake local db
+
       let todo = await api.addTodo(text);
       let { result, entities } = normalize(
         todo,
@@ -67,6 +97,8 @@ const useNormalizedApi = () => {
       db.mergeEntities(entities);
       db.updateStoredQuery('ALL_TODOS', (prev) => immutableOps.addId(prev, todo.id));
       db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.addId(prev, todo.id));
+
+     //we're not using this return value but it could be useful
       return {
         value: result,
         schema: apiSchemas.addTodoResponseSchema

@@ -1,6 +1,8 @@
 // const uuidv4 = require('uuid/v4');
 // This is a fake in-memory implementation of something
 // that would be implemented by calling a REST server.
+import {getUserPlaylists} from "../playlists";
+
 let counter = 0
 
 const fakeDatabase = {
@@ -44,6 +46,20 @@ const fetchTodo = id =>
     return fakeDatabase.todos.find(t => t.id === id);
   });
 
+
+var fakeFetch = function(){
+    return new Promise(function(done, fail) {
+        done(getUserPlaylists)
+    })
+};
+
+const fetchPlaylists = id =>
+    delay(500).then(() => {
+        return fakeFetch()
+    });
+
+
+
 const addTodo = text =>
   delay(200).then(() => {
     const todo = {
@@ -75,5 +91,6 @@ export default {
   fetchTodo,
   addTodo,
   updateTodo,
-  deleteTodo
+  deleteTodo,
+    fetchPlaylists
 }

@@ -20,7 +20,18 @@ const AddTodoDialog = (props) => {
       .catch(() => {
         props.onCancel()
       })
-  }
+  };
+
+  const fetchPlaylists = () => {
+    console.log("fetchPlaylists");
+    normalizedApi.fetchPlaylists(text)
+        .then(() => {
+          props.onSuccess()
+        })
+        .catch(() => {
+          props.onCancel()
+        })
+  };
 
   return (
     <Dialog
@@ -47,6 +58,9 @@ const AddTodoDialog = (props) => {
         </Button>
         <Button onClick={addTodo} color="primary">
           Create
+        </Button>
+        <Button onClick={fetchPlaylists} color="primary">
+          testFetch
         </Button>
       </DialogActions>
     </Dialog>
