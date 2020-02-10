@@ -3,6 +3,7 @@
 // that would be implemented by calling a REST server.
 import {getUserPlaylists} from "../testdata/getUserPlaylists";
 import {getArtistGenres} from "../testdata/getArtistGenres";
+import {getMetroEvents} from "../testdata/getMetroEvents";
 let counter = 0
 
 const fakeDatabase = {
@@ -58,6 +59,12 @@ var fakeFetch2 = function(){
     })
 };
 
+var fakeFetch3 = function(){
+    return new Promise(function(done, fail) {
+        done(getMetroEvents)
+    })
+};
+
 const fetchPlaylists = id =>
     delay(500).then(() => {
         return fakeFetch1()
@@ -67,6 +74,12 @@ const fetchArtistGenres = id =>
     delay(500).then(() => {
         return fakeFetch2()
     });
+
+const fetchEvents = id =>
+    delay(500).then(() => {
+        return fakeFetch3()
+    });
+
 
 
 
@@ -103,5 +116,6 @@ export default {
   updateTodo,
   deleteTodo,
     fetchPlaylists,
-    fetchArtistGenres
+    fetchArtistGenres,
+    fetchEvents
 }

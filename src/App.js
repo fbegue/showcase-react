@@ -8,6 +8,9 @@ import Typography from '@material-ui/core/Typography';
 import Sidebar from './Sidebar';
 import FilterBar from './FilterBar';
 import NestedList from './NestedList';
+import NestedListEvents from './NestedListEvents';
+import './App.css'
+
 
 
 import TodoDetail from './TodoDetail';
@@ -21,6 +24,12 @@ import {getUserPlaylists } from './testdata/getUserPlaylists.js'
 
 import 'brace/mode/json';
 import 'brace/theme/monokai';
+import List from "@material-ui/core/List";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import InboxIcon from "@material-ui/core/SvgIcon/SvgIcon";
+import ListItemText from "@material-ui/core/ListItemText";
 
 const drawerWidth = 360;
 
@@ -74,86 +83,6 @@ const filterQueries = {
   'completed': 'COMPLETED_TODOS'
 }
 
-//==================================================
-//HTTP attempt with hooks
-//https://blog.bitsrc.io/making-api-calls-with-react-hooks-748ebfc7de8c
-
-// import React, { useState, useEffect } from "react";
-// import ReactDOM from "react-dom";
-//
-// import "./styles.css";
-
-//<GithubCommit />
-// function GithubCommit() {
-//   const [page, setPage] = useState(1);
-//   const [commitHistory, setCommitHistory] = useState([]);
-//   const [isLoading, setIsLoading] = useState(true);
-//
-//   const loadMoreCommit = () => {
-//     setPage(page + 1);
-//   };
-//
-//   //every time the component renders, we will call useEffect
-//
-//   var fakeFetch = function(){
-//       return new Promise(function(done, fail) {
-//         done(getUserPlaylists)
-//       })
-//   };
-//
-//   useEffect(() => {
-//     // fetch(
-//     //   // `https://api.github.com/search/commits?q=repo:facebook/react+css&page=${page}`,
-//     //   'http://localhost:8888/getUserPlaylists',
-//     //   {
-//     //     method: "POST",
-//     //     // mode: "no-cors"
-//     //     // headers: new Headers({
-//     //     //   Accept: "application/vnd.github.cloak-preview"
-//     //     // })
-//     //   }
-//     // )
-//     fakeFetch()
-//       // .then(res => res.json())
-//       .then(response => {
-//         console.warn("using fake data");
-//         response = getUserPlaylists;
-//         console.log(response);
-//         setCommitHistory(response.items);
-//         setIsLoading(false);
-//       })
-//       .catch(error => console.log(error));
-//   }, [page]);
-//
-//   return (
-//     <div>
-//       <h1> API calls with React Hooks </h1>
-//       {isLoading && <p>Wait I'm Loading comments for you</p>}
-//
-//       {commitHistory.length !== 0 && (
-//         <button onClick={loadMoreCommit}>Load More Commits</button>
-//       )}
-//
-//       {commitHistory.map((c, index) => (
-//         <div key={index}>
-//           {c.name && (
-//               <div>
-//                 <h2 style={{ textDecoration: "Underline" }}>
-//                   {c.name}
-//                   ({c.tracks.total})
-//                 </h2>
-//                 <p>{c.owner.display_name}</p>
-//               </div>
-//           )}
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
-
-//==================================================
-//boilerplate begin
-
 function App(props) {
   const { classes } = props;
   let [filter, setFilter] = useState('active');
@@ -178,6 +107,13 @@ function App(props) {
 
   let pqry3 = db.getStoredQuery('ALL_GENRES');
   let genres = db.executeQuery(pqry3);
+
+
+  let pqry4 = db.getStoredQuery('ALL_EVENTS');
+  let events = db.executeQuery(pqry4);
+
+  //testing:
+  let performances = [{id:1,displayName:"display1"},{id:2,displayName:"display2"},{id:3,displayName:"display3"}]
 
   let todoIds = JSON.stringify(todos.map(t => t.id))
 
@@ -208,63 +144,111 @@ function App(props) {
           artists={artists}
           genres={genres}
       />
+
+      {/*todo: list of nested lists?*/}
+      {/*yeah no this isn't working very well - could be for an easy reason but idk */}
+      {/*like i can in no way actually click on anything in here*/}
+      {/*just seems like its not going to be THAT easy :)*/}
+      {/*google: list of nestedList material ui*/}
+      {/*https://stackoverflow.com/questions/48607844/multilevel-nested-list-in-material-ui-next*/}
+      <div>
+        <List>
+          {events.map((event, index) => (
+              <ListItem
+                  button
+                  key={event.id}
+                  onClick={(e) => props.onSelectedTodoChange(event.id)}
+              >
+                <Typography
+                    variant="subtitle1"
+                    color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}
+                >
+                  {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>
+                </Typography>
+                <div className={"nestedListEvents"} >
+                    {/*<NestedListEvents*/}
+                    {/*    // performances={event.performance}*/}
+                    {/*    // testing:*/}
+                    {/*    performances={performances}*/}
+                    {/*/>*/}
+                </div>
+              </ListItem>
+          ))}
+        </List>
+        {/*<List>*/}
+        {/*  {events.map((event, index) => (*/}
+        {/*      <ListItem*/}
+        {/*          button*/}
+        {/*          key={event.id}*/}
+        {/*          onClick={(e) => props.onSelectedTodoChange(event.id)}*/}
+        {/*      >*/}
+        {/*        <Typography*/}
+        {/*            variant="subtitle1"*/}
+        {/*            color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}*/}
+        {/*        >*/}
+        {/*          {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>*/}
+        {/*        </Typography>*/}
+        {/*      </ListItem>*/}
+        {/*  ))}*/}
+        {/*</List>*/}
+      </div>
       <div className={classes.contentAndToolbar}>
-        <AppBar position="relative" className={classes.appBar}>
-          <Toolbar>
-            <Typography variant="h6" color="inherit" noWrap>
-              Todo App
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        <div className={classes.content}>
-          <div className={classes.todoDetail}>
-            <TodoDetail id={selectedTodoId}/>
-          </div>
-          <div className={classes.storeInspectors}>
-            <div className={classes.storeInspector}>
-            <ContainerDimensions>
-                { ({ height, width }) => (
-                    <React.Fragment>
-                      <div className={classes.storeInspectorHeader}>
-                        Entity Store
-                      </div>
-                      <AceEditor
-                        value={JSON.stringify(db.entities, 2, 2)}
-                        mode="json"
-                        theme="monokai"
-                        width={width}
-                        height={320}
-                        readOnly
-                        name="entities-json"
-                        editorProps={{$blockScrolling: true}}
-                      />
-                    </React.Fragment>
-                ) }
-            </ContainerDimensions>
-            </div>
-            <div className={classes.storeInspector}>
-              <ContainerDimensions>
-                  { ({ height, width }) => (
-                    <React.Fragment>
-                      <div className={classes.storeInspectorHeader}>
-                        Query Store
-                      </div>
-                      <AceEditor
-                        value={JSON.stringify(db.storedQueries, 2, 2)}
-                        mode="json"
-                        theme="monokai"
-                        width={width}
-                        height={320}
-                        readOnly
-                        name="stored-queries-json"
-                        editorProps={{$blockScrolling: true}}
-                      />
-                    </React.Fragment>
-                  ) }
-              </ContainerDimensions>
-            </div>
-          </div>
-        </div>
+        {/*<AppBar position="relative" className={classes.appBar}>*/}
+        {/*  <Toolbar>*/}
+        {/*    <Typography variant="h6" color="inherit" noWrap>*/}
+        {/*      Todo App*/}
+        {/*    </Typography>*/}
+        {/*  </Toolbar>*/}
+        {/*</AppBar>*/}
+        {/*<div className={classes.content}>*/}
+        {/*  <div className={classes.todoDetail}>*/}
+        {/*    <TodoDetail id={selectedTodoId}/>*/}
+        {/*  </div>*/}
+        {/*  <div className={classes.storeInspectors}>*/}
+        {/*    <div className={classes.storeInspector}>*/}
+        {/*    <ContainerDimensions>*/}
+        {/*        { ({ height, width }) => (*/}
+        {/*            <React.Fragment>*/}
+        {/*              <div className={classes.storeInspectorHeader}>*/}
+        {/*                Entity Store*/}
+        {/*              </div>*/}
+        {/*              <AceEditor*/}
+        {/*                value={JSON.stringify(db.entities, 2, 2)}*/}
+        {/*                mode="json"*/}
+        {/*                theme="monokai"*/}
+        {/*                width={width}*/}
+        {/*                height={320}*/}
+        {/*                readOnly*/}
+        {/*                name="entities-json"*/}
+        {/*                editorProps={{$blockScrolling: true}}*/}
+        {/*              />*/}
+        {/*            </React.Fragment>*/}
+        {/*        ) }*/}
+        {/*    </ContainerDimensions>*/}
+        {/*    </div>*/}
+        {/*    <div className={classes.storeInspector}>*/}
+        {/*      <ContainerDimensions>*/}
+        {/*          { ({ height, width }) => (*/}
+        {/*            <React.Fragment>*/}
+        {/*              <div className={classes.storeInspectorHeader}>*/}
+        {/*                Query Store*/}
+        {/*              </div>*/}
+        {/*              <AceEditor*/}
+        {/*                value={JSON.stringify(db.storedQueries, 2, 2)}*/}
+        {/*                mode="json"*/}
+        {/*                theme="monokai"*/}
+        {/*                width={width}*/}
+        {/*                height={320}*/}
+        {/*                readOnly*/}
+        {/*                name="stored-queries-json"*/}
+        {/*                editorProps={{$blockScrolling: true}}*/}
+        {/*              />*/}
+        {/*            </React.Fragment>*/}
+        {/*          ) }*/}
+        {/*      </ContainerDimensions>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
       </div>
     </div>
   );

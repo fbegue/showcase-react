@@ -32,12 +32,12 @@ import './NestedList.css';
 // 	},
 // }));
 
-export default function NestedList(props) {
+export default function NestedListEvents(props) {
 	//const classes = useStyles();
 	const classes = {nested:"nestedCustom",root:"root"}
 	const [open, setOpen] = React.useState(true);
 
-	console.log("NestedList props",props);
+	console.log("NestedListEvents props",props);
 
 	const handleClick = () => {
 		setOpen(!open);
@@ -47,51 +47,48 @@ export default function NestedList(props) {
 		<List
 			component="nav"
 			aria-labelledby="nested-list-subheader"
-			subheader={
-				<ListSubheader component="div" id="nested-list-subheader">
-					Artists and Genres
-				</ListSubheader>
-			}
+			// subheader={
+			// 	<ListSubheader component="div" id="nested-list-subheader">
+			// 		Events
+			// 	</ListSubheader>
+			// }
 			className={classes.root}
 		>
 			<ListItem button onClick={handleClick}>
 				<ListItemIcon>
 					<InboxIcon />
 				</ListItemIcon>
-				<ListItemText primary="Artists" />
+				<ListItemText primary="Performances" />
 				{open ? <ExpandLess /> : <ExpandMore />}
 			</ListItem>
 			<Collapse in={open} timeout="auto" unmountOnExit>
 				<List component="div" disablePadding>
-					{props.artists.map((art, index) => (
-						<ListItem key={art.id}button className={classes.nested}>
-							{/*<ListItemIcon>*/}
-								{/*<StarBorder />*/}
-							{/*</ListItemIcon>*/}
-							<ListItemText primary={art.name} />
+					{props.performances.map((perf, index) => (
+						<ListItem key={perf.id}button className={classes.nested}>
+							<ListItemText primary={perf.displayName} />
 						</ListItem>
 					))}
 				</List>
 			</Collapse>
-			<ListItem button onClick={handleClick}>
-				<ListItemIcon>
-					<InboxIcon />
-				</ListItemIcon>
-				<ListItemText primary="Genres" />
-				{open ? <ExpandLess /> : <ExpandMore />}
-			</ListItem>
-			<Collapse in={open} timeout="auto" unmountOnExit>
-				<List component="div" disablePadding>
-					{props.genres.map((g, index) => (
-						<ListItem key={g.id}button className={classes.nested}>
-							{/*<ListItemIcon>*/}
-							{/*<StarBorder />*/}
-							{/*</ListItemIcon>*/}
-							<ListItemText primary={g.name} />
-						</ListItem>
-					))}
-				</List>
-			</Collapse>
+		{/*	<ListItem button onClick={handleClick}>*/}
+		{/*		<ListItemIcon>*/}
+		{/*			<InboxIcon />*/}
+		{/*		</ListItemIcon>*/}
+		{/*		<ListItemText primary="Genres" />*/}
+		{/*		{open ? <ExpandLess /> : <ExpandMore />}*/}
+		{/*	</ListItem>*/}
+		{/*	<Collapse in={open} timeout="auto" unmountOnExit>*/}
+		{/*		<List component="div" disablePadding>*/}
+		{/*			{props.genres.map((g, index) => (*/}
+		{/*				<ListItem key={g.id}button className={classes.nested}>*/}
+		{/*					/!*<ListItemIcon>*!/*/}
+		{/*					/!*<StarBorder />*!/*/}
+		{/*					/!*</ListItemIcon>*!/*/}
+		{/*					<ListItemText primary={g.name} />*/}
+		{/*				</ListItem>*/}
+		{/*			))}*/}
+		{/*		</List>*/}
+		{/*	</Collapse>*/}
 		</List>
 	);
 }

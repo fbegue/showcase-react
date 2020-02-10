@@ -235,6 +235,27 @@ const useNormalizedApi = () => {
         schema: apiSchemas.fetchPlaylistResponseSchema
       };
     },
+    fetchEvents: async (filter) => {
+
+      let events = await api.fetchEvents(filter);
+      console.log("events",events);
+
+      let { result, entities } = normalize(
+          events,
+          apiSchemas.fetchEventResponseSchema
+      );
+
+      db.mergeEntities(entities);
+      db.updateStoredQuery("ALL_EVENTS", result);
+      console.log(entities);
+      console.log(result);
+      
+      //var result = {};
+      return {
+        value: result,
+        schema: apiSchemas.fetchEventResponseSchema
+      };
+    },
     updateTodo: async (id, payload) => {
       let todo = await api.updateTodo(id, payload);
       let { result, entities } = normalize(

@@ -78,7 +78,14 @@ function Sidebar(props) {
 
   const testTodo = (text) => {
     console.log("testTodo",props);
-    normalizedApi.testTodo(text)
+    // normalizedApi.testTodo(text)
+    //     .then(() => {
+    //       //props.onSuccess()
+    //     })
+    //     .catch(() => {
+    //       //props.onCancel()
+    //     })
+    normalizedApi.fetchEvents(text)
         .then(() => {
           //props.onSuccess()
         })
