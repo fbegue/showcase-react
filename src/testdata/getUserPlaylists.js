@@ -5,6 +5,52 @@ module.exports.getUserPlaylists = {
 			"collaborative": false,
 			"description": "",
 			"external_urls": {
+				"spotify": "https://open.spotify.com/playlist/651K6azUoEp54g1xQa35cI"
+			},
+			"href": "https://api.spotify.com/v1/playlists/651K6azUoEp54g1xQa35cI",
+			"id": "651K6azUoEp54g1xQa35cI",
+			"images": [
+				{
+					"height": 640,
+					"url": "https://mosaic.scdn.co/640/2f4ac0b9e8697d8ebed7f59ce433b442b880f6c8ab67616d0000b273350f4f1b49478d061fb8318aab67616d0000b273f2effc054ae243d0669ce179d9f5e0fe9955ac7563721e3d2c53913a47772099",
+					"width": 640
+				},
+				{
+					"height": 300,
+					"url": "https://mosaic.scdn.co/300/2f4ac0b9e8697d8ebed7f59ce433b442b880f6c8ab67616d0000b273350f4f1b49478d061fb8318aab67616d0000b273f2effc054ae243d0669ce179d9f5e0fe9955ac7563721e3d2c53913a47772099",
+					"width": 300
+				},
+				{
+					"height": 60,
+					"url": "https://mosaic.scdn.co/60/2f4ac0b9e8697d8ebed7f59ce433b442b880f6c8ab67616d0000b273350f4f1b49478d061fb8318aab67616d0000b273f2effc054ae243d0669ce179d9f5e0fe9955ac7563721e3d2c53913a47772099",
+					"width": 60
+				}
+			],
+			"name": "showcase_test1",
+			"owner": {
+				"display_name": "Franky Begue",
+				"external_urls": {
+					"spotify": "https://open.spotify.com/user/dacandyman01"
+				},
+				"href": "https://api.spotify.com/v1/users/dacandyman01",
+				"id": "dacandyman01",
+				"type": "user",
+				"uri": "spotify:user:dacandyman01"
+			},
+			"primary_color": null,
+			"public": true,
+			"snapshot_id": "OCw5YWRiNGFjZDg4NTI1MDNmOTE1MjQxMDczMDFiYjRmODc2YjVlZDkx",
+			"tracks": {
+				"href": "https://api.spotify.com/v1/playlists/651K6azUoEp54g1xQa35cI/tracks",
+				"total": 7
+			},
+			"type": "playlist",
+			"uri": "spotify:playlist:651K6azUoEp54g1xQa35cI"
+		},
+		{
+			"collaborative": false,
+			"description": "",
+			"external_urls": {
 				"spotify": "https://open.spotify.com/playlist/7tSKoibeWp1Eh5TitvbjKo"
 			},
 			"href": "https://api.spotify.com/v1/playlists/7tSKoibeWp1Eh5TitvbjKo",
@@ -167,7 +213,7 @@ module.exports.getUserPlaylists = {
 			},
 			"primary_color": null,
 			"public": false,
-			"snapshot_id": "MjYzNTAwMTAsMDAwMDAwMDBlNjc3N2IzYWYwNjlhMWM1NTE2MzExZTI0N2RkYTNjNA==",
+			"snapshot_id": "MjYzNTQzMjksMDAwMDAwMDAxNTcxMWJmYjMxZDY0MzVmY2U2NWE1NDkxN2M2ZWQxMw==",
 			"tracks": {
 				"href": "https://api.spotify.com/v1/playlists/37i9dQZF1DZ06evO2ZTWSp/tracks",
 				"total": 40
@@ -222,7 +268,7 @@ module.exports.getUserPlaylists = {
 			"images": [
 				{
 					"height": null,
-					"url": "https://newjams-images.scdn.co/v2/discover-weekly/kJRoCccrUqc8Wb_-qtmFpqd3X5Cl0HPjVBcOqji8OaOhbC2amP2cjjCuYWB5jrZlQID_VLFAqUDnhNwAQMb9kaMJNXu0s8A6vMSLaWtR14_8yd3Oy7sCs8JK_ajNS0DwM4JxZPufHVtUEj0N_K5z39VDOywn-Ki0lJm-4WFeNAPi3LAgYDqerve-F2vQx715CjkXc3wEWarjc-wXYi__VtbMal07iRkDAsBbEuVUptTTBipjFTQ97mQ84Ekun566MOrVD3ljSaR5u6l0afX2kBP7OoU_yamm1hSDsE73P4mgK4QnL6lcGtIpoJhomPPo/NzE6MzQ6MzJUMzItMjAtMA==/default",
+					"url": "https://newjams-images.scdn.co/v2/discover-weekly/kJRoCccrUqc8Wb_-qtmFpqd3X5Cl0HPjVBcOqji8OaOhbC2amP2cjjCuYWB5jrZlQID_VLFAqUDnhNwAQMb9kaMJNXu0s8A6vMSLaWtR14_8yd3Oy7sCs8JK_ajNS0DwM4JxZPufHVtUEj0N_K5z37ao5vf1d9RcaSbJKgLpM7U-0_bkBXxuH7xg167yYfbEyFU0epfK5oWXk3rE7V1qrKCg1SYqPr-ThEitoqGb1pwXjIhNh8BahGjeBy3CNq9vBq4icQCfni5Jb4W5ojbp9vl938jGwhgZkpo9M7p0DH78szV1f0n9603Eti-Bm3_l/NzE6MzQ6MzJUMzItMjAtMA==/default",
 					"width": null
 				}
 			],
@@ -239,7 +285,7 @@ module.exports.getUserPlaylists = {
 			},
 			"primary_color": null,
 			"public": false,
-			"snapshot_id": "MjYzNDQ4MDAsMDAwMDAwMDBkNjZjMTZmMjgyMmRkNTA5ZTlkMmFjZjc5OTliYjAyMA==",
+			"snapshot_id": "MjYzNDQ4MDAsMDAwMDAwMDBjODNlNTNhNGFlMTYwZDkwNTcxMTlmY2JlM2E1NzE3ZA==",
 			"tracks": {
 				"href": "https://api.spotify.com/v1/playlists/37i9dQZEVXcGolgKZUussr/tracks",
 				"total": 30
@@ -258,7 +304,7 @@ module.exports.getUserPlaylists = {
 			"images": [
 				{
 					"height": null,
-					"url": "https://newjams-images.scdn.co/v2/discover-weekly/wW2X07uyLXD58Py6KNOIgzm-lP02vV9duDh5Zqelqw7T2qqpxWfl2iFMT_a3Rvyz2Ne98e_ecFMsWkFM-VyLiHH5L7Q_PFZslonY_saR2CPc0tLepkcwz3Ml6ZCNrxD3jqFTKCkI6ur_euro-t9yWUIZgEXJZlakEheJpxnhLzPWqH90VnWnStOoszUNUTztgpl_JgWc35p4QvCxCzwOjyo3GBaOhlG4nIbnwskeCqmY68qaOAALILT1jQKjOttjRhEJvHwOIffuQ3UFF_zm6qoyIYQygEmhWbxZ4XgNNB4=/MTE6MzE6MTFUODEtMjAtMA==/default",
+					"url": "https://newjams-images.scdn.co/v2/discover-weekly/UtHD117KGSeULcnMSi0DrKwrROUEcvakSJIHw1-9ZU4rVg3iK0vuN9mtyvPbg447OgWKIVMVrcW8ASzVTPFDXENaybYOBsibawadUHQaZ6_TT-v93iHkhBsyPyR-x2VqyDiLtm-NGoFQ6W1WcEhCSsAstQq8eI4XXjl-QeuUsq5X2hnumAUabY4VJZzvSpPz9RRsXtFnNZ_BwtHhY-coFnVw6d6chi08frW7-llrGpkiK9dtHOCqTrJic6up9ZyOGrmwoRg9BbTyXH0qNxtdohBK33PwiYy19JOI44ZVBZ-E1lPvy9daojcnaIoIR2E2uPOs6ltLnBA_3HgNvQb-2z1TjYf1xgz70vAzD37ZTIc=/MTE6MzE6MTFUODEtMjAtMA==/default",
 					"width": null
 				}
 			],
@@ -275,7 +321,7 @@ module.exports.getUserPlaylists = {
 			},
 			"primary_color": null,
 			"public": false,
-			"snapshot_id": "MjYzNDQ4MDAsMDAwMDAwMDBiMjc5ZTNkNGUxODM5MmNmMTA3ODQ4YmRmNTVlZGRlNg==",
+			"snapshot_id": "MjYzNDQ4MDAsMDAwMDAwMDAyMzU3NTk1OTI2YWVmYjc5YTU1NmQ5MWM4ZmEwNzAzYw==",
 			"tracks": {
 				"href": "https://api.spotify.com/v1/playlists/37i9dQZEVXcFB94oN35ZLw/tracks",
 				"total": 30
@@ -294,7 +340,7 @@ module.exports.getUserPlaylists = {
 			"images": [
 				{
 					"height": null,
-					"url": "https://newjams-images.scdn.co/v2/discover-weekly/szTvrNbSdHFRGq6RfISCF-TlySrRL61xI97ahiPMsNOWryhD-uGAD9GMONdEfuSFEGTcs5FgoSDx5y98V1NtTtbNuPqk2vb2dovpo1g8lnTs3h0ycsOf0w4NAsRT2nNX8SbskQ99CaJcIlLkVIEJOQe7NY0AM_uL1uD1_Oi2rSxX-ED0OWKXk7gQmxnspF99xvu9AMvCfTto8LsNFvcUnhaOX-lq6I5ooxbIVZVDCXzeaLrXKMH05nNWcUmK7V0fHh8xO5Amq-3CLSc0kCd6bDtM86ZrN31wSsnWs4xQc3MtlUvXb1zJ3cVO1XzHX5MyCz1_SLB0iy9W8ovAqJCfh7J4uiUfuMrzyM5k2dv0tAIjOwBhMbK0VZXRBTwSBZlX/OTI6OTI6MTFUMDItMjAtMA==/default",
+					"url": "https://newjams-images.scdn.co/v2/discover-weekly/UiHamT6WSvYyZAfStywvaLrEx0-vn3cAvr55KkimcJB70f7ACDooIn6jm8f-sxm1OJg55TZIkZTsuN18CGoOeWFogdb-O29RtKv_UxqgTdqgMFJYMenicEBZFjVg5I5HFLKyJ3I2I3mlmDWPbl4jYUdIl-IBcs_8W6osiSxtl7iFSSI7H9lqC0FPLd8a5PqcdyRfw3V1kGTcqQzYJArOYr4BFtnBTghrHMfnzWzIiV09BydEQKrrPu3GLddUmTOGCSRYRejfeRnK5fdcsNkF1PMwJaPq1RomWYESTi0ecvr9SxW3wn0gogWn66_zn2dv/OTI6OTI6MTFUMDItMjAtMA==/default",
 					"width": null
 				}
 			],
@@ -311,7 +357,7 @@ module.exports.getUserPlaylists = {
 			},
 			"primary_color": null,
 			"public": true,
-			"snapshot_id": "MjYzNDQ4MDAsMDAwMDAwMDA4OGI0YzY4MGY3NTVkMjgwNDhlZGYwZGIzNmU2MTNlNQ==",
+			"snapshot_id": "MjYzNDQ4MDAsMDAwMDAwMDA4NTc1ZGQzMDNlZmNkMzU4NjRiMjdhNmZhN2JjOWQ1Nw==",
 			"tracks": {
 				"href": "https://api.spotify.com/v1/playlists/37i9dQZEVXcPhThMf8Qd9X/tracks",
 				"total": 30
@@ -330,7 +376,7 @@ module.exports.getUserPlaylists = {
 			"images": [
 				{
 					"height": null,
-					"url": "https://newjams-images.scdn.co/v2/discover-weekly/RlHmJzMsf52eiPKMSge2KPn6Z4AtNpK68YIGUBeQFj-zwDWSnScUuDQ13UMmEkdgEUjR2QNELOGE70JGwo_s1HmK4wC9UcA-8qsb1PLJu6G1SlgyiG3Gg2SM41jSiS4ppVReJhnmAhENyxcx8b0n-Y-TiDsdMNpbI6ejoxRias40Kq3D8B8uFAnwq1r2FQLXHZ8y09z8efgNqyppByprzhvu7PO9ImbGfgsLCqSrG3HkyTacbIqaYVWNq_X_4AlwKFMBxxofCUsjpSvFhNVCZmJYWnPMzWb6lkAl9Ex85X9fiqd9t21wiTblAjmTw-cOM7k4bPKE21O0U0uQfGtRD2gApZHZ8uW2Z7InbfDU421hPYhYT0_nihD7QVbxjWjX/NzU6MTI6OTBUOTEtMjAtMA==/default",
+					"url": "https://newjams-images.scdn.co/v2/discover-weekly/GSxTKfRf5WhecONljToVUBvWxOTwERXNkdwS3NsJCm4ge8GS6W9Tb_-9Mo6MrI4znieb020pF8aaRyBhAOwwYiE2fR_kzI2Eu_UubUhBMoWGZM_B3i0q8Mw4upOBn0yeOvWG7ckT_L-4NIjZ2TFZ3fHtrgATagjxzD0yyAjSICasT1ol1q3PUCeP5k9YVR0Iq2M021DkrHu4JdkJgXAxY7TE206b9pIUiPEA0tEIgNxT9yVvnYd_NPBanoCUSAasADPZm38SL5bUvhozyo-J9ZsEELAhA_cNkRQQEisTl-5vnKN3NJORoOpkDn_8MvX2/NzU6MTI6OTBUOTEtMjAtMA==/default",
 					"width": null
 				}
 			],
@@ -347,7 +393,7 @@ module.exports.getUserPlaylists = {
 			},
 			"primary_color": null,
 			"public": false,
-			"snapshot_id": "MjYzNDQ4MDAsMDAwMDAwMDA4YjhmZjIxNDljODIzOGY5NGMwMGViYjI5NDlhZTlmNg==",
+			"snapshot_id": "MjYzNDQ4MDAsMDAwMDAwMDBkNTAwZWZmNTkzMWM3ODQ5OTU5YzYzOGFiNjJmNzRhOA==",
 			"tracks": {
 				"href": "https://api.spotify.com/v1/playlists/37i9dQZEVXcFnyf4g58Bi1/tracks",
 				"total": 30
@@ -465,7 +511,7 @@ module.exports.getUserPlaylists = {
 			},
 			"primary_color": null,
 			"public": false,
-			"snapshot_id": "MTM0LGRhNTljNTgyMzQyZGZkNDIyNjdiNWIzZTQzZTBhMDRlOGRkYmVjOWI=",
+			"snapshot_id": "MTM1LDE0OThjY2I1ODE4MGRmNTVkNzM4OWY5MWZjNzI0MTVlOTI1ZTA5ZDE=",
 			"tracks": {
 				"href": "https://api.spotify.com/v1/playlists/26Bms3YJ9pnWTVcBvBgPGE/tracks",
 				"total": 100
@@ -609,7 +655,7 @@ module.exports.getUserPlaylists = {
 			},
 			"primary_color": null,
 			"public": false,
-			"snapshot_id": "MTU4MTA1MTY2MCwwMDAwMDQxZTAwMDAwMTcwMWUwNWM3ZjAwMDAwMDE3MDE2Yzg3ZTRi",
+			"snapshot_id": "MTU4MTA5NjgzMywwMDAwMDQxZjAwMDAwMTcwMjBiNzEwM2MwMDAwMDE3MDE2Yzg3ZTRi",
 			"tracks": {
 				"href": "https://api.spotify.com/v1/playlists/37i9dQZF1DX4dyzvuaRJ0n/tracks",
 				"total": 59
@@ -724,47 +770,11 @@ module.exports.getUserPlaylists = {
 			},
 			"type": "playlist",
 			"uri": "spotify:playlist:6GBSGTJ9djtNjkoRZcFNCi"
-		},
-		{
-			"collaborative": false,
-			"description": "Chill hip-hop beats with a jazzy edge.",
-			"external_urls": {
-				"spotify": "https://open.spotify.com/playlist/37i9dQZF1DX0SM0LYsmbMT"
-			},
-			"href": "https://api.spotify.com/v1/playlists/37i9dQZF1DX0SM0LYsmbMT",
-			"id": "37i9dQZF1DX0SM0LYsmbMT",
-			"images": [
-				{
-					"height": null,
-					"url": "https://i.scdn.co/image/ab67706f000000022f5ef11b68089ed3b8166944",
-					"width": null
-				}
-			],
-			"name": "Jazz Vibes",
-			"owner": {
-				"display_name": "Spotify",
-				"external_urls": {
-					"spotify": "https://open.spotify.com/user/spotify"
-				},
-				"href": "https://api.spotify.com/v1/users/spotify",
-				"id": "spotify",
-				"type": "user",
-				"uri": "spotify:user:spotify"
-			},
-			"primary_color": null,
-			"public": false,
-			"snapshot_id": "MTU4MDQ3MzM4MCwwMDAwMDE3NjAwMDAwMTZmZmI4ZGVjYmQwMDAwMDE2ZDE1NWE0MzFi",
-			"tracks": {
-				"href": "https://api.spotify.com/v1/playlists/37i9dQZF1DX0SM0LYsmbMT/tracks",
-				"total": 200
-			},
-			"type": "playlist",
-			"uri": "spotify:playlist:37i9dQZF1DX0SM0LYsmbMT"
 		}
 	],
 	"limit": 20,
 	"next": "https://api.spotify.com/v1/users/dacandyman01/playlists?offset=20&limit=20",
 	"offset": 0,
 	"previous": null,
-	"total": 317
+	"total": 319
 }

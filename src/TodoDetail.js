@@ -22,7 +22,9 @@ function TodoDetail(props) {
   let [todoText, setTodoText] = useState('')
   let [completed, setCompleted] = useState(false)
 
-  let todo = db.executeQuery(queries.getTodoById(props.id))
+  let todo = db.executeQuery(queries.getTodoById(props.id));
+  // console.log(props.id);
+  // console.log("$$todo",todo);
 
   const updateTodo = () => {
     normalizedApi.updateTodo(props.id, {

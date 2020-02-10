@@ -101,20 +101,6 @@ function Sidebar(props) {
         })
   };
 
-  const fetchArtistGenres = (text) => {
-    console.log("fetchArtistGenres",props);
-
-    //todo: not sure exactly how todo manages to have status
-    //something to do with fetchTodosRequest on props
-    normalizedApi.fetchArtistGenres(text)
-        .then(() => {
-          //props.onSuccess()
-        })
-        .catch(() => {
-          //props.onCancel()
-        })
-  };
-
   const showStore = (text) => {
     console.log("showStore",props);
     normalizedApi.showStore(text)
@@ -149,10 +135,6 @@ function Sidebar(props) {
           <Button onClick={fetchPlaylists} color="primary">
             fetchPlaylists
           </Button>
-          <Button onClick={fetchArtistGenres} color="primary">
-            fetchArtistGenres
-          </Button>
-
           <Button onClick={showStore} color="primary">
             showStore
           </Button>
@@ -187,70 +169,6 @@ function Sidebar(props) {
             </List>
       </div>
   );
-
-  // return (
-  //   <div className={classes.drawer}>
-  //     <div className={classes.toolbar}>
-  //       <Tabs
-  //         value={tabs.indexOf(props.filter)}
-  //         onChange={(e, i) => props.onFilterChange(tabs[i])}
-  //         indicatorColor="primary"
-  //         textColor="primary"
-  //         variant="fullWidth"
-  //         className={classes.tabs}
-  //         classes={{flexContainer: classes.tabsFlexContainer}}
-  //       >
-  //         {/*<Tab label="Active" classes={{ root: classes.tabRoot }} />*/}
-  //         {/*<Tab label="Completed" classes={{ root: classes.tabRoot }} />*/}
-  //         <Tab label="All" classes={{ root: classes.tabRoot }}/>
-  //       </Tabs>
-  //       <Button onClick={testTodo} color="primary">
-  //         testTodo
-  //       </Button>
-  //       <Button onClick={fetchPlaylists} color="primary">
-  //         fetchPlaylists
-  //       </Button>
-  //       <Button onClick={showStore} color="primary">
-  //         showStore
-  //       </Button>
-  //
-  //       <div className={classes.addTodoButton}>
-  //         <IconButton onClick={openAddTodoDialog} color="primary" component="span">
-  //           <AddIcon />
-  //         </IconButton>
-  //         <AddTodoDialog
-  //           open={addTodoDialogOpen}
-  //           onCancel={closeAddTodoDialog}
-  //           onSuccess={closeAddTodoDialog}
-  //         />
-  //       </div>
-  //     </div>
-  //     <Divider />
-  //     {props.fetchTodosRequest.pending && (
-  //       <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '30%'}}>
-  //         <HashLoader size={30} />
-  //       </div>
-  //     )}
-  //     {props.fetchTodosRequest.fulfilled && (
-  //       <List>
-  //         {props.todos.map((todo, index) => (
-  //           <ListItem
-  //             button
-  //             key={todo.id}
-  //             onClick={(e) => props.onSelectedTodoChange(todo.id)}
-  //           >
-  //           <Typography
-  //             variant="subtitle1"
-  //             color={props.selectedTodo === todo.id ? 'secondary' : 'textPrimary'}
-  //           >
-  //             {todo.text}
-  //           </Typography>
-  //           </ListItem>
-  //         ))}
-  //       </List>
-  //     )}
-  //   </div>
-  // );
 }
 
 Sidebar.propTypes = {

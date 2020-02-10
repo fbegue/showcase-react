@@ -6,6 +6,10 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Sidebar from './Sidebar';
+import FilterBar from './FilterBar';
+import NestedList from './NestedList';
+
+
 import TodoDetail from './TodoDetail';
 import brace from 'brace';
 import AceEditor from 'react-ace';
@@ -13,7 +17,7 @@ import ContainerDimensions from 'react-container-dimensions';
 import useAsync from './useAsync';
 import { useDB, useNormalizedApi } from './db'
 
-import {getUserPlaylists } from './playlists.js'
+import {getUserPlaylists } from './testdata/getUserPlaylists.js'
 
 import 'brace/mode/json';
 import 'brace/theme/monokai';
@@ -79,72 +83,76 @@ const filterQueries = {
 //
 // import "./styles.css";
 
-function GithubCommit() {
-  const [page, setPage] = useState(1);
-  const [commitHistory, setCommitHistory] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+//<GithubCommit />
+// function GithubCommit() {
+//   const [page, setPage] = useState(1);
+//   const [commitHistory, setCommitHistory] = useState([]);
+//   const [isLoading, setIsLoading] = useState(true);
+//
+//   const loadMoreCommit = () => {
+//     setPage(page + 1);
+//   };
+//
+//   //every time the component renders, we will call useEffect
+//
+//   var fakeFetch = function(){
+//       return new Promise(function(done, fail) {
+//         done(getUserPlaylists)
+//       })
+//   };
+//
+//   useEffect(() => {
+//     // fetch(
+//     //   // `https://api.github.com/search/commits?q=repo:facebook/react+css&page=${page}`,
+//     //   'http://localhost:8888/getUserPlaylists',
+//     //   {
+//     //     method: "POST",
+//     //     // mode: "no-cors"
+//     //     // headers: new Headers({
+//     //     //   Accept: "application/vnd.github.cloak-preview"
+//     //     // })
+//     //   }
+//     // )
+//     fakeFetch()
+//       // .then(res => res.json())
+//       .then(response => {
+//         console.warn("using fake data");
+//         response = getUserPlaylists;
+//         console.log(response);
+//         setCommitHistory(response.items);
+//         setIsLoading(false);
+//       })
+//       .catch(error => console.log(error));
+//   }, [page]);
+//
+//   return (
+//     <div>
+//       <h1> API calls with React Hooks </h1>
+//       {isLoading && <p>Wait I'm Loading comments for you</p>}
+//
+//       {commitHistory.length !== 0 && (
+//         <button onClick={loadMoreCommit}>Load More Commits</button>
+//       )}
+//
+//       {commitHistory.map((c, index) => (
+//         <div key={index}>
+//           {c.name && (
+//               <div>
+//                 <h2 style={{ textDecoration: "Underline" }}>
+//                   {c.name}
+//                   ({c.tracks.total})
+//                 </h2>
+//                 <p>{c.owner.display_name}</p>
+//               </div>
+//           )}
+//         </div>
+//       ))}
+//     </div>
+//   );
+// }
 
-  const loadMoreCommit = () => {
-    setPage(page + 1);
-  };
-
-  //every time the component renders, we will call useEffect
-
-  var fakeFetch = function(){
-      return new Promise(function(done, fail) {
-        done(getUserPlaylists)
-      })
-  };
-
-  useEffect(() => {
-    // fetch(
-    //   // `https://api.github.com/search/commits?q=repo:facebook/react+css&page=${page}`,
-    //   'http://localhost:8888/getUserPlaylists',
-    //   {
-    //     method: "POST",
-    //     // mode: "no-cors"
-    //     // headers: new Headers({
-    //     //   Accept: "application/vnd.github.cloak-preview"
-    //     // })
-    //   }
-    // )
-    fakeFetch()
-      // .then(res => res.json())
-      .then(response => {
-        console.warn("using fake data");
-        response = getUserPlaylists;
-        console.log(response);
-        setCommitHistory(response.items);
-        setIsLoading(false);
-      })
-      .catch(error => console.log(error));
-  }, [page]);
-
-  return (
-    <div>
-      <h1> API calls with React Hooks </h1>
-      {isLoading && <p>Wait I'm Loading comments for you</p>}
-
-      {commitHistory.length !== 0 && (
-        <button onClick={loadMoreCommit}>Load More Commits</button>
-      )}
-
-      {commitHistory.map((c, index) => (
-        <div key={index}>
-          {c.name && (
-              <div>
-                <h2 style={{ textDecoration: "Underline" }}>
-                  {c.name}
-                  ({c.tracks.total})
-                </h2>
-                <p>{c.owner.display_name}</p>
-              </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
+//==================================================
+//boilerplate begin
 
 function App(props) {
   const { classes } = props;
@@ -155,13 +163,22 @@ function App(props) {
   let db = useDB();
 
   let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
-
+  //let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
 
   useEffect(() => {
     fetchTodos(filter)
   }, [filter])
 
   let todos = db.executeStoredQuery(filterQueries[filter]);
+
+  let pqry = db.getStoredQuery('ALL');
+  let playlists = db.executeQuery(pqry);
+  let pqry2 = db.getStoredQuery('ALL_ARTISTS');
+  let artists = db.executeQuery(pqry2);
+
+  let pqry3 = db.getStoredQuery('ALL_GENRES');
+  let genres = db.executeQuery(pqry3);
+
   let todoIds = JSON.stringify(todos.map(t => t.id))
 
   useEffect(() => {
@@ -171,14 +188,25 @@ function App(props) {
   return (
     <div className={classes.root}>
 
-      <GithubCommit />
+      {/*<Sidebar*/}
+        {/*todos={todos}*/}
+        {/*fetchTodosRequest={fetchTodosRequest}*/}
+        {/*filter={filter}*/}
+        {/*onFilterChange={setFilter}*/}
+        {/*selectedTodo={selectedTodoId}*/}
+        {/*onSelectedTodoChange={setSelectedTodoId}*/}
+      {/*/>*/}
       <Sidebar
-        todos={todos}
-        fetchTodosRequest={fetchTodosRequest}
-        filter={filter}
-        onFilterChange={setFilter}
-        selectedTodo={selectedTodoId}
-        onSelectedTodoChange={setSelectedTodoId}
+          playlists={playlists}
+          fetchTodosRequest={fetchTodosRequest}
+          filter={filter}
+          onFilterChange={setFilter}
+          selectedTodo={selectedTodoId}
+          onSelectedTodoChange={setSelectedTodoId}
+      />
+      <NestedList
+          artists={artists}
+          genres={genres}
       />
       <div className={classes.contentAndToolbar}>
         <AppBar position="relative" className={classes.appBar}>
@@ -194,25 +222,25 @@ function App(props) {
           </div>
           <div className={classes.storeInspectors}>
             <div className={classes.storeInspector}>
-            {/*<ContainerDimensions>*/}
-            {/*    { ({ height, width }) => (*/}
-            {/*        <React.Fragment>*/}
-            {/*          <div className={classes.storeInspectorHeader}>*/}
-            {/*            Entity Store*/}
-            {/*          </div>*/}
-            {/*          <AceEditor*/}
-            {/*            value={JSON.stringify(db.entities, 2, 2)}*/}
-            {/*            mode="json"*/}
-            {/*            theme="monokai"*/}
-            {/*            width={width}*/}
-            {/*            height={320}*/}
-            {/*            readOnly*/}
-            {/*            name="entities-json"*/}
-            {/*            editorProps={{$blockScrolling: true}}*/}
-            {/*          />*/}
-            {/*        </React.Fragment>*/}
-            {/*    ) }*/}
-            {/*</ContainerDimensions>*/}
+            <ContainerDimensions>
+                { ({ height, width }) => (
+                    <React.Fragment>
+                      <div className={classes.storeInspectorHeader}>
+                        Entity Store
+                      </div>
+                      <AceEditor
+                        value={JSON.stringify(db.entities, 2, 2)}
+                        mode="json"
+                        theme="monokai"
+                        width={width}
+                        height={320}
+                        readOnly
+                        name="entities-json"
+                        editorProps={{$blockScrolling: true}}
+                      />
+                    </React.Fragment>
+                ) }
+            </ContainerDimensions>
             </div>
             <div className={classes.storeInspector}>
               <ContainerDimensions>
