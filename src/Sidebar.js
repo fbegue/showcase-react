@@ -74,8 +74,6 @@ function Sidebar(props) {
   const openAddTodoDialog = () => setAddTodoDialogOpen(true)
   const closeAddTodoDialog = () => setAddTodoDialogOpen(false)
 
-
-
   const testTodo = (text) => {
     console.log("testTodo",props);
     // normalizedApi.testTodo(text)
