@@ -31,6 +31,14 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import InboxIcon from "@material-ui/core/SvgIcon/SvgIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 
+//import NestedListRecurse  from "./NestedList2"
+// var NestedListRecurse = require("./NestedList2").default
+
+//import TreeView  from "./NestedList3"
+import MenuBar from './MenuBar'
+import { BrowserRouter } from 'react-router-dom'
+
+
 const drawerWidth = 360;
 
 const styles = theme => ({
@@ -111,15 +119,120 @@ function App(props) {
 
   let pqry4 = db.getStoredQuery('ALL_EVENTS');
   let events = db.executeQuery(pqry4);
+  events.forEach(function(e){e.childrenKey = "performance"});
+
+  //testing: trying to determine how one component modifying it's props
+  //can trigger a rebind of data in another component
+
+  //act as if the event has that info
+  // events[0].genres = ["underground hip hop"];
+
+  //just one for now
+  events.length ? events[0].genre = "underground hip hop":{}
+
+  //doing a raw filter on events (doesn't make sense it would work?)
+  //I mean if events changes out here - its a prop so it should force an update?
+  //since this will run . . every time? idk
+
+  //todo: need to look for examples about how to interact with items
+    var filtered = [];
+    var selected = genres.filter(g =>{return g.selected});
+    console.log("selected",selected);
+    selected.forEach(function(sg){
+      events.forEach(function(e){
+         sg.name === e.genre ? filtered.push(e):{};
+      })
+    });
+
+  events = filtered;
+
+
+    // return selected.indexOf(e.genre) !== -1})
+  console.log("$events",events);
+
 
   //testing:
-  let performances = [{id:1,displayName:"display1"},{id:2,displayName:"display2"},{id:3,displayName:"display3"}]
+  //let performances = [{id:1,displayName:"display1"},{id:2,displayName:"display2"},{id:3,displayName:"display3"}]
 
   let todoIds = JSON.stringify(todos.map(t => t.id))
 
   useEffect(() => {
     setSelectedTodoId(todos[0] && todos[0].id)
   }, [todoIds])
+
+  var menuItems =  [
+    {
+      "name": "Item1",
+      "url": "/item1"
+    },
+    {
+      "name": "Item2",
+      "url": "/item2"
+    },
+    {
+      "name": "Item3",
+      "childrenKey":"children",
+      "children": [
+        {
+          "name": "Child31",
+          "url": "/child31"
+        },
+        {
+          "name": "Child32",
+          "url": "/child32"
+        },
+        {
+          "name": "Child33",
+          "childrenKey":"children",
+          "children": [
+            {
+              "name": "Child331",
+              "url": "/child31"
+            },
+            {
+              "name": "Child332",
+              "url": "/Child33"
+            },
+            {
+              "name": "Child323",
+              "url": "/child32"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Item4",
+      "childrenKey":"children",
+      "children": [
+        {
+          "name": "Child41",
+          "url": "/child41"
+        },
+        {
+          "name": "Child42",
+          "url": "/child42"
+        },
+        {
+          "name": "Child43",
+          "childrenKey":"testKey",
+          "testKey": [
+            {
+              "name": "Child431",
+              "url": "/child431"
+            },
+            {
+              "name": "Child432",
+              "url": "/child432,"
+            },
+            {
+              "name": "Child433",
+              "url": "/child433"
+            }
+          ]
+        }
+      ]
+    }];
 
   return (
       <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
@@ -132,7 +245,7 @@ function App(props) {
         {/*selectedTodo={selectedTodoId}*/}
         {/*onSelectedTodoChange={setSelectedTodoId}*/}
         {/*/>*/}
-        <div >
+        <div>
           <Sidebar
               playlists={playlists}
               fetchTodosRequest={fetchTodosRequest}
@@ -148,6 +261,11 @@ function App(props) {
               genres={genres}
           />
         </div>
+        <div>
+          {/*<BrowserRouter>*/}
+          <MenuBar data={events} />
+          {/*</BrowserRouter>*/}
+        </div>
 
         {/*todo: list of nested lists?*/}
         {/*yeah no this isn't working very well - could be for an easy reason but idk */}
@@ -156,29 +274,31 @@ function App(props) {
         {/*google: list of nestedList material ui*/}
         {/*https://stackoverflow.com/questions/48607844/multilevel-nested-list-in-material-ui-next*/}
         <div>
-          <List>
-            {events.map((event, index) => (
-                <ListItem
-                    button
-                    key={event.id}
-                    onClick={(e) => props.onSelectedTodoChange(event.id)}
-                >
-                  <Typography
-                      variant="subtitle1"
-                      color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}
-                  >
-                    {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>
-                  </Typography>
-                  <div className={"nestedListEvents"} >
-                    {/*<NestedListEvents*/}
-                    {/*    // performances={event.performance}*/}
-                    {/*    // testing:*/}
-                    {/*    performances={performances}*/}
-                    {/*/>*/}
-                  </div>
-                </ListItem>
-            ))}
-          </List>
+          {/*<List>*/}
+          {/*{events.map((event, index) => (*/}
+          {/*<ListItem*/}
+          {/*button*/}
+          {/*key={event.id}*/}
+          {/*onClick={(e) => props.onSelectedTodoChange(event.id)}*/}
+          {/*>*/}
+          {/*<Typography*/}
+          {/*variant="subtitle1"*/}
+          {/*color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}*/}
+          {/*>*/}
+          {/*{event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>*/}
+          {/*</Typography>*/}
+          {/*<div className={"nestedListEvents"} >*/}
+          {/*/!*<NestedListEvents*!/*/}
+          {/*/!*    // performances={event.performance}*!/*/}
+          {/*/!*    // testing:*!/*/}
+          {/*/!*    performances={performances}*!/*/}
+          {/*/>*/}
+          {/*</div>*/}
+          {/*</ListItem>*/}
+          {/*))}*/}
+          {/*</List>*/}
+
+          {/*==============default=============================*/}
           {/*<List>*/}
           {/*  {events.map((event, index) => (*/}
           {/*      <ListItem*/}
@@ -195,7 +315,10 @@ function App(props) {
           {/*      </ListItem>*/}
           {/*  ))}*/}
           {/*</List>*/}
+          {/*==============default=============================*/}
+
         </div>
+
         <div className={classes.contentAndToolbar}>
           {/*<AppBar position="relative" className={classes.appBar}>*/}
           {/*  <Toolbar>*/}

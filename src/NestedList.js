@@ -46,6 +46,19 @@ export default function NestedList(props) {
 	const handleClick2 = () => {
 		setOpen2(!open2);
 	};
+	const setSelect = (g) => {
+		//console.log(g);
+		//todo: look for examples about how to actually do this
+		props.genres[0].selected = true;
+
+		//todo: if my goal is to change genres b/c I think that will
+		//trigger a change in events in app.js, I need to commit this value
+		//do the ALL_GENRES query and therefore the db
+
+		console.log(props.genres);
+
+	};
+
 
 	return (
 		<List
@@ -68,7 +81,7 @@ export default function NestedList(props) {
 			<Collapse in={open} timeout="auto" unmountOnExit>
 				<List component="div" disablePadding>
 					{props.artists.map((art, index) => (
-						<ListItem key={art.id}button className={classes.nested}>
+						<ListItem key={art.id}button className={classes.nested} >
 							{/*<ListItemIcon>*/}
 								{/*<StarBorder />*/}
 							{/*</ListItemIcon>*/}
@@ -87,7 +100,7 @@ export default function NestedList(props) {
 			<Collapse in={open2} timeout="auto" unmountOnExit>
 				<List component="div" disablePadding>
 					{props.genres.map((g, index) => (
-						<ListItem key={g.id}button className={classes.nested}>
+						<ListItem key={g.id}button className={classes.nested} onClick={setSelect}>
 							{/*<ListItemIcon>*/}
 							{/*<StarBorder />*/}
 							{/*</ListItemIcon>*/}

@@ -20,6 +20,7 @@ const playlistFilterQueries = {
 };
 
 
+var testFlag = false;
 
 const immutableOps = {
   addId: (array, id) => {
@@ -52,7 +53,7 @@ const useNormalizedApi = () => {
       console.log(allPlaylists);
 
       let pqry2 = db.getStoredQuery('ALL_ARTISTS');
-     console.log(pqry);
+      console.log(pqry);
       let ALL_ARTISTS = db.executeQuery(pqry2);
       console.log(ALL_ARTISTS);
 
@@ -81,7 +82,7 @@ const useNormalizedApi = () => {
           {id: 99,
             text: "playlist99",
             completed: false,
-          testField:true};
+            testField:true};
 
       let todo = await api.updateTodo(99, payload);
       let { result, entities } = normalize(
@@ -171,7 +172,14 @@ const useNormalizedApi = () => {
       artistGenres.forEach(function(ga){
         var gname = (' ' + ga.genre).slice(1);
         var g = {name:gname,id:ga.id_genre}
-        genres.push(g)
+
+        //quick uniqueness filter
+        var flag = true;
+        genres.forEach(function(ge){
+          if(ge.id === g.id){flag = false }
+        });
+        flag ? genres.push(g):{};
+
       });
       artistGenres.forEach(function(ga){
         delete ga.genre;
@@ -183,18 +191,18 @@ const useNormalizedApi = () => {
 
       //for some reason these can't happen one after another
       var a =  function(){
-          return new Promise(function(done, fail) {
-            console.log("a");
-            let { result, entities } = normalize(
-                artists,
-                apiSchemas.fetchArtistResponseSchema
-            );
-            db.mergeEntities(entities);
-            db.updateStoredQuery("ALL_ARTISTS", result);
-            console.log(entities);
-            console.log(result);
-            done()
-          })
+        return new Promise(function(done, fail) {
+          console.log("a");
+          let { result, entities } = normalize(
+              artists,
+              apiSchemas.fetchArtistResponseSchema
+          );
+          db.mergeEntities(entities);
+          db.updateStoredQuery("ALL_ARTISTS", result);
+          console.log(entities);
+          console.log(result);
+          done()
+        })
       }
 
       var g =  function(){
@@ -240,6 +248,12 @@ const useNormalizedApi = () => {
       let events = await api.fetchEvents(filter);
       console.log("events",events);
 
+      if(testFlag){
+        console.log("testFlag");
+        events = [{id:12345612,displayName:"testDisplayName",
+          performance:[{id:12312323,displayName:"testDisplayPerf"}]}]
+      }
+
       let { result, entities } = normalize(
           events,
           apiSchemas.fetchEventResponseSchema
@@ -249,7 +263,9 @@ const useNormalizedApi = () => {
       db.updateStoredQuery("ALL_EVENTS", result);
       console.log(entities);
       console.log(result);
-      
+
+      testFlag = true;
+
       //var result = {};
       return {
         value: result,
