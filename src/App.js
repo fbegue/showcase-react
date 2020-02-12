@@ -122,135 +122,139 @@ function App(props) {
   }, [todoIds])
 
   return (
-    <div className={classes.root}>
+      <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
 
-      {/*<Sidebar*/}
+        {/*<Sidebar*/}
         {/*todos={todos}*/}
         {/*fetchTodosRequest={fetchTodosRequest}*/}
         {/*filter={filter}*/}
         {/*onFilterChange={setFilter}*/}
         {/*selectedTodo={selectedTodoId}*/}
         {/*onSelectedTodoChange={setSelectedTodoId}*/}
-      {/*/>*/}
-      <Sidebar
-          playlists={playlists}
-          fetchTodosRequest={fetchTodosRequest}
-          filter={filter}
-          onFilterChange={setFilter}
-          selectedTodo={selectedTodoId}
-          onSelectedTodoChange={setSelectedTodoId}
-      />
-      <NestedList
-          artists={artists}
-          genres={genres}
-      />
+        {/*/>*/}
+        <div >
+          <Sidebar
+              playlists={playlists}
+              fetchTodosRequest={fetchTodosRequest}
+              filter={filter}
+              onFilterChange={setFilter}
+              selectedTodo={selectedTodoId}
+              onSelectedTodoChange={setSelectedTodoId}
+          />
+        </div>
+        <div>
+          <NestedList
+              artists={artists}
+              genres={genres}
+          />
+        </div>
 
-      {/*todo: list of nested lists?*/}
-      {/*yeah no this isn't working very well - could be for an easy reason but idk */}
-      {/*like i can in no way actually click on anything in here*/}
-      {/*just seems like its not going to be THAT easy :)*/}
-      {/*google: list of nestedList material ui*/}
-      {/*https://stackoverflow.com/questions/48607844/multilevel-nested-list-in-material-ui-next*/}
-      <div>
-        <List>
-          {events.map((event, index) => (
-              <ListItem
-                  button
-                  key={event.id}
-                  onClick={(e) => props.onSelectedTodoChange(event.id)}
-              >
-                <Typography
-                    variant="subtitle1"
-                    color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}
+        {/*todo: list of nested lists?*/}
+        {/*yeah no this isn't working very well - could be for an easy reason but idk */}
+        {/*like i can in no way actually click on anything in here*/}
+        {/*just seems like its not going to be THAT easy :)*/}
+        {/*google: list of nestedList material ui*/}
+        {/*https://stackoverflow.com/questions/48607844/multilevel-nested-list-in-material-ui-next*/}
+        <div>
+          <List>
+            {events.map((event, index) => (
+                <ListItem
+                    button
+                    key={event.id}
+                    onClick={(e) => props.onSelectedTodoChange(event.id)}
                 >
-                  {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>
-                </Typography>
-                <div className={"nestedListEvents"} >
+                  <Typography
+                      variant="subtitle1"
+                      color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}
+                  >
+                    {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>
+                  </Typography>
+                  <div className={"nestedListEvents"} >
                     {/*<NestedListEvents*/}
                     {/*    // performances={event.performance}*/}
                     {/*    // testing:*/}
                     {/*    performances={performances}*/}
                     {/*/>*/}
-                </div>
-              </ListItem>
-          ))}
-        </List>
-        {/*<List>*/}
-        {/*  {events.map((event, index) => (*/}
-        {/*      <ListItem*/}
-        {/*          button*/}
-        {/*          key={event.id}*/}
-        {/*          onClick={(e) => props.onSelectedTodoChange(event.id)}*/}
-        {/*      >*/}
-        {/*        <Typography*/}
-        {/*            variant="subtitle1"*/}
-        {/*            color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}*/}
-        {/*        >*/}
-        {/*          {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>*/}
-        {/*        </Typography>*/}
-        {/*      </ListItem>*/}
-        {/*  ))}*/}
-        {/*</List>*/}
+                  </div>
+                </ListItem>
+            ))}
+          </List>
+          {/*<List>*/}
+          {/*  {events.map((event, index) => (*/}
+          {/*      <ListItem*/}
+          {/*          button*/}
+          {/*          key={event.id}*/}
+          {/*          onClick={(e) => props.onSelectedTodoChange(event.id)}*/}
+          {/*      >*/}
+          {/*        <Typography*/}
+          {/*            variant="subtitle1"*/}
+          {/*            color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}*/}
+          {/*        >*/}
+          {/*          {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>*/}
+          {/*        </Typography>*/}
+          {/*      </ListItem>*/}
+          {/*  ))}*/}
+          {/*</List>*/}
+        </div>
+        <div className={classes.contentAndToolbar}>
+          {/*<AppBar position="relative" className={classes.appBar}>*/}
+          {/*  <Toolbar>*/}
+          {/*    <Typography variant="h6" color="inherit" noWrap>*/}
+          {/*      Todo App*/}
+          {/*    </Typography>*/}
+          {/*  </Toolbar>*/}
+          {/*</AppBar>*/}
+          {/*<div className={classes.content}>*/}
+          {/*  <div className={classes.todoDetail}>*/}
+          {/*    <TodoDetail id={selectedTodoId}/>*/}
+          {/*  </div>*/}
+          {/*  <div className={classes.storeInspectors}>*/}
+          {/*    <div className={classes.storeInspector}>*/}
+          {/*    <ContainerDimensions>*/}
+          {/*        { ({ height, width }) => (*/}
+          {/*            <React.Fragment>*/}
+          {/*              <div className={classes.storeInspectorHeader}>*/}
+          {/*                Entity Store*/}
+          {/*              </div>*/}
+          {/*              <AceEditor*/}
+          {/*                value={JSON.stringify(db.entities, 2, 2)}*/}
+          {/*                mode="json"*/}
+          {/*                theme="monokai"*/}
+          {/*                width={width}*/}
+          {/*                height={320}*/}
+          {/*                readOnly*/}
+          {/*                name="entities-json"*/}
+          {/*                editorProps={{$blockScrolling: true}}*/}
+          {/*              />*/}
+          {/*            </React.Fragment>*/}
+          {/*        ) }*/}
+          {/*    </ContainerDimensions>*/}
+          {/*    </div>*/}
+          {/*    <div className={classes.storeInspector}>*/}
+          {/*      <ContainerDimensions>*/}
+          {/*          { ({ height, width }) => (*/}
+          {/*            <React.Fragment>*/}
+          {/*              <div className={classes.storeInspectorHeader}>*/}
+          {/*                Query Store*/}
+          {/*              </div>*/}
+          {/*              <AceEditor*/}
+          {/*                value={JSON.stringify(db.storedQueries, 2, 2)}*/}
+          {/*                mode="json"*/}
+          {/*                theme="monokai"*/}
+          {/*                width={width}*/}
+          {/*                height={320}*/}
+          {/*                readOnly*/}
+          {/*                name="stored-queries-json"*/}
+          {/*                editorProps={{$blockScrolling: true}}*/}
+          {/*              />*/}
+          {/*            </React.Fragment>*/}
+          {/*          ) }*/}
+          {/*      </ContainerDimensions>*/}
+          {/*    </div>*/}
+          {/*  </div>*/}
+          {/*</div>*/}
+        </div>
       </div>
-      <div className={classes.contentAndToolbar}>
-        {/*<AppBar position="relative" className={classes.appBar}>*/}
-        {/*  <Toolbar>*/}
-        {/*    <Typography variant="h6" color="inherit" noWrap>*/}
-        {/*      Todo App*/}
-        {/*    </Typography>*/}
-        {/*  </Toolbar>*/}
-        {/*</AppBar>*/}
-        {/*<div className={classes.content}>*/}
-        {/*  <div className={classes.todoDetail}>*/}
-        {/*    <TodoDetail id={selectedTodoId}/>*/}
-        {/*  </div>*/}
-        {/*  <div className={classes.storeInspectors}>*/}
-        {/*    <div className={classes.storeInspector}>*/}
-        {/*    <ContainerDimensions>*/}
-        {/*        { ({ height, width }) => (*/}
-        {/*            <React.Fragment>*/}
-        {/*              <div className={classes.storeInspectorHeader}>*/}
-        {/*                Entity Store*/}
-        {/*              </div>*/}
-        {/*              <AceEditor*/}
-        {/*                value={JSON.stringify(db.entities, 2, 2)}*/}
-        {/*                mode="json"*/}
-        {/*                theme="monokai"*/}
-        {/*                width={width}*/}
-        {/*                height={320}*/}
-        {/*                readOnly*/}
-        {/*                name="entities-json"*/}
-        {/*                editorProps={{$blockScrolling: true}}*/}
-        {/*              />*/}
-        {/*            </React.Fragment>*/}
-        {/*        ) }*/}
-        {/*    </ContainerDimensions>*/}
-        {/*    </div>*/}
-        {/*    <div className={classes.storeInspector}>*/}
-        {/*      <ContainerDimensions>*/}
-        {/*          { ({ height, width }) => (*/}
-        {/*            <React.Fragment>*/}
-        {/*              <div className={classes.storeInspectorHeader}>*/}
-        {/*                Query Store*/}
-        {/*              </div>*/}
-        {/*              <AceEditor*/}
-        {/*                value={JSON.stringify(db.storedQueries, 2, 2)}*/}
-        {/*                mode="json"*/}
-        {/*                theme="monokai"*/}
-        {/*                width={width}*/}
-        {/*                height={320}*/}
-        {/*                readOnly*/}
-        {/*                name="stored-queries-json"*/}
-        {/*                editorProps={{$blockScrolling: true}}*/}
-        {/*              />*/}
-        {/*            </React.Fragment>*/}
-        {/*          ) }*/}
-        {/*      </ContainerDimensions>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
-      </div>
-    </div>
   );
 }
 

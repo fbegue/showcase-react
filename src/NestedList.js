@@ -36,11 +36,15 @@ export default function NestedList(props) {
 	//const classes = useStyles();
 	const classes = {nested:"nestedCustom",root:"root"}
 	const [open, setOpen] = React.useState(true);
+	const [open2, setOpen2] = React.useState(true);
 
 	console.log("NestedList props",props);
 
 	const handleClick = () => {
 		setOpen(!open);
+	};
+	const handleClick2 = () => {
+		setOpen2(!open2);
 	};
 
 	return (
@@ -73,14 +77,14 @@ export default function NestedList(props) {
 					))}
 				</List>
 			</Collapse>
-			<ListItem button onClick={handleClick}>
+			<ListItem button onClick={handleClick2}>
 				<ListItemIcon>
 					<InboxIcon />
 				</ListItemIcon>
 				<ListItemText primary="Genres" />
-				{open ? <ExpandLess /> : <ExpandMore />}
+				{open2 ? <ExpandLess /> : <ExpandMore />}
 			</ListItem>
-			<Collapse in={open} timeout="auto" unmountOnExit>
+			<Collapse in={open2} timeout="auto" unmountOnExit>
 				<List component="div" disablePadding>
 					{props.genres.map((g, index) => (
 						<ListItem key={g.id}button className={classes.nested}>
