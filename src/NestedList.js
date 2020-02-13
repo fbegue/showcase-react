@@ -32,11 +32,15 @@ import './NestedList.css';
 // 	},
 // }));
 
+import { useDB, useNormalizedApi } from './db'
+
 export default function NestedList(props) {
 	//const classes = useStyles();
 	const classes = {nested:"nestedCustom",root:"root"}
 	const [open, setOpen] = React.useState(true);
 	const [open2, setOpen2] = React.useState(true);
+
+	let normalizedApi = useNormalizedApi();
 
 	console.log("NestedList props",props);
 
@@ -48,17 +52,14 @@ export default function NestedList(props) {
 	};
 	const setSelect = (g) => {
 		//console.log(g);
-		//todo: look for examples about how to actually do this
-		props.genres[0].selected = true;
 
 		//todo: if my goal is to change genres b/c I think that will
 		//trigger a change in events in app.js, I need to commit this value
 		//do the ALL_GENRES query and therefore the db
-
-		console.log(props.genres);
+		g.selected = !g.selected;
+		normalizedApi.updateGenre(g)
 
 	};
-
 
 	return (
 		<List
@@ -100,7 +101,7 @@ export default function NestedList(props) {
 			<Collapse in={open2} timeout="auto" unmountOnExit>
 				<List component="div" disablePadding>
 					{props.genres.map((g, index) => (
-						<ListItem key={g.id}button className={classes.nested} onClick={setSelect}>
+						<ListItem key={g.id}button className={classes.nested} onClick={() => setSelect(g)}>
 							{/*<ListItemIcon>*/}
 							{/*<StarBorder />*/}
 							{/*</ListItemIcon>*/}

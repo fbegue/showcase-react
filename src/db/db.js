@@ -36,6 +36,10 @@ let [ DatabaseProvider, useDB ] = createDB(
         schema: [models.EventSchema],
         defaultValue: []
       },
+      SELECTED_GENRES: {
+        schema: [models.GenreSchema],
+        defaultValue: []
+      },
     }
   }
 );

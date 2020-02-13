@@ -10,4 +10,7 @@ export const fetchArtistResponseSchema = [ArtistSchema];
 export const fetchGenreResponseSchema = [GenreSchema];
 export const fetchEventResponseSchema = [EventSchema];
 
+export const updateGenreResponseSchema = GenreSchema;
+
+
 

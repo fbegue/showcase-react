@@ -112,127 +112,61 @@ function App(props) {
   let playlists = db.executeQuery(pqry);
   let pqry2 = db.getStoredQuery('ALL_ARTISTS');
   let artists = db.executeQuery(pqry2);
-
   let pqry3 = db.getStoredQuery('ALL_GENRES');
   let genres = db.executeQuery(pqry3);
-
-
   let pqry4 = db.getStoredQuery('ALL_EVENTS');
   let events = db.executeQuery(pqry4);
+
   events.forEach(function(e){e.childrenKey = "performance"});
 
-  //testing: trying to determine how one component modifying it's props
-  //can trigger a rebind of data in another component
+  //todo: a) this is ugly as shit but I wonder if I really need anything more complicated?
+  //b) I had to add songkick_ids to getArtistGenres, but I guess we should be expecting those
+  //back anyways?
 
-  //act as if the event has that info
-  // events[0].genres = ["underground hip hop"];
+  //filter events based on selected genres
+  //events have an array of performances, each performance has a single artist
+  //object with an id. we need to only keep events for which at least one performance's
+  //artist has a genre that is selected.
 
-  //just one for now
-  events.length ? events[0].genre = "underground hip hop":{}
+  //the db's artists have an array of genre_ids. so determine acceptable artists
+  //ids by filtering them based on the selected genres. then filter events
+  //based on whether they have one of those artists in a performance
 
-  //doing a raw filter on events (doesn't make sense it would work?)
-  //I mean if events changes out here - its a prop so it should force an update?
-  //since this will run . . every time? idk
-
-  //todo: need to look for examples about how to interact with items
-    var filtered = [];
+  if(genres.length){
+    //selected genres's ids
     var selected = genres.filter(g =>{return g.selected});
-    console.log("selected",selected);
-    selected.forEach(function(sg){
-      events.forEach(function(e){
-         sg.name === e.genre ? filtered.push(e):{};
-      })
+    var ids = selected.map(g => g.id);
+
+    //artists who have one of the selected genres
+    var eartists = artists.filter(a => {
+      var ret = false;
+      for (var x = 0; x < a.genres.length; x++) {
+        if (ids.indexOf(a.genres[x]) !== -1) {  ret = true;break;}
+      }
+      return ret
     });
 
-  events = filtered;
+    var eids = eartists.map(g => g.id_songkick);
 
+    events = events.filter(e => {
+      var ret = false;
+      for(var x = 0; x < e.performance.length; x++){
+        var id = e.performance[x].artist.id;
+        if(eids.indexOf(id) !== -1){ret = true;break;}
+      }
+      return ret;
+    });
 
-    // return selected.indexOf(e.genre) !== -1})
-  console.log("$events",events);
+    console.log("updated events",events);
+  }
 
-
-  //testing:
-  //let performances = [{id:1,displayName:"display1"},{id:2,displayName:"display2"},{id:3,displayName:"display3"}]
+  console.log("events",events);
 
   let todoIds = JSON.stringify(todos.map(t => t.id))
 
   useEffect(() => {
     setSelectedTodoId(todos[0] && todos[0].id)
   }, [todoIds])
-
-  var menuItems =  [
-    {
-      "name": "Item1",
-      "url": "/item1"
-    },
-    {
-      "name": "Item2",
-      "url": "/item2"
-    },
-    {
-      "name": "Item3",
-      "childrenKey":"children",
-      "children": [
-        {
-          "name": "Child31",
-          "url": "/child31"
-        },
-        {
-          "name": "Child32",
-          "url": "/child32"
-        },
-        {
-          "name": "Child33",
-          "childrenKey":"children",
-          "children": [
-            {
-              "name": "Child331",
-              "url": "/child31"
-            },
-            {
-              "name": "Child332",
-              "url": "/Child33"
-            },
-            {
-              "name": "Child323",
-              "url": "/child32"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Item4",
-      "childrenKey":"children",
-      "children": [
-        {
-          "name": "Child41",
-          "url": "/child41"
-        },
-        {
-          "name": "Child42",
-          "url": "/child42"
-        },
-        {
-          "name": "Child43",
-          "childrenKey":"testKey",
-          "testKey": [
-            {
-              "name": "Child431",
-              "url": "/child431"
-            },
-            {
-              "name": "Child432",
-              "url": "/child432,"
-            },
-            {
-              "name": "Child433",
-              "url": "/child433"
-            }
-          ]
-        }
-      ]
-    }];
 
   return (
       <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>

@@ -94,7 +94,7 @@ class NodeView extends React.Component {
 						path={newPath}
 						checked={isNodeChecked(newPath)}
 						expanded={isPathExpanded(newPath)}
-						isPathExpanded={isPathExpanded}
+						isPathExpandisNodeCheckeded={isPathExpanded}
 						isNodeChecked={isNodeChecked}
 						onNodeToggle={onNodeToggle}
 						onNodeChecked={onNodeChecked}
