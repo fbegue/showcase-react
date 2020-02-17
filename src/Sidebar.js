@@ -149,7 +149,7 @@ function Sidebar(props) {
             <Tab label="All" classes={{ root: classes.tabRoot }}/>
           </Tabs>
           <Button onClick={testTodo} color="primary">
-            testTodo
+            sendplays
           </Button>
           <Button onClick={fetchPlaylists} color="primary">
             fetchPlaylists

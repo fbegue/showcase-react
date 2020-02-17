@@ -123,15 +123,12 @@ const useNormalizedApi = () => {
 
       console.log("fetchPlaylists",playlists);
 
-      //todo: seems like with fetchTodos we're allowed to submit an array?
 
-      //var playlist = playlists.items[0];
-      var playlist = playlists.items;
       let { result, entities } = normalize(
-          playlist,
+          playlists,
           apiSchemas.fetchPlaylistResponseSchema
       );
-      console.log("playlist",playlist);
+     // console.log("playlist",playlists);
       console.log("result",result);
       db.mergeEntities(entities);
       db.updateStoredQuery(playlistFilterQueries['all'], result);
