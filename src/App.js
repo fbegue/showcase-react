@@ -108,7 +108,7 @@ function App(props) {
 
   let todos = db.executeStoredQuery(filterQueries[filter]);
 
-  let pqry = db.getStoredQuery('ALL');
+  let pqry = db.getStoredQuery('ALL_PLAYLISTS');
   let playlists = db.executeQuery(pqry);
   let pqry2 = db.getStoredQuery('ALL_ARTISTS');
   let artists = db.executeQuery(pqry2);

@@ -16,7 +16,7 @@ const filterQueries = {
 
 //todo: not sure why he sets this up like this
 const playlistFilterQueries = {
-  'all': 'ALL',
+  'all': 'ALL_PLAYLISTS',
 };
 
 
@@ -309,6 +309,22 @@ const useNormalizedApi = () => {
         schema: apiSchemas.updateGenreResponseSchema
       };
     },
+
+    updatePlaylist: async (payload) => {
+    let { result, entities } = normalize(
+        payload,
+        apiSchemas.updatePlaylistResponseSchema
+    );
+
+    db.mergeEntities(entities);
+
+    //could be useful later
+    // db.updateStoredQuery('SELECTED_GENRES', (prev) => immutableOps.addId(prev, payload.id));
+    return {
+      value: result,
+      schema: apiSchemas.updatePlaylistResponseSchema
+    };
+  },
     updateTodo: async (id, payload) => {
       let todo = await api.updateTodo(id, payload);
       let { result, entities } = normalize(

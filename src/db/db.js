@@ -20,7 +20,7 @@ let [ DatabaseProvider, useDB ] = createDB(
         schema: [models.TodoSchema],
         defaultValue: []
       },
-      ALL: {
+      ALL_PLAYLISTS: {
         schema: [models.PlaylistSchema],
         defaultValue: []
       },

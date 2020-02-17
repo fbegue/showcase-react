@@ -16,7 +16,8 @@ import HashLoader from 'react-spinners/HashLoader';
 
 import Button from '@material-ui/core/Button';
 
-import { useNormalizedApi } from './db'
+import {useDB, useNormalizedApi} from './db'
+
 
 
 const drawerWidth = 360;
@@ -66,6 +67,7 @@ const tabs = ['active', 'completed', 'all']
 
 function Sidebar(props) {
   let normalizedApi = useNormalizedApi()
+  let db = useDB();
 
   const { classes } = props;
 
@@ -74,22 +76,23 @@ function Sidebar(props) {
   const openAddTodoDialog = () => setAddTodoDialogOpen(true)
   const closeAddTodoDialog = () => setAddTodoDialogOpen(false)
 
+
   const testTodo = (text) => {
-    console.log("testTodo",props);
-    // normalizedApi.testTodo(text)
+    console.log("test",props);
+
+    let pqry3 = db.getStoredQuery('ALL_PLAYLISTS');
+    let genres = db.executeQuery(pqry3);
+    var selected = genres.filter(g =>{return g.selected});
+    console.log("sel",selected);
+
+    //todo: move
+    // normalizedApi.fetchEvents(text)
     //     .then(() => {
     //       //props.onSuccess()
     //     })
     //     .catch(() => {
     //       //props.onCancel()
     //     })
-    normalizedApi.fetchEvents(text)
-        .then(() => {
-          //props.onSuccess()
-        })
-        .catch(() => {
-          //props.onCancel()
-        })
   };
 
   const fetchPlaylists = (text) => {
@@ -130,7 +133,11 @@ function Sidebar(props) {
           //props.onCancel()
         })
   };
-
+  const setSelect = (g) => {
+    //console.log(g);
+    g.selected = !g.selected;
+    normalizedApi.updatePlaylist(g)
+  };
 
   return (
       <div className={classes.drawer}>
@@ -175,17 +182,17 @@ function Sidebar(props) {
         </div>
         <Divider />
             <List>
-              {props.playlists.map((todo, index) => (
+              {props.playlists.map((play, index) => (
                   <ListItem
                       button
-                      key={todo.id}
-                      onClick={(e) => props.onSelectedTodoChange(todo.id)}
+                      key={play.id}
+                      onClick={() => setSelect(play)}
                   >
                     <Typography
                         variant="subtitle1"
-                        color={props.selectedTodo === todo.id ? 'secondary' : 'textPrimary'}
+                        color={play.selected ? 'secondary' : 'textPrimary'}
                     >
-                      {todo.name} - <span style={{fontSize:"10px"}}>{todo.owner.display_name}</span>
+                      {play.name} - <span style={{fontSize:"10px"}}>{play.owner.display_name}</span>
                     </Typography>
                   </ListItem>
               ))}

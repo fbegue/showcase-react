@@ -11,6 +11,8 @@ export const fetchGenreResponseSchema = [GenreSchema];
 export const fetchEventResponseSchema = [EventSchema];
 
 export const updateGenreResponseSchema = GenreSchema;
+export const updatePlaylistResponseSchema = PlaylistSchema;
+
 
 
 
