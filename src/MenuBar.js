@@ -5,6 +5,8 @@ import ListItemText from '@material-ui/core/ListItemText'
 import Collapse from '@material-ui/core/Collapse'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
+import './MenuBar.css'
+
 import Drawer from '@material-ui/core/Drawer'
 //import { withStyles } from 'material-ui/core/styles'
 import { Link } from 'react-router-dom'
@@ -102,6 +104,7 @@ var menuItems = {
 // };
 
 function MenuBar (props){
+	console.log("$MenuBar");
 
 	// constructor( props ) {
 	// 	super( props )
@@ -125,9 +128,6 @@ function MenuBar (props){
 
 // if the menu item doesn't have any child, this method simply returns a clickable menu item that redirects to any location and if there is no child this method uses recursion to go until the last level of children and then returns the item by the first condition.
 	var handler = function( children ) {
-
-		//todo:
-		var classes = {menuHeader:"menuHeader",list:"list",links:"links"}
 
 		//const { state } = this
 		return children.map( ( subOption ) => {
@@ -175,16 +175,10 @@ function MenuBar (props){
 		} )
 	};
 
-	var classes = {menuHeader:"menuHeader",list:"list",links:"links"}
+	var classes = {menuHeader:"menuHeader",list:"list",links:"links"};
 
 		return (
 			<div className={classes.list}>
-				<Drawer
-					variant="persistent"
-					anchor="left"
-					open
-					classes={ { paper: classes.list } }>
-					<div>
 						<List>
 							<ListItem
 								key="menuHeading"
@@ -194,17 +188,14 @@ function MenuBar (props){
 								<ListItemText
 									className={ classes.menuHeader }
 									inset
-									primary="Nested Menu"
+									primary="Events"
 								/>
 							</ListItem>
 							{/*{ this.handler( menuItems.data ) }*/}
 							{ handler( props.data ) }
 						</List>
-					</div>
-				</Drawer>
 			</div>
 		)
-
 }
 // export default withStyles(styles)(MenuBar_class)
 export default MenuBar

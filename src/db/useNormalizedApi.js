@@ -20,6 +20,7 @@ const playlistFilterQueries = {
 };
 
 
+var testFlag = false;
 
 const immutableOps = {
   addId: (array, id) => {
@@ -52,9 +53,15 @@ const useNormalizedApi = () => {
       console.log(allPlaylists);
 
       let pqry2 = db.getStoredQuery('ALL_ARTISTS');
-     console.log(pqry);
+      console.log(pqry);
       let ALL_ARTISTS = db.executeQuery(pqry2);
       console.log(ALL_ARTISTS);
+
+      // let pqry3 = db.getStoredQuery('SELECTED_GENRES');
+      // console.log(pqry);
+      // let SELECTED_GENRES = db.executeQuery(pqry3);
+      // console.log(SELECTED_GENRES);
+
 
       // const queries = {
       //   getTodoById: id => {
@@ -77,23 +84,23 @@ const useNormalizedApi = () => {
     },
     testTodo: async (filter) => {
 
-      var payload =
-          {id: 99,
-            text: "playlist99",
-            completed: false,
-          testField:true};
-
-      let todo = await api.updateTodo(99, payload);
-      let { result, entities } = normalize(
-          todo,
-          apiSchemas.updateTodoResponseSchema
-      );
-      db.mergeEntities(entities);
-
-      return {
-        value: result,
-        schema: apiSchemas.fetchTodosResponseSchema
-      };
+      // var payload =
+      //     {id: 99,
+      //       text: "playlist99",
+      //       completed: false,
+      //       testField:true};
+      //
+      // let todo = await api.updateTodo(99, payload);
+      // let { result, entities } = normalize(
+      //     todo,
+      //     apiSchemas.updateTodoResponseSchema
+      // );
+      // db.mergeEntities(entities);
+      //
+      // return {
+      //   value: result,
+      //   schema: apiSchemas.fetchTodosResponseSchema
+      // };
     },
     fetchTodos: async (filter) => {
       //filter = active
@@ -168,11 +175,32 @@ const useNormalizedApi = () => {
       artistGenres.forEach(function(ga){
         var gname = (' ' + ga.genre).slice(1);
         var g = {name:gname,id:ga.id_genre}
-        genres.push(g)
+
+        //quick uniqueness filter
+        var flag = true;
+        genres.forEach(function(ge){
+          if(ge.id === g.id){flag = false }
+        });
+        flag ? genres.push(g):{};
+
       });
+
+      var artist_genre_map = {};
+
       artistGenres.forEach(function(ga){
-        delete ga.genre;
-        if(!(artists.filter(a => a.name === ga.name).length)){artists.push(ga)}
+        !artist_genre_map[ga.id] ? artist_genre_map[ga.id] = []:{}
+        artist_genre_map[ga.id].indexOf(ga.id_genre) === -1 ? artist_genre_map[ga.id].push(ga.id_genre):{};
+      });
+
+      console.log("artist_genre_map",artist_genre_map);
+      artistGenres.forEach(function(ga){
+        //todo:
+        if(!(artists.filter(a => a.name === ga.name).length)){
+          delete ga.id_genre;
+          delete ga.genre
+          ga.genres = artist_genre_map[ga.id];
+          artists.push(ga)
+        }
       });
 
       console.log("genres",genres);
@@ -180,18 +208,18 @@ const useNormalizedApi = () => {
 
       //for some reason these can't happen one after another
       var a =  function(){
-          return new Promise(function(done, fail) {
-            console.log("a");
-            let { result, entities } = normalize(
-                artists,
-                apiSchemas.fetchArtistResponseSchema
-            );
-            db.mergeEntities(entities);
-            db.updateStoredQuery("ALL_ARTISTS", result);
-            console.log(entities);
-            console.log(result);
-            done()
-          })
+        return new Promise(function(done, fail) {
+          console.log("a");
+          let { result, entities } = normalize(
+              artists,
+              apiSchemas.fetchArtistResponseSchema
+          );
+          db.mergeEntities(entities);
+          db.updateStoredQuery("ALL_ARTISTS", result);
+          console.log(entities);
+          console.log(result);
+          done()
+        })
       }
 
       var g =  function(){
@@ -237,6 +265,12 @@ const useNormalizedApi = () => {
       let events = await api.fetchEvents(filter);
       console.log("events",events);
 
+      // if(testFlag){
+      //   console.log("testFlag");
+      //   events = [{id:12345612,displayName:"testDisplayName",
+      //     performance:[{id:12312323,displayName:"testDisplayPerf"}]}]
+      // }
+
       let { result, entities } = normalize(
           events,
           apiSchemas.fetchEventResponseSchema
@@ -246,11 +280,33 @@ const useNormalizedApi = () => {
       db.updateStoredQuery("ALL_EVENTS", result);
       console.log(entities);
       console.log(result);
-      
+
+      // testFlag = true;
+
       //var result = {};
       return {
         value: result,
         schema: apiSchemas.fetchEventResponseSchema
+      };
+    },
+    //interesting b/c this is my first one that is being used solely to update the
+    //db's local storage. notice I just needed to merge the entities - I wasn't
+    //required to update the "ALL_GENRES" query b/c mergeEntity updated a member
+    //of that query, triggering an update cycle
+
+    updateGenre: async (payload) => {
+      let { result, entities } = normalize(
+          payload,
+          apiSchemas.updateGenreResponseSchema
+      );
+
+      db.mergeEntities(entities);
+
+      //could be useful later
+      // db.updateStoredQuery('SELECTED_GENRES', (prev) => immutableOps.addId(prev, payload.id));
+      return {
+        value: result,
+        schema: apiSchemas.updateGenreResponseSchema
       };
     },
     updateTodo: async (id, payload) => {

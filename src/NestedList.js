@@ -32,15 +32,33 @@ import './NestedList.css';
 // 	},
 // }));
 
+import { useDB, useNormalizedApi } from './db'
+
 export default function NestedList(props) {
 	//const classes = useStyles();
 	const classes = {nested:"nestedCustom",root:"root"}
 	const [open, setOpen] = React.useState(true);
+	const [open2, setOpen2] = React.useState(true);
+
+	let normalizedApi = useNormalizedApi();
 
 	console.log("NestedList props",props);
 
 	const handleClick = () => {
 		setOpen(!open);
+	};
+	const handleClick2 = () => {
+		setOpen2(!open2);
+	};
+	const setSelect = (g) => {
+		//console.log(g);
+
+		//todo: if my goal is to change genres b/c I think that will
+		//trigger a change in events in app.js, I need to commit this value
+		//do the ALL_GENRES query and therefore the db
+		g.selected = !g.selected;
+		normalizedApi.updateGenre(g)
+
 	};
 
 	return (
@@ -64,7 +82,7 @@ export default function NestedList(props) {
 			<Collapse in={open} timeout="auto" unmountOnExit>
 				<List component="div" disablePadding>
 					{props.artists.map((art, index) => (
-						<ListItem key={art.id}button className={classes.nested}>
+						<ListItem key={art.id}button className={classes.nested} >
 							{/*<ListItemIcon>*/}
 								{/*<StarBorder />*/}
 							{/*</ListItemIcon>*/}
@@ -73,17 +91,17 @@ export default function NestedList(props) {
 					))}
 				</List>
 			</Collapse>
-			<ListItem button onClick={handleClick}>
+			<ListItem button onClick={handleClick2}>
 				<ListItemIcon>
 					<InboxIcon />
 				</ListItemIcon>
 				<ListItemText primary="Genres" />
-				{open ? <ExpandLess /> : <ExpandMore />}
+				{open2 ? <ExpandLess /> : <ExpandMore />}
 			</ListItem>
-			<Collapse in={open} timeout="auto" unmountOnExit>
+			<Collapse in={open2} timeout="auto" unmountOnExit>
 				<List component="div" disablePadding>
 					{props.genres.map((g, index) => (
-						<ListItem key={g.id}button className={classes.nested}>
+						<ListItem key={g.id}button className={classes.nested} onClick={() => setSelect(g)}>
 							{/*<ListItemIcon>*/}
 							{/*<StarBorder />*/}
 							{/*</ListItemIcon>*/}

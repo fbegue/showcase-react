@@ -112,19 +112,55 @@ function App(props) {
   let playlists = db.executeQuery(pqry);
   let pqry2 = db.getStoredQuery('ALL_ARTISTS');
   let artists = db.executeQuery(pqry2);
-
   let pqry3 = db.getStoredQuery('ALL_GENRES');
   let genres = db.executeQuery(pqry3);
-
-
   let pqry4 = db.getStoredQuery('ALL_EVENTS');
   let events = db.executeQuery(pqry4);
+
   events.forEach(function(e){e.childrenKey = "performance"});
-  console.log("$events",events);
 
+  //todo: a) this is ugly as shit but I wonder if I really need anything more complicated?
+  //b) I had to add songkick_ids to getArtistGenres, but I guess we should be expecting those
+  //back anyways?
 
-  //testing:
-  //let performances = [{id:1,displayName:"display1"},{id:2,displayName:"display2"},{id:3,displayName:"display3"}]
+  //filter events based on selected genres
+  //events have an array of performances, each performance has a single artist
+  //object with an id. we need to only keep events for which at least one performance's
+  //artist has a genre that is selected.
+
+  //the db's artists have an array of genre_ids. so determine acceptable artists
+  //ids by filtering them based on the selected genres. then filter events
+  //based on whether they have one of those artists in a performance
+
+  if(genres.length){
+    //selected genres's ids
+    var selected = genres.filter(g =>{return g.selected});
+    var ids = selected.map(g => g.id);
+
+    //artists who have one of the selected genres
+    var eartists = artists.filter(a => {
+      var ret = false;
+      for (var x = 0; x < a.genres.length; x++) {
+        if (ids.indexOf(a.genres[x]) !== -1) {  ret = true;break;}
+      }
+      return ret
+    });
+
+    var eids = eartists.map(g => g.id_songkick);
+
+    events = events.filter(e => {
+      var ret = false;
+      for(var x = 0; x < e.performance.length; x++){
+        var id = e.performance[x].artist.id;
+        if(eids.indexOf(id) !== -1){ret = true;break;}
+      }
+      return ret;
+    });
+
+    console.log("updated events",events);
+  }
+
+  console.log("events",events);
 
   let todoIds = JSON.stringify(todos.map(t => t.id))
 
@@ -133,7 +169,7 @@ function App(props) {
   }, [todoIds])
 
   return (
-      <div className={classes.root}>
+      <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
 
         {/*<Sidebar*/}
         {/*todos={todos}*/}
@@ -143,25 +179,28 @@ function App(props) {
         {/*selectedTodo={selectedTodoId}*/}
         {/*onSelectedTodoChange={setSelectedTodoId}*/}
         {/*/>*/}
-        <div style={{marginLeft:"10em"}}>
-        <Sidebar
-            playlists={playlists}
-            fetchTodosRequest={fetchTodosRequest}
-            filter={filter}
-            onFilterChange={setFilter}
-            selectedTodo={selectedTodoId}
-            onSelectedTodoChange={setSelectedTodoId}
-        />
+        <div>
+          <Sidebar
+              playlists={playlists}
+              fetchTodosRequest={fetchTodosRequest}
+              filter={filter}
+              onFilterChange={setFilter}
+              selectedTodo={selectedTodoId}
+              onSelectedTodoChange={setSelectedTodoId}
+          />
         </div>
-        {/*<NestedList*/}
-        {/*artists={artists}*/}
-        {/*genres={genres}*/}
-        {/*/>*/}
+        <div>
+          <NestedList
+              artists={artists}
+              genres={genres}
+          />
+        </div>
         <div>
           {/*<BrowserRouter>*/}
           <MenuBar data={events} />
+          {/*</BrowserRouter>*/}
         </div>
-        {/*</BrowserRouter>*/}
+
         {/*todo: list of nested lists?*/}
         {/*yeah no this isn't working very well - could be for an easy reason but idk */}
         {/*like i can in no way actually click on anything in here*/}
