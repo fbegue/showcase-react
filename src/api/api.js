@@ -74,6 +74,9 @@ var fakeFetch3 = function(){
 
 var fetchPlaylists =  function(){
     return new Promise(function(done, fail) {
+
+        //testing: must turn cors off in browser
+
         $.ajax({
             url: 'http://localhost:8888/getUserPlaylists',
             type:"POST"
@@ -84,10 +87,23 @@ var fetchPlaylists =  function(){
     })
 }
 
-const fetchArtistGenres = id =>
-    delay(500).then(() => {
-        return fakeFetch2()
-    });
+//testing: must turn cors off in browser
+
+var fetchArtistGenres =  function(playlists){
+	return new Promise(function(done, fail) {
+
+		//testing: must turn cors off in browser
+
+		$.ajax({
+			url: 'http://localhost:8888/resolvePlaylists',
+			type:"POST",
+			data: {playlists:JSON.stringify(playlists)}
+		}).done(function(payload){
+			console.log("retrieved: ",payload);
+			done(payload.items)
+		})
+	})
+}
 
 const fetchEvents = id =>
     delay(500).then(() => {

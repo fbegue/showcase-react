@@ -162,49 +162,62 @@ const useNormalizedApi = () => {
         schema: apiSchemas.fetchPlaylistResponseSchema
       };
     },
-    fetchArtistGenres: async (filter) => {
+    fetchArtistGenres: async (playlists) => {
 
-      let artistGenres = await api.fetchArtistGenres(filter);
-      //console.log("artistGenres",artistGenres);
+      let playObs = await api.fetchArtistGenres(playlists);
+     console.log("fetchArtistGenres playObs",playObs);
 
-      //need to register this stuff in separate tables
+      //testing: test data isn't really like what we were expecting later
+      //so it required some parsing
+      // var genres = [];
+      // var artists = [];
+      //
+      // artistGenres.forEach(function(ga){
+      //   var gname = (' ' + ga.genre).slice(1);
+      //   var g = {name:gname,id:ga.id_genre}
+      //
+      //   //quick uniqueness filter
+      //   var flag = true;
+      //   genres.forEach(function(ge){
+      //     if(ge.id === g.id){flag = false }
+      //   });
+      //   flag ? genres.push(g):{};
+      //
+      // });
+      //
+      // var artist_genre_map = {};
+      //
+      // artistGenres.forEach(function(ga){
+      //   !artist_genre_map[ga.id] ? artist_genre_map[ga.id] = []:{}
+      //   artist_genre_map[ga.id].indexOf(ga.id_genre) === -1 ? artist_genre_map[ga.id].push(ga.id_genre):{};
+      // });
+      //
+      // console.log("artist_genre_map",artist_genre_map);
+      // artistGenres.forEach(function(ga){
+      //   //todo:
+      //   if(!(artists.filter(a => a.name === ga.name).length)){
+      //     delete ga.id_genre;
+      //     delete ga.genre
+      //     ga.genres = artist_genre_map[ga.id];
+      //     artists.push(ga)
+      //   }
+      // });
+      //
+      // console.log("genres",genres);
+      // console.log("artists",artists);
 
       var genres = [];
       var artists = [];
 
-      artistGenres.forEach(function(ga){
-        var gname = (' ' + ga.genre).slice(1);
-        var g = {name:gname,id:ga.id_genre}
+      playObs.forEach(p =>{
+        p.artists.forEach(a => {
+          // a.genres.forEach(g => {
+          //   var gen = {}
+          // })
 
-        //quick uniqueness filter
-        var flag = true;
-        genres.forEach(function(ge){
-          if(ge.id === g.id){flag = false }
-        });
-        flag ? genres.push(g):{};
-
+          //var art = {a.name}
+        })
       });
-
-      var artist_genre_map = {};
-
-      artistGenres.forEach(function(ga){
-        !artist_genre_map[ga.id] ? artist_genre_map[ga.id] = []:{}
-        artist_genre_map[ga.id].indexOf(ga.id_genre) === -1 ? artist_genre_map[ga.id].push(ga.id_genre):{};
-      });
-
-      console.log("artist_genre_map",artist_genre_map);
-      artistGenres.forEach(function(ga){
-        //todo:
-        if(!(artists.filter(a => a.name === ga.name).length)){
-          delete ga.id_genre;
-          delete ga.genre
-          ga.genres = artist_genre_map[ga.id];
-          artists.push(ga)
-        }
-      });
-
-      console.log("genres",genres);
-      console.log("artists",artists);
 
       //for some reason these can't happen one after another
       var a =  function(){

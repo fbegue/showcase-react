@@ -80,10 +80,10 @@ function Sidebar(props) {
   const testTodo = (text) => {
     console.log("test",props);
 
-    let pqry3 = db.getStoredQuery('ALL_PLAYLISTS');
-    let genres = db.executeQuery(pqry3);
-    var selected = genres.filter(g =>{return g.selected});
-    console.log("sel",selected);
+    // let pqry3 = db.getStoredQuery('ALL_PLAYLISTS');
+    // let genres = db.executeQuery(pqry3);
+    // var selected = genres.filter(g =>{return g.selected});
+    // console.log("sel",selected);
 
     //todo: move
     // normalizedApi.fetchEvents(text)
@@ -95,11 +95,21 @@ function Sidebar(props) {
     //     })
   };
 
+
+  const fetchEvents = (text) => {
+    console.log("fetchEvents",props);
+    normalizedApi.fetchEvents(text)
+        .then(() => {
+          //props.onSuccess()
+        })
+        .catch(() => {
+          //props.onCancel()
+        })
+  };
+
+
   const fetchPlaylists = (text) => {
     console.log("fetchPlaylists",props);
-
-    //todo: not sure exactly how todo manages to have status
-    //something to do with fetchTodosRequest on props
     normalizedApi.fetchPlaylists(text)
         .then(() => {
           //props.onSuccess()
@@ -109,12 +119,24 @@ function Sidebar(props) {
         })
   };
 
+  var getSelectedPlays = function(retFlag){
+    let pqry3 = db.getStoredQuery('ALL_PLAYLISTS');
+    let plays = db.executeQuery(pqry3);
+    var selected = plays.filter(g =>{return g.selected});
+    //console.log("sel",selected);
+
+    if(retFlag === 'length'){
+      return selected.length
+    }
+    return selected;
+  };
+
   const fetchArtistGenres = (text) => {
     console.log("fetchArtistGenres",props);
+    var selected = getSelectedPlays();
+    console.log("selected",selected);
 
-    //todo: not sure exactly how todo manages to have status
-    //something to do with fetchTodosRequest on props
-    normalizedApi.fetchArtistGenres(text)
+    normalizedApi.fetchArtistGenres(selected)
         .then(() => {
           //props.onSuccess()
         })
@@ -156,13 +178,16 @@ function Sidebar(props) {
             <Tab label="All" classes={{ root: classes.tabRoot }}/>
           </Tabs>
           <Button onClick={testTodo} color="primary">
-            sendplays
+            testTodo
+          </Button>
+          <Button onClick={fetchEvents} color="primary">
+            fetchEvents
           </Button>
           <Button onClick={fetchPlaylists} color="primary">
             fetchPlaylists
           </Button>
           <Button onClick={fetchArtistGenres} color="primary">
-            fetchArtistGenres
+            fetchArtistGenres  ({getSelectedPlays('length')})
           </Button>
 
           <Button onClick={showStore} color="primary">
@@ -181,22 +206,22 @@ function Sidebar(props) {
           </div>
         </div>
         <Divider />
-            <List>
-              {props.playlists.map((play, index) => (
-                  <ListItem
-                      button
-                      key={play.id}
-                      onClick={() => setSelect(play)}
-                  >
-                    <Typography
-                        variant="subtitle1"
-                        color={play.selected ? 'secondary' : 'textPrimary'}
-                    >
-                      {play.name} - <span style={{fontSize:"10px"}}>{play.owner.display_name}</span>
-                    </Typography>
-                  </ListItem>
-              ))}
-            </List>
+        <List>
+          {props.playlists.map((play, index) => (
+              <ListItem
+                  button
+                  key={play.id}
+                  onClick={() => setSelect(play)}
+              >
+                <Typography
+                    variant="subtitle1"
+                    color={play.selected ? 'secondary' : 'textPrimary'}
+                >
+                  {play.name} - <span style={{fontSize:"10px"}}>{play.owner.display_name}</span>
+                </Typography>
+              </ListItem>
+          ))}
+        </List>
       </div>
   );
 
