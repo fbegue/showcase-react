@@ -166,63 +166,32 @@ const useNormalizedApi = () => {
 
       let playObs = await api.fetchArtistGenres(playlists);
      console.log("fetchArtistGenres playObs",playObs);
-
-      //testing: test data isn't really like what we were expecting later
-      //so it required some parsing
-      // var genres = [];
-      // var artists = [];
-      //
-      // artistGenres.forEach(function(ga){
-      //   var gname = (' ' + ga.genre).slice(1);
-      //   var g = {name:gname,id:ga.id_genre}
-      //
-      //   //quick uniqueness filter
-      //   var flag = true;
-      //   genres.forEach(function(ge){
-      //     if(ge.id === g.id){flag = false }
-      //   });
-      //   flag ? genres.push(g):{};
-      //
-      // });
-      //
-      // var artist_genre_map = {};
-      //
-      // artistGenres.forEach(function(ga){
-      //   !artist_genre_map[ga.id] ? artist_genre_map[ga.id] = []:{}
-      //   artist_genre_map[ga.id].indexOf(ga.id_genre) === -1 ? artist_genre_map[ga.id].push(ga.id_genre):{};
-      // });
-      //
-      // console.log("artist_genre_map",artist_genre_map);
-      // artistGenres.forEach(function(ga){
-      //   //todo:
-      //   if(!(artists.filter(a => a.name === ga.name).length)){
-      //     delete ga.id_genre;
-      //     delete ga.genre
-      //     ga.genres = artist_genre_map[ga.id];
-      //     artists.push(ga)
-      //   }
-      // });
-      //
-      // console.log("genres",genres);
-      // console.log("artists",artists);
+      //looks like: {playlist:{},tracks:[],artists:[],payload:[],db:[],lastLook:[]}
 
       var genres = [];
       var artists = [];
 
+      //todo: somehow one of these is not a string
+      //needs to be fixed upstream
+
+      var inG = function(gin){
+        genres.forEach(g =>{
+          if(g.id == gin.id){return true}return false;
+        })
+      }
       playObs.forEach(p =>{
         p.artists.forEach(a => {
-          // a.genres.forEach(g => {
-          //   var gen = {}
-          // })
-
-          //var art = {a.name}
+          a.genres.forEach(g => {
+           // genres.indexOf(g) === -1 ? genres.push(g):{};
+            !(inG(g))?genres.push(g):{};
+          })
+          artists.push(a);
         })
       });
 
       //for some reason these can't happen one after another
       var a =  function(){
         return new Promise(function(done, fail) {
-          console.log("a");
           let { result, entities } = normalize(
               artists,
               apiSchemas.fetchArtistResponseSchema
@@ -237,12 +206,10 @@ const useNormalizedApi = () => {
 
       var g =  function(){
         return new Promise(function(done, fail) {
-          console.log("g");
           let { result, entities } = normalize(
               genres,
               apiSchemas.fetchGenreResponseSchema
           );
-
           db.mergeEntities(entities);
           db.updateStoredQuery("ALL_GENRES", result);
           console.log(entities);
@@ -252,7 +219,6 @@ const useNormalizedApi = () => {
       };
 
       a().then(g());
-
 
       //var playlist = playlists.items[0];
       // var playlist = playlists.items;
@@ -414,5 +380,46 @@ const useNormalizedApi = () => {
 
   };
 };
+
+//var parseShittyTestData = function(){
+//test data isn't really like what we were expecting later
+//so it required some parsing
+// var genres = [];
+// var artists = [];
+//
+// artistGenres.forEach(function(ga){
+//   var gname = (' ' + ga.genre).slice(1);
+//   var g = {name:gname,id:ga.id_genre}
+//
+//   //quick uniqueness filter
+//   var flag = true;
+//   genres.forEach(function(ge){
+//     if(ge.id === g.id){flag = false }
+//   });
+//   flag ? genres.push(g):{};
+//
+// });
+//
+// var artist_genre_map = {};
+//
+// artistGenres.forEach(function(ga){
+//   !artist_genre_map[ga.id] ? artist_genre_map[ga.id] = []:{}
+//   artist_genre_map[ga.id].indexOf(ga.id_genre) === -1 ? artist_genre_map[ga.id].push(ga.id_genre):{};
+// });
+//
+// console.log("artist_genre_map",artist_genre_map);
+// artistGenres.forEach(function(ga){
+//
+//   if(!(artists.filter(a => a.name === ga.name).length)){
+//     delete ga.id_genre;
+//     delete ga.genre
+//     ga.genres = artist_genre_map[ga.id];
+//     artists.push(ga)
+//   }
+// });
+//
+// console.log("genres",genres);
+// console.log("artists",artists);
+//}
 
 export default useNormalizedApi;

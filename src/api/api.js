@@ -99,8 +99,8 @@ var fetchArtistGenres =  function(playlists){
 			type:"POST",
 			data: {playlists:JSON.stringify(playlists)}
 		}).done(function(payload){
-			console.log("retrieved: ",payload);
-			done(payload.items)
+			//console.log("retrieved: ",payload);
+			done(payload)
 		})
 	})
 }
