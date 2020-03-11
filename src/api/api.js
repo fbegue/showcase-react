@@ -90,27 +90,39 @@ var fetchPlaylists =  function(){
 //testing: must turn cors off in browser
 
 var fetchArtistGenres =  function(playlists){
-	return new Promise(function(done, fail) {
+    return new Promise(function(done, fail) {
 
-		//testing: must turn cors off in browser
+        //testing: must turn cors off in browser
 
-		$.ajax({
-			url: 'http://localhost:8888/resolvePlaylists',
-			type:"POST",
-			data: {playlists:JSON.stringify(playlists)}
-		}).done(function(payload){
-			//console.log("retrieved: ",payload);
-			done(payload)
-		})
-	})
+        $.ajax({
+            url: 'http://localhost:8888/resolvePlaylists',
+            type:"POST",
+            data: {playlists:JSON.stringify(playlists)}
+        }).done(function(payload){
+            //console.log("retrieved: ",payload);
+            done(payload)
+        })
+    })
 }
 
-const fetchEvents = id =>
-    delay(500).then(() => {
-        return fakeFetch3()
-    });
+var fetchEvents =  function(param){
+    return new Promise(function(done, fail) {
 
+        //testing: must turn cors off in browser
+        param = {
+            metro:{displayName:"Columbus", id:9480},
+            dateFilter:{start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"}};
 
+        $.ajax({
+            url: 'http://localhost:8888/getMetroEvents',
+            type:"POST",
+            data: {data:JSON.stringify(param)}
+        }).done(function(payload){
+            //console.log("retrieved: ",payload);
+            done(payload)
+        })
+    })
+}
 
 
 const addTodo = text =>

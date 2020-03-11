@@ -242,27 +242,16 @@ const useNormalizedApi = () => {
     fetchEvents: async (filter) => {
 
       let events = await api.fetchEvents(filter);
-      console.log("events",events);
-
-      // if(testFlag){
-      //   console.log("testFlag");
-      //   events = [{id:12345612,displayName:"testDisplayName",
-      //     performance:[{id:12312323,displayName:"testDisplayPerf"}]}]
-      // }
+      console.log("fetchEvents",events);
 
       let { result, entities } = normalize(
           events,
           apiSchemas.fetchEventResponseSchema
       );
-
       db.mergeEntities(entities);
       db.updateStoredQuery("ALL_EVENTS", result);
-      console.log(entities);
-      console.log(result);
-
-      // testFlag = true;
-
-      //var result = {};
+      // console.log(entities);
+      // console.log(result);
       return {
         value: result,
         schema: apiSchemas.fetchEventResponseSchema
