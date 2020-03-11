@@ -113,14 +113,16 @@ var fetchEvents =  function(param){
             metro:{displayName:"Columbus", id:9480},
             dateFilter:{start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"}};
 
-        $.ajax({
-            url: 'http://localhost:8888/getMetroEvents',
-            type:"POST",
-            data: {data:JSON.stringify(param)}
-        }).done(function(payload){
-            //console.log("retrieved: ",payload);
-            done(payload)
-        })
+        // $.ajax({
+        //         //     url: 'http://localhost:8888/getMetroEvents',
+        //         //     type:"POST",
+        //         //     data: {data:JSON.stringify(param)}
+        //         // }).done(function(payload){
+        //         //     //console.log("retrieved: ",payload);
+        //         //     done(payload)
+        //         // })
+
+        fakeFetch3().then(r =>{done(r)})
     })
 }
 

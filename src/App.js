@@ -8,7 +8,6 @@ import Typography from '@material-ui/core/Typography';
 import Sidebar from './Sidebar';
 import FilterBar from './FilterBar';
 import NestedList from './NestedList';
-import NestedListEvents from './NestedListEvents';
 import './App.css'
 
 

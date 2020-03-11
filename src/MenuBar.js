@@ -6,6 +6,9 @@ import Collapse from '@material-ui/core/Collapse'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
 import './MenuBar.css'
+import Typography from '@material-ui/core/Typography';
+import TextField from "@material-ui/core/TextField";
+import Moment from 'moment';
 
 import Drawer from '@material-ui/core/Drawer'
 //import { withStyles } from 'material-ui/core/styles'
@@ -126,6 +129,23 @@ function MenuBar (props){
 		) )
 	}
 
+
+
+	//seems like start.date is always guranteed, don't know about datetime, time
+	//we'll take either here, defaulting to time if no datetime
+	//if time's not there, we get nothing back
+	var moment = function(dt,format){
+		//console.log("$m",Moment(dt).format(format));
+		if(dt.length){
+			dt[0] ? dt = dt[0]:dt = dt[1]
+		}
+	    if(Moment(dt).format(format) !== 'Invalid date'){
+			return(<React.Fragment> {Moment(dt).format(format)} </React.Fragment>) //basically you can do all sorts of the formatting and others
+		}else{return ""}
+	};
+
+
+
 // if the menu item doesn't have any child, this method simply returns a clickable menu item that redirects to any location and if there is no child this method uses recursion to go until the last level of children and then returns the item by the first condition.
 	var handler = function( children ) {
 
@@ -136,8 +156,10 @@ function MenuBar (props){
 					<div key={ subOption.displayName }>
 						<ListItem
 							button
-							key={ subOption.displayName }>
+							key={ subOption.displayName }
+							className={'nestedCustom'}>
 							{subOption.displayName}
+
 							{/*<Link*/}
 								{/*to={ subOption.url }*/}
 								{/*className={ classes.links }>*/}
@@ -157,7 +179,24 @@ function MenuBar (props){
 						onClick={ () => handleClick( subOption.displayName ) }>
 						<ListItemText
 							inset
-							primary={ subOption.displayName } />
+							primary={ subOption.displayName.toString().replace(/at.*/,"")}
+							secondary={
+								<React.Fragment>
+									<Typography
+										component="span"
+										variant="body2"
+										// className={classes.inline}
+										color="textPrimary"
+									>
+										{moment(subOption.start.date,'MMM do')}
+										{moment([subOption.start.datetime,subOption.start.time],'LT')}
+									</Typography>
+									{subOption.venue.displayName} -
+									{subOption.location.city.toString().replace(", US","")}
+								</React.Fragment>
+							}
+						/>
+
 						{ state[ subOption.displayName ] ?
 							<ExpandLess /> :
 							<ExpandMore />

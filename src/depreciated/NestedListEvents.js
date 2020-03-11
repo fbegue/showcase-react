@@ -64,7 +64,7 @@ export default function NestedListEvents(props) {
 			<Collapse in={open} timeout="auto" unmountOnExit>
 				<List component="div" disablePadding>
 					{props.performances.map((perf, index) => (
-						<ListItem key={perf.id}button className={classes.nested}>
+						<ListItem key={perf.id} button className={'nestedCustom'}>
 							<ListItemText primary={perf.displayName} />
 						</ListItem>
 					))}
