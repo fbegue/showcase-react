@@ -107,7 +107,6 @@ var menuItems = {
 // };
 
 function MenuBar (props){
-	console.log("$MenuBar");
 
 	// constructor( props ) {
 	// 	super( props )
@@ -131,7 +130,7 @@ function MenuBar (props){
 
 
 
-	//seems like start.date is always guranteed, don't know about datetime, time
+	//seems like start.date is always guaranteed, don't know about datetime, time
 	//we'll take either here, defaulting to time if no datetime
 	//if time's not there, we get nothing back
 	var moment = function(dt,format){
@@ -146,7 +145,8 @@ function MenuBar (props){
 
 
 
-// if the menu item doesn't have any child, this method simply returns a clickable menu item that redirects to any location and if there is no child this method uses recursion to go until the last level of children and then returns the item by the first condition.
+// if the menu item doesn't have any child, this method simply returns a clickable menu item that redirects to any
+// location and if there is no child this method uses recursion to go until the last level of children and then returns the item by the first condition.
 	var handler = function( children ) {
 
 		//const { state } = this
