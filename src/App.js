@@ -116,7 +116,14 @@ function App(props) {
   let pqry4 = db.getStoredQuery('ALL_EVENTS');
   let events = db.executeQuery(pqry4);
 
-  events.forEach(function(e){e.childrenKey = "performance"});
+  //todo: sets up nested list
+  events.forEach(function(e){
+    e.childrenKey = "performance"
+    // e.performance.forEach(p =>{
+    //   p.childrenKey = "genres"
+    // })
+  });
+
 
   //todo: a) this is ugly as shit but I wonder if I really need anything more complicated?
   //b) I had to add songkick_ids to getArtistGenres, but I guess we should be expecting those

@@ -10,173 +10,148 @@ import Typography from '@material-ui/core/Typography';
 import TextField from "@material-ui/core/TextField";
 import Moment from 'moment';
 
-import Drawer from '@material-ui/core/Drawer'
-//import { withStyles } from 'material-ui/core/styles'
-import { Link } from 'react-router-dom'
-import Divider from "./Sidebar";
+import Chip from '@material-ui/core/Chip';
+import Paper from '@material-ui/core/Paper';
 
-//import menuItems from './menuItems'
-var menuItems = {
-	"data" : [
-		{
-			"name": "Item1",
-			"url": "/item1"
-		},
-		{
-			"name": "Item2",
-			"url": "/item2"
-		},
-		{
-			"name": "Item3",
-			"childrenKey":"children",
-			"children": [
-				{
-					"name": "Child31",
-					"url": "/child31"
-				},
-				{
-					"name": "Child32",
-					"url": "/child32"
-				},
-				{
-					"name": "Child32",
-					"childrenKey":"children",
-					"children": [
-						{
-							"name": "Child321",
-							"url": "/child31"
-						},
-						{
-							"name": "Child322",
-							"url": "/child32"
-						},
-						{
-							"name": "Child323",
-							"url": "/child32"
-						}
-					]
+var testChips = [{ id: 0, name: 'Angular' },
+	{ id: 1, name: 'jQuery' },
+	{ id: 2, name: 'Polymer' },
+	{ id: 3, name: 'React' },
+	{ id: 4, name: 'Vue.js' }]
+
+function ChipsArray(props) {
+
+	//console.log("ChipsArray",props);
+	//const classes = useStyles();
+	//todo: implement useStyles
+	//see 'chip array'
+	//https://material-ui.com/components/chips/
+	var classes = {root:"root",chip:"chip"}
+	const [chipData, setChipData] = React.useState(props.chipData);
+	console.log(typeof chipData[0].name);
+
+	const handleDelete = chipToDelete => () => {
+		setChipData(chips => chips.filter(chip => chip.key !== chipToDelete.key));
+	};
+
+	return (
+
+		<Paper style={{maxWidth:"40em"}} className={classes.root}>
+			{chipData.map(data => {
+				let icon;
+
+				if (data.label === 'React') {
+					// icon = <TagFacesIcon />;
 				}
-			]
-		},
-		{
-			"name": "Item4",
-			"childrenKey":"children",
-			"children": [
-				{
-					"name": "Child41",
-					"url": "/child41"
-				},
-				{
-					"name": "Child42",
-					"url": "/child42"
-				},
-				{
-					"name": "Child43",
-					"childrenKey":"testKey",
-					"testKey": [
-						{
-							"name": "Child431",
-							"url": "/child431"
-						},
-						{
-							"name": "Child432",
-							"url": "/child432,"
-						},
-						{
-							"name": "Child433",
-							"url": "/child433"
-						}
-					]
-				}
-			]
-		}
-	]
+
+				// return (
+				// 	<div>{data.name}</div>
+				// );
+				return (
+					<Chip
+						key={data.id}
+						// icon={icon}
+						label={data.name}
+						className={classes.chip}
+					/>
+				);
+			})}
+		</Paper>
+	);
 }
 
-
-// const styles = {
-// 	list: {
-// 		width: 250,
-// 	},
-// 	links: {
-// 		textDecoration:'none',
-// 	}
-// 	menuHeader: {
-// 		paddingLeft: '30px'
-// 	}
-// };
-
-function MenuBar (props){
-
-	// constructor( props ) {
-	// 	super( props )
-	// 	this.state = {};
-	// 	this.data = props.data;
-	// 	this.rerender = function(){
-	// 		console.log("rerender");
-	// 	};
-	// 	console.log("this.data",this.data);
-	// }
-
-	//var state = {};
-	let [state, setState] = useState({});
-
-// this method sets the current state of a menu item i.e whether it is in expanded or collapsed or a collapsed state
-	var handleClick =function( item ) {
-		setState( prevState => (
-			{ [ item ]: !prevState[ item ] }
-		) )
+class MenuBar extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {};
+		// function determineDepthOfObject(object) {
+		// 	let depth = 0;
+		// 	if (object.children) {
+		// 		object.children.forEach(x => {
+		// 			let temp = determineDepthOfObject(x);
+		// 			if (temp > depth) {
+		// 				depth = temp;
+		// 			}
+		// 		})
+		// 	}
+		// 	return depth + 1;
+		// }
+		// console.log("depth",determineDepthOfObject(menuItems.data[3]));
 	}
 
 
 
-	//seems like start.date is always guaranteed, don't know about datetime, time
-	//we'll take either here, defaulting to time if no datetime
-	//if time's not there, we get nothing back
-	var moment = function(dt,format){
-		//console.log("$m",Moment(dt).format(format));
-		if(dt.length){
-			dt[0] ? dt = dt[0]:dt = dt[1]
+	// this method sets the current state of a menu item i.e whether it is in expanded or collapsed or a collapsed state
+	handleClick(item) {
+		this.setState(prevState => ({ [item]: !prevState[item] }));
+	}
+
+
+
+	// if the menu item doesn't have any child, this method simply returns a clickable menu item that redirects to any location and if there is no child this method uses recursion to go until the last level of children and then returns the item by the first condition.
+	handler(children,key) {
+
+		var moment = function(dt,format){
+			//console.log("$m",Moment(dt).format(format));
+			if(dt.length){
+				dt[0] ? dt = dt[0]:dt = dt[1]
+			}
+			if(Moment(dt).format(format) !== 'Invalid date'){
+				return(<React.Fragment> {Moment(dt).format(format)} </React.Fragment>) //basically you can do all sorts of the formatting and others
+			}else{return ""}
+		};
+
+		var moment2 = function(o){console.log(o);}
+
+		var renderLevel = function(op){
+			console.log("$",op);
+			if(op.venue){return op.venue.displayName}
+			if(op.artist){return op.artist.displayName}
 		}
-	    if(Moment(dt).format(format) !== 'Invalid date'){
-			return(<React.Fragment> {Moment(dt).format(format)} </React.Fragment>) //basically you can do all sorts of the formatting and others
-		}else{return ""}
-	};
+
+		//was trying a depth-based style here.
+		// function getDepth(d){
+		// 	return {marginLeft: d + 'em',color: 'blue'}
+		// }
+		// style={getDepth(subOption.depth)}
+
+		// console.log(key);
+		// console.log(children);
 
 
-
-// if the menu item doesn't have any child, this method simply returns a clickable menu item that redirects to any
-// location and if there is no child this method uses recursion to go until the last level of children and then returns the item by the first condition.
-	var handler = function( children ) {
-
-		//const { state } = this
-		return children.map( ( subOption ) => {
-			if ( !subOption.childrenKey ) {
+		const { classes } = this.props;
+		const { state } = this;
+		return children.map(subOption => {
+			if (!subOption.childrenKey) {
 				return (
-					<div key={ subOption.displayName }>
-						<ListItem
-							button
-							key={ subOption.displayName }
-							className={'nestedCustom'}>
-							{subOption.displayName}
-
-							{/*<Link*/}
-								{/*to={ subOption.url }*/}
-								{/*className={ classes.links }>*/}
-								{/*<ListItemText*/}
-									{/*inset*/}
-									{/*primary={ subOption.displayName }*/}
-								{/*/>*/}
-							{/*</Link>*/}
-						</ListItem>
+					<div key={subOption.id}>
+						<ListItemText
+							style={{marginLeft:"2em"}}
+							inset
+							primary={ subOption.displayName}
+							secondary={
+								<React.Fragment>
+									<Typography
+										component="span"
+										variant="body2"
+										// className={classes.inline}
+										color="textPrimary"
+									>
+										<ChipsArray chipData={subOption.artist.genres}>
+										</ChipsArray>
+									</Typography>
+									{/*{subOption.venue.displayName} -*/}
+									{/*{subOption.location.city.toString().replace(", US","")}*/}
+								</React.Fragment>
+							}
+						/>
 					</div>
-				)
+				);
 			}
 			return (
-				<div key={ subOption.displayName }>
-					<ListItem
-						button
-						onClick={ () => handleClick( subOption.displayName ) }>
+				<div key={subOption.name}>
+
+					<ListItem  button onClick={() => this.handleClick(subOption.id)}>
 						<ListItemText
 							inset
 							primary={ subOption.displayName.toString().replace(/at.*/,"")}
@@ -196,45 +171,35 @@ function MenuBar (props){
 								</React.Fragment>
 							}
 						/>
-
-						{ state[ subOption.displayName ] ?
-							<ExpandLess /> :
-							<ExpandMore />
-						}
+						{state[subOption.name] ? <ExpandLess /> : <ExpandMore />}
 					</ListItem>
-					<Collapse
-						in={ state[ subOption.displayName ] }
-						timeout="auto"
-						unmountOnExit
-					>
-						{ handler( subOption[subOption.childrenKey] ) }
+					<Collapse in={state[subOption.id]} timeout="auto" unmountOnExit>
+						{this.handler( subOption[subOption.childrenKey],subOption.childrenKey, ) }
 					</Collapse>
 				</div>
-			)
-		} )
-	};
-
-	var classes = {menuHeader:"menuHeader",list:"list",links:"links"};
-
+			);
+		});
+	}
+	render() {
+		//const { classes, drawerOpen, menuOptions } = this.props;
+		//todo:
+		var classes = {menuHeader:"menuHeader",list:"list"};
 		return (
 			<div className={classes.list}>
-						<List>
-							<ListItem
-								key="menuHeading"
-								divider
-								disableGutters
-							>
-								<ListItemText
-									className={ classes.menuHeader }
-									inset
-									primary="Events"
-								/>
-							</ListItem>
-							{/*{ this.handler( menuItems.data ) }*/}
-							{ handler( props.data ) }
-						</List>
+				<List>
+					<ListItem  key="menuHeading" divider disableGutters>
+						<ListItemText
+							//className={classes.menuHeader}
+							// style={getStyle()}
+							inset
+							primary="Nested Menu"
+						/>
+					</ListItem>
+					{this.handler(this.props.data)}
+				</List>
 			</div>
-		)
+		);
+	}
 }
 // export default withStyles(styles)(MenuBar_class)
 export default MenuBar
