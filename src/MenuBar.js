@@ -13,23 +13,17 @@ import Moment from 'moment';
 import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
 
-var testChips = [{ id: 0, name: 'Angular' },
-	{ id: 1, name: 'jQuery' },
-	{ id: 2, name: 'Polymer' },
-	{ id: 3, name: 'React' },
-	{ id: 4, name: 'Vue.js' }]
-
 function ChipsArray(props) {
-
-	//console.log("ChipsArray",props);
 	//const classes = useStyles();
 	//todo: implement useStyles
 	//see 'chip array'
 	//https://material-ui.com/components/chips/
+
 	var classes = {root:"root",chip:"chip"}
 	const [chipData, setChipData] = React.useState(props.chipData);
 	console.log(typeof chipData[0].name);
 
+	//leaving as example on how to interact with later
 	const handleDelete = chipToDelete => () => {
 		setChipData(chips => chips.filter(chip => chip.key !== chipToDelete.key));
 	};
@@ -38,15 +32,7 @@ function ChipsArray(props) {
 
 		<Paper style={{maxWidth:"40em"}} className={classes.root}>
 			{chipData.map(data => {
-				let icon;
-
-				if (data.label === 'React') {
-					// icon = <TagFacesIcon />;
-				}
-
-				// return (
-				// 	<div>{data.name}</div>
-				// );
+				//let icon = <TagFacesIcon />;
 				return (
 					<Chip
 						key={data.id}
@@ -81,14 +67,17 @@ class MenuBar extends Component {
 
 
 
-	// this method sets the current state of a menu item i.e whether it is in expanded or collapsed or a collapsed state
+	// this method sets the current state of a menu item i.e whether
+	// it is in expanded or collapsed or a collapsed state
 	handleClick(item) {
 		this.setState(prevState => ({ [item]: !prevState[item] }));
 	}
 
 
 
-	// if the menu item doesn't have any child, this method simply returns a clickable menu item that redirects to any location and if there is no child this method uses recursion to go until the last level of children and then returns the item by the first condition.
+	// if the menu item doesn't have any child, this method simply returns a clickable menu
+	// item that redirects to any location and if there is no child this method uses recursion to go until
+	// the last level of children and then returns the item by the first condition.
 	handler(children,key) {
 
 		var moment = function(dt,format){
@@ -101,23 +90,17 @@ class MenuBar extends Component {
 			}else{return ""}
 		};
 
-		var moment2 = function(o){console.log(o);}
-
-		var renderLevel = function(op){
-			console.log("$",op);
-			if(op.venue){return op.venue.displayName}
-			if(op.artist){return op.artist.displayName}
-		}
+		// var renderLevel = function(op){
+		// 	console.log("$",op);
+		// 	if(op.venue){return op.venue.displayName}
+		// 	if(op.artist){return op.artist.displayName}
+		// }
 
 		//was trying a depth-based style here.
 		// function getDepth(d){
 		// 	return {marginLeft: d + 'em',color: 'blue'}
 		// }
 		// style={getDepth(subOption.depth)}
-
-		// console.log(key);
-		// console.log(children);
-
 
 		const { classes } = this.props;
 		const { state } = this;
@@ -150,7 +133,6 @@ class MenuBar extends Component {
 			}
 			return (
 				<div key={subOption.name}>
-
 					<ListItem  button onClick={() => this.handleClick(subOption.id)}>
 						<ListItemText
 							inset
