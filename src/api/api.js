@@ -77,10 +77,11 @@ var fetchPlaylists =  function(){
 
         //testing: must turn cors off in browser
 
-        $.ajax({
-            url: 'http://localhost:8888/getUserPlaylists',
-            type:"POST"
-        }).done(function(payload){
+        // $.ajax({
+        //     url: 'http://localhost:8888/getUserPlaylists',
+        //     type:"POST"
+        // })
+        fakeFetch2().done(function(payload){
             console.log("retrieved: ",payload);
             done(payload.items)
         })
@@ -113,16 +114,20 @@ var fetchEvents =  function(param){
             metro:{displayName:"Columbus", id:9480},
             dateFilter:{start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"}};
 
-        // $.ajax({
-        //         //     url: 'http://localhost:8888/getMetroEvents',
-        //         //     type:"POST",
-        //         //     data: {data:JSON.stringify(param)}
-        //         // }).done(function(payload){
-        //         //     //console.log("retrieved: ",payload);
-        //         //     done(payload)
-        //         // })
+        $.ajax({
+                    url: 'http://localhost:8888/resolveEvents',
+                    type:"POST",
+                     data: {data:JSON.stringify(param)}
+            //todo:[Object: null prototype] when trying to read
+             //data: JSON.stringify(param)
+            //data: param
+                }).done(function(payload){
+                    console.log("retrieved: ",payload);
+                    done(payload)
+                })
 
-        fakeFetch3().then(r =>{done(r)})
+        //testing:
+        // fakeFetch3().then(r =>{done(r)})
     })
 }
 
