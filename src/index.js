@@ -5,8 +5,8 @@ import App from './App'
 import './index.css'
 const rootElement = document.getElementById("root");
 ReactDOM.render(
-  <DatabaseProvider>
-    <App />
-  </DatabaseProvider>,
-  rootElement
+    <DatabaseProvider>
+        <App />
+    </DatabaseProvider>,
+    rootElement
 );

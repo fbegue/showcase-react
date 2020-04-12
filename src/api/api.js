@@ -77,14 +77,14 @@ var fetchPlaylists =  function(){
 
         //testing: must turn cors off in browser
 
-        // $.ajax({
-        //     url: 'http://localhost:8888/getUserPlaylists',
-        //     type:"POST"
-        // })
-        fakeFetch2().done(function(payload){
-            console.log("retrieved: ",payload);
-            done(payload.items)
-        })
+        $.ajax({
+            url: 'http://localhost:8888/getUserPlaylists',
+            type:"POST"
+        }).done(function(payload){
+                console.log("retrieved: ",payload);
+                done(payload.items)
+            })
+        // fakeFetch2()
     })
 }
 

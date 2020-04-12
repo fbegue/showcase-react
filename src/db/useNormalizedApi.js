@@ -183,8 +183,9 @@ const useNormalizedApi = () => {
         p.artists.forEach(a => {
           a.genres.forEach(g => {
            // genres.indexOf(g) === -1 ? genres.push(g):{};
+
             !(inG(g))?genres.push(g):{};
-          })
+          });
           artists.push(a);
         })
       });

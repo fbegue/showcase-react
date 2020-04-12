@@ -5,7 +5,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import Collapse from '@material-ui/core/Collapse'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
-import './MenuBar.css'
+import './EventsList.css'
 import Typography from '@material-ui/core/Typography';
 import TextField from "@material-ui/core/TextField";
 import Moment from 'moment';

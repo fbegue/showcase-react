@@ -5,7 +5,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import Collapse from '@material-ui/core/Collapse'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
-import './MenuBar.css'
+import './EventsList.css'
 import Typography from '@material-ui/core/Typography';
 import TextField from "@material-ui/core/TextField";
 import Moment from 'moment';
@@ -30,7 +30,7 @@ function ChipsArray(props) {
 
 	return (
 
-		<Paper style={{maxWidth:"40em"}} className={classes.root}>
+		<div style={{maxWidth:"40em"}} className={classes.root}>
 			{chipData.map(data => {
 				//let icon = <TagFacesIcon />;
 				return (
@@ -42,11 +42,11 @@ function ChipsArray(props) {
 					/>
 				);
 			})}
-		</Paper>
+		</div>
 	);
 }
 
-class MenuBar extends Component {
+class EventsList extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
@@ -174,7 +174,7 @@ class MenuBar extends Component {
 							//className={classes.menuHeader}
 							// style={getStyle()}
 							inset
-							primary="Nested Menu"
+							primary="Events"
 						/>
 					</ListItem>
 					{this.handler(this.props.data)}
@@ -184,4 +184,4 @@ class MenuBar extends Component {
 	}
 }
 // export default withStyles(styles)(MenuBar_class)
-export default MenuBar
+export default EventsList

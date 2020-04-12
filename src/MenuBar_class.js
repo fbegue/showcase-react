@@ -90,7 +90,7 @@ var menuItems = {
 
 
 
-//todo: wasn't too sure about how to interact with this MenuBar as a class
+//todo: wasn't too sure about how to interact with this EventsList as a class
 //particularly I realized that even after binding the data in props
 //and having that change in App.js, this this doesn't trigger a rerender like I expected
 
