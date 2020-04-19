@@ -1,3 +1,7 @@
+###startup
+`cd C:\Users\Candy.DESKTOP-TMB4Q31\WebstormProjects\showcase-react`  
+`cls && npm run start`
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>

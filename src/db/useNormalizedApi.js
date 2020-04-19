@@ -173,22 +173,51 @@ const useNormalizedApi = () => {
 
       //todo: somehow one of these is not a string
       //needs to be fixed upstream
-
       var inG = function(gin){
         genres.forEach(g =>{
           if(g.id == gin.id){return true}return false;
         })
       }
+
+      //alright so first very basic attempt at doing some metadata analysis
+      //here. I feel like I'm going very narrow and will probably end up
+      //rewriting this when I understand what my possible use cases look like a
+      //little more clearly
+
+      //mutate genres with ranks over the entire fetch
+
+      var gMap = {};
+      var rank = {};
+
       playObs.forEach(p =>{
         p.artists.forEach(a => {
+          a.genres_ranked = [];
           a.genres.forEach(g => {
-           // genres.indexOf(g) === -1 ? genres.push(g):{};
-
-            !(inG(g))?genres.push(g):{};
+            !rank[g.id] ? rank[g.id]= 1:rank[g.id]++;
+            gMap[g.id] = g;
           });
+          // for(var g in rank){
+          //   var gr = {id:g,name:gMap[g].name,rank:g[rank]}
+          //   a.genres_ranked.push(gr)
+          // }
           artists.push(a);
         })
       });
+
+      console.log("$gmap",gMap);
+      console.log("$rank",rank);
+      for(var g in rank){
+
+        //todo: this id should not be a string - need to fix upstream
+
+        var gr = {id:parseInt(g,10),name:gMap[g].name,rank:rank[g]}
+        genres.push(gr)
+      }
+       genres.sort(function(f,s){
+        if(f.rank < s.rank){return 1}else{return -1}
+      });
+
+      console.log("$ranked",genres)
 
       //for some reason these can't happen one after another
       var a =  function(){

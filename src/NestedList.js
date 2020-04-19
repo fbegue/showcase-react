@@ -105,7 +105,8 @@ export default function NestedList(props) {
 							{/*<ListItemIcon>*/}
 							{/*<StarBorder />*/}
 							{/*</ListItemIcon>*/}
-							<ListItemText primary={g.name} />
+							{/*todo: https://material-ui.com/api/list-item-text/*/}
+							<ListItemText primary={g.name} secondary={g.rank}/>
 						</ListItem>
 					))}
 				</List>
