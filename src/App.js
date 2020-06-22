@@ -246,9 +246,16 @@ function App(props) {
     console.log("events",events);
 
     //testing: example metro catalog
-    var states = {"OH":[{name:"Columbus",id:"9998"}]}
+    var states = {"OH":[
+    {"displayName":"Columbus", "id":9480},
+    {"displayName":"Cleveland", "id":14700},
+    {"displayName":"Cincinnati", "id":22040},
+    {"displayName":"Dayton", "id":3673}]}
 
-    let todoIds = JSON.stringify(todos.map(t => t.id))
+    //{"displayName": "Salt Lake City", "id":13560}
+    //{"displayName":"SF Bay Area", "id":26330}
+
+    let todoIds = JSON.stringify(todos.map(t => t.id));
 
     useEffect(() => {
         setSelectedTodoId(todos[0] && todos[0].id)

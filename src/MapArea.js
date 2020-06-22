@@ -92,7 +92,7 @@ function MapArea(props) {
                     variant="subtitle1"
                     color={play.selected ? 'secondary' : 'textPrimary'}
                 >
-                  {play.name}
+                  {play.displayName}
                   {/*- <span style={{fontSize:"10px"}}>{play.owner.display_name}</span>*/}
                 </Typography>
               </ListItem>

@@ -189,20 +189,22 @@ const useNormalizedApi = () => {
       var gMap = {};
       var rank = {};
 
-      playObs.forEach(p =>{
-        p.artists.forEach(a => {
-          a.genres_ranked = [];
-          a.genres.forEach(g => {
-            !rank[g.id] ? rank[g.id]= 1:rank[g.id]++;
-            gMap[g.id] = g;
-          });
-          // for(var g in rank){
-          //   var gr = {id:g,name:gMap[g].name,rank:g[rank]}
-          //   a.genres_ranked.push(gr)
-          // }
-          artists.push(a);
-        })
-      });
+      try {
+        playObs.forEach(p => {
+          p.resolved.forEach(a => {
+            a.genres_ranked = [];
+            a.genres.forEach(g => {
+              !rank[g.id] ? rank[g.id] = 1 : rank[g.id]++;
+              gMap[g.id] = g;
+            });
+            // for(var g in rank){
+            //   var gr = {id:g,name:gMap[g].name,rank:g[rank]}
+            //   a.genres_ranked.push(gr)
+            // }
+            artists.push(a);
+          })
+        });
+      }catch(e){console.log(e);}
 
       console.log("$gmap",gMap);
       console.log("$rank",rank);
