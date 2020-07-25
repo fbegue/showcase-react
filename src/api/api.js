@@ -106,6 +106,21 @@ var fetchArtistGenres =  function(playlists){
     })
 }
 
+var getMySavedTracks =  function(){
+    return new Promise(function(done, fail) {
+        //testing: must turn cors off in browser
+        $.ajax({
+            url: 'http://localhost:8888/getMySavedTracks',
+            type:"POST",
+            data: {}
+        }).done(function(payload){
+            //console.log("retrieved: ",payload);
+            done(payload.items)
+        })
+    })
+}
+
+
 var fetchEvents =  function(param){
     return new Promise(function(done, fail) {
 
@@ -166,5 +181,6 @@ export default {
     deleteTodo,
     fetchPlaylists,
     fetchArtistGenres,
-    fetchEvents
+    fetchEvents,
+    getMySavedTracks
 }

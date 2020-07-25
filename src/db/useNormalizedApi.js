@@ -271,6 +271,118 @@ const useNormalizedApi = () => {
         schema: apiSchemas.fetchPlaylistResponseSchema
       };
     },
+    getMySavedTracks: async () => {
+
+      let tracks = await api.getMySavedTracks();
+      console.log("getMySavedTracks:",tracks);
+      //looks like: {track.artists}
+      tracks.forEach(t=>{
+
+      })
+
+
+      // var genres = [];
+      // var artists = [];
+
+      // //todo: somehow one of these is not a string
+      // //needs to be fixed upstream
+      // var inG = function(gin){
+      //   genres.forEach(g =>{
+      //     if(g.id == gin.id){return true}return false;
+      //   })
+      // }
+      //
+      // //alright so first very basic attempt at doing some metadata analysis
+      // //here. I feel like I'm going very narrow and will probably end up
+      // //rewriting this when I understand what my possible use cases look like a
+      // //little more clearly
+      //
+      // //mutate genres with ranks over the entire fetch
+      //
+      // var gMap = {};
+      // var rank = {};
+      //
+      //
+      //   playObs.forEach(p => {
+      //     p.resolved.forEach(a => {
+      //       a.genres_ranked = [];
+      //       a.genres.forEach(g => {
+      //         !rank[g.id] ? rank[g.id] = 1 : rank[g.id]++;
+      //         gMap[g.id] = g;
+      //       });
+      //       // for(var g in rank){
+      //       //   var gr = {id:g,name:gMap[g].name,rank:g[rank]}
+      //       //   a.genres_ranked.push(gr)
+      //       // }
+      //       artists.push(a);
+      //     })
+      //   });
+      //
+      // console.log("$gmap",gMap);
+      // console.log("$rank",rank);
+      // for(var g in rank){
+      //
+      //   //todo: this id should not be a string - need to fix upstream
+      //
+      //   var gr = {id:parseInt(g,10),name:gMap[g].name,rank:rank[g]}
+      //   genres.push(gr)
+      // }
+      // genres.sort(function(f,s){
+      //   if(f.rank < s.rank){return 1}else{return -1}
+      // });
+      //
+      // console.log("$ranked",genres)
+      //
+      // //for some reason these can't happen one after another
+      // var a =  function(){
+      //   return new Promise(function(done, fail) {
+      //     let { result, entities } = normalize(
+      //         artists,
+      //         apiSchemas.fetchArtistResponseSchema
+      //     );
+      //     db.mergeEntities(entities);
+      //     db.updateStoredQuery("ALL_ARTISTS", result);
+      //     console.log(entities);
+      //     console.log(result);
+      //     done()
+      //   })
+      // }
+      //
+      // var g =  function(){
+      //   return new Promise(function(done, fail) {
+      //     let { result, entities } = normalize(
+      //         genres,
+      //         apiSchemas.fetchGenreResponseSchema
+      //     );
+      //     db.mergeEntities(entities);
+      //     db.updateStoredQuery("ALL_GENRES", result);
+      //     console.log(entities);
+      //     console.log(result);
+      //     done()
+      //   })
+      // };
+      //
+      // a().then(g());
+
+      //var playlist = playlists.items[0];
+      // var playlist = playlists.items;
+      // let { result, entities } = normalize(
+      //     playlist,
+      //     apiSchemas.fetchPlaylistResponseSchema
+      // );
+      // console.log("playlist",playlist);
+      // console.log("result",result);
+      // db.mergeEntities(entities);
+      // db.updateStoredQuery(playlistFilterQueries['all'], result);
+
+      //todo: not sure how result works outside of callback functions (which are disabled right now)
+      var result = {};
+      return {
+        value: result,
+        //todo:
+        schema: apiSchemas.fetchPlaylistResponseSchema
+      };
+    },
     fetchEvents: async (filter) => {
 
       let events = await api.fetchEvents(filter);

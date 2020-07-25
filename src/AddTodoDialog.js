@@ -29,7 +29,7 @@ const AddTodoDialog = (props) => {
       onClose={props.onCancel}
       aria-labelledby="form-dialog-title"
     >
-      <DialogTitle id="form-dialog-title">Add Todo</DialogTitle>
+      <DialogTitle id="form-dialog-title">Add Node</DialogTitle>
       <DialogContent>
         <TextField
           value={text}

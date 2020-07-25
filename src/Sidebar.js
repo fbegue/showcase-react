@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -17,6 +17,7 @@ import HashLoader from 'react-spinners/HashLoader';
 import Button from '@material-ui/core/Button';
 
 import {useDB, useNormalizedApi} from './db'
+//import useAsync from "./useAsync";
 
 
 
@@ -76,9 +77,32 @@ function Sidebar(props) {
   const openAddTodoDialog = () => setAddTodoDialogOpen(true)
   const closeAddTodoDialog = () => setAddTodoDialogOpen(false)
 
+  //let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
+  //let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
+
+
+
+   let [filter, setFilter] = useState('active');
+
+  //todo: set on page load?
+  // useEffect(() => {
+  //   fetchTodos(filter)
+  // }, [filter])
+
+  const filterQueries = {
+    'active': 'ACTIVE_TODOS',
+    'all': 'ALL_TODOS',
+    'completed': 'COMPLETED_TODOS'
+  }
+
+ // let todos = db.executeStoredQuery(filterQueries[filter]);
+  let tqry = db.getStoredQuery('ALL_TODOS');
+  let todos = db.executeQuery(tqry);
+
 
   const testTodo = (text) => {
     console.log("test",props);
+    console.log(todos);
 
     // let pqry3 = db.getStoredQuery('ALL_PLAYLISTS');
     // let genres = db.executeQuery(pqry3);
@@ -94,6 +118,8 @@ function Sidebar(props) {
     //       //props.onCancel()
     //     })
   };
+
+
 
 
   const fetchEvents = (text) => {
@@ -145,6 +171,17 @@ function Sidebar(props) {
         })
   };
 
+  const getMySavedTracks = (text) => {
+    //console.log("fetchArtistGenres",props);
+    normalizedApi.getMySavedTracks()
+        .then(() => {
+          //props.onSuccess()
+        })
+        .catch(() => {
+          //props.onCancel()
+        })
+  };
+
   const showStore = (text) => {
     console.log("showStore",props);
     normalizedApi.showStore(text)
@@ -160,6 +197,14 @@ function Sidebar(props) {
     g.selected = !g.selected;
     normalizedApi.updatePlaylist(g)
   };
+  const setSelectNode = (g) => {
+    //console.log(g);
+    g.selected = !g.selected;
+    //todo:
+    //normalizedApi.updatePlaylist(g)
+  };
+
+
 
   return (
       <div className={classes.drawer}>
@@ -177,24 +222,27 @@ function Sidebar(props) {
             {/*<Tab label="Completed" classes={{ root: classes.tabRoot }} />*/}
             <Tab label="All" classes={{ root: classes.tabRoot }}/>
           </Tabs>
-          <Button onClick={testTodo} color="primary">
-            testTodo
-          </Button>
-          <Button onClick={fetchEvents} color="primary">
-            fetchEvents
-          </Button>
+          {/*<Button onClick={testTodo} color="primary">*/}
+          {/*  testTodo*/}
+          {/*</Button>*/}
+          {/*<Button onClick={fetchEvents} color="primary">*/}
+          {/*  fetchEvents*/}
+          {/*</Button>*/}
           <Button onClick={fetchPlaylists} color="primary">
             fetchPlaylists
+          </Button>
+          <Button onClick={getMySavedTracks} color="primary">
+            getMySavedTracks
           </Button>
           <Button onClick={fetchArtistGenres} color="primary">
             fetchArtistGenres  ({getSelectedPlays('length')})
           </Button>
 
-          <Button onClick={showStore} color="primary">
-            showStore
-          </Button>
+          {/*<Button onClick={showStore} color="primary">*/}
+          {/*  showStore*/}
+          {/*</Button>*/}
 
-          <div className={classes.addTodoButton}>
+          <div style={{marginBottom:"1em"}} className={classes.addTodoButton}>
             <IconButton onClick={openAddTodoDialog} color="primary" component="span">
               <AddIcon />
             </IconButton>
@@ -207,21 +255,37 @@ function Sidebar(props) {
         </div>
         <Divider />
         <List>
-          {props.playlists.map((play, index) => (
+          {todos.map((node, index) => (
               <ListItem
                   button
-                  key={play.id}
-                  onClick={() => setSelect(play)}
+                  key={node.id}
+                  onClick={() => setSelect(node)}
               >
                 <Typography
                     variant="subtitle1"
-                    color={play.selected ? 'secondary' : 'textPrimary'}
+                    color={node.selected ? 'secondary' : 'textPrimary'}
                 >
-                  {play.name} - <span style={{fontSize:"10px"}}>{play.owner.display_name}</span>
+                  {node.text} - <span style={{fontSize:"10px"}}></span>
                 </Typography>
               </ListItem>
           ))}
         </List>
+        {/*<List>*/}
+        {/*  {props.playlists.map((play, index) => (*/}
+        {/*      <ListItem*/}
+        {/*          button*/}
+        {/*          key={play.id}*/}
+        {/*          onClick={() => setSelect(play)}*/}
+        {/*      >*/}
+        {/*        <Typography*/}
+        {/*            variant="subtitle1"*/}
+        {/*            color={play.selected ? 'secondary' : 'textPrimary'}*/}
+        {/*        >*/}
+        {/*          {play.name} - <span style={{fontSize:"10px"}}>{play.owner.display_name}</span>*/}
+        {/*        </Typography>*/}
+        {/*      </ListItem>*/}
+        {/*  ))}*/}
+        {/*</List>*/}
       </div>
   );
 }

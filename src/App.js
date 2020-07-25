@@ -11,6 +11,12 @@ import NestedList from './NestedList';
 import MapArea from './MapArea';
 import './App.css'
 
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Box from '@material-ui/core/Box';
+
+
+
 //import $ from "jquery"
 //import {$} from './libraries/jquery.min'
 //import useScript from './useScript';
@@ -22,7 +28,7 @@ import TodoDetail from './TodoDetail';
 import brace from 'brace';
 import AceEditor from 'react-ace';
 import ContainerDimensions from 'react-container-dimensions';
-import useAsync from './useAsync';
+//import useAsync from './useAsync';
 import { useDB, useNormalizedApi } from './db'
 
 import {getUserPlaylists } from './testdata/getUserPlaylists.js'
@@ -42,7 +48,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 //import TreeView  from "./NestedList3"
 import EventsList from './EventsList'
 import { BrowserRouter } from 'react-router-dom'
-
+import SimpleTabs from "./SimpleTabs";
 
 const drawerWidth = 360;
 
@@ -175,14 +181,14 @@ function App(props) {
     let normalizedApi = useNormalizedApi()
     let db = useDB();
 
-    let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
-    //let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
-
-    useEffect(() => {
-        fetchTodos(filter)
-    }, [filter])
-
-    let todos = db.executeStoredQuery(filterQueries[filter]);
+    // let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
+    // //let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
+    //
+    // useEffect(() => {
+    //     fetchTodos(filter)
+    // }, [filter])
+    //
+    // let todos = db.executeStoredQuery(filterQueries[filter]);
 
     let pqry = db.getStoredQuery('ALL_PLAYLISTS');
     let playlists = db.executeQuery(pqry);
@@ -255,11 +261,11 @@ function App(props) {
     //{"displayName": "Salt Lake City", "id":13560}
     //{"displayName":"SF Bay Area", "id":26330}
 
-    let todoIds = JSON.stringify(todos.map(t => t.id));
+   // let todoIds = JSON.stringify(todos.map(t => t.id));
 
-    useEffect(() => {
-        setSelectedTodoId(todos[0] && todos[0].id)
-    }, [todoIds])
+    // useEffect(() => {
+    //     setSelectedTodoId(todos[0] && todos[0].id)
+    // }, [todoIds])
 
     return (
         <div>
@@ -270,7 +276,7 @@ function App(props) {
             <div>
                 <Sidebar
                     playlists={playlists}
-                    fetchTodosRequest={fetchTodosRequest}
+                    // fetchTodosRequest={fetchTodosRequest}
                     filter={filter}
                     onFilterChange={setFilter}
                     selectedTodo={selectedTodoId}
@@ -278,15 +284,17 @@ function App(props) {
                 />
             </div>
             <div>
+                <SimpleTabs></SimpleTabs>
+            </div>
+
+            <div>
                 <NestedList
                     artists={artists}
                     genres={genres}
                 />
             </div>
             <div>
-                {/*<BrowserRouter>*/}
                 <EventsList data={events} />
-                {/*</BrowserRouter>*/}
             </div>
 
             {/*todo: list of nested lists?*/}
@@ -296,30 +304,6 @@ function App(props) {
             {/*google: list of nestedList material ui*/}
             {/*https://stackoverflow.com/questions/48607844/multilevel-nested-list-in-material-ui-next*/}
             <div>
-                {/*<List>*/}
-                {/*{events.map((event, index) => (*/}
-                {/*<ListItem*/}
-                {/*button*/}
-                {/*key={event.id}*/}
-                {/*onClick={(e) => props.onSelectedTodoChange(event.id)}*/}
-                {/*>*/}
-                {/*<Typography*/}
-                {/*variant="subtitle1"*/}
-                {/*color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}*/}
-                {/*>*/}
-                {/*{event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>*/}
-                {/*</Typography>*/}
-                {/*<div className={"nestedListEvents"} >*/}
-                {/*/!*<NestedListEvents*!/*/}
-                {/*/!*    // performances={event.performance}*!/*/}
-                {/*/!*    // testing:*!/*/}
-                {/*/!*    performances={performances}*!/*/}
-                {/*/>*/}
-                {/*</div>*/}
-                {/*</ListItem>*/}
-                {/*))}*/}
-                {/*</List>*/}
-
                 {/*==============default=============================*/}
                 {/*<List>*/}
                 {/*  {events.map((event, index) => (*/}
