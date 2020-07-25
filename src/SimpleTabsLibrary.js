@@ -9,6 +9,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 //import Box from '@material-ui/core/Box';
 import {useDB, useNormalizedApi} from './db'
+import MaterialTable from "material-table";
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -73,7 +74,10 @@ export default function SimpleTabsLibrary() {
 		normalizedApi.updatePlaylist(g)
 	};
 
-
+var exampleData = [
+		{ name: 'Mehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 },
+		{ name: 'Zerya Betül', surname: 'Baran', birthYear: 2017, birthCity: 34 },
+	];
 	return (
 		<div className={classes.root}>
 			<AppBar position="static">
@@ -86,22 +90,46 @@ export default function SimpleTabsLibrary() {
 				Saved Artists
 			</TabPanel>
 			<TabPanel value={value} index={1}>
-				<List>
-					{playlists.map((play, index) => (
-						<ListItem
-							button
-							key={play.id}
-							onClick={() => setSelect(play)}
-						>
-							<Typography
-								variant="subtitle1"
-								color={play.selected ? 'secondary' : 'textPrimary'}
-							>
-								{play.name} - <span style={{fontSize:"10px"}}>{play.owner.display_name}</span>
-							</Typography>
-						</ListItem>
-					))}
-				</List>
+				{/*<MaterialTable*/}
+				{/*	title="Basic Search Preview"*/}
+				{/*	columns={[*/}
+				{/*		{ title: 'Name', field: 'name' },*/}
+				{/*		{ title: '# Tracks', field: 'tracks.total' },*/}
+				{/*		{ title: 'Owner', field: 'owner.display_name'},*/}
+				{/*		// { title: 'Owner', field: 'owner.display_name', type: 'numeric' },*/}
+				{/*		// {*/}
+				{/*		// 	field: 'url',*/}
+				{/*		// 	title: 'Avatar',*/}
+				{/*		// 	render: rowData => <img src={rowData.url} style={{width: 50, borderRadius: '50%'}}/>*/}
+				{/*		// }*/}
+				{/*		// {*/}
+				{/*		// 	title: 'Birth Place',*/}
+				{/*		// 	field: 'birthCity',*/}
+				{/*		// 	// lookup: { 34: 'İstanbul', 63: 'Şanlıurfa' },*/}
+				{/*		// },*/}
+				{/*	]}*/}
+				{/*	data={playlists}*/}
+				{/*	// data={exampleData}*/}
+				{/*	options={{*/}
+				{/*		search: true*/}
+				{/*	}}*/}
+				{/*/>*/}
+				{/*<List>*/}
+				{/*	{playlists.map((play, index) => (*/}
+				{/*		<ListItem*/}
+				{/*			button*/}
+				{/*			key={play.id}*/}
+				{/*			onClick={() => setSelect(play)}*/}
+				{/*		>*/}
+				{/*			<Typography*/}
+				{/*				variant="subtitle1"*/}
+				{/*				color={play.selected ? 'secondary' : 'textPrimary'}*/}
+				{/*			>*/}
+				{/*				{play.name} - <span style={{fontSize:"10px"}}>{play.owner.display_name}</span>*/}
+				{/*			</Typography>*/}
+				{/*		</ListItem>*/}
+				{/*	))}*/}
+				{/*</List>*/}
 			</TabPanel>
 		</div>
 	);
