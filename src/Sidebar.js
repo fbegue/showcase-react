@@ -14,11 +14,16 @@ import Typography from '@material-ui/core/Typography';
 import AddTodoDialog from './AddTodoDialog';
 import HashLoader from 'react-spinners/HashLoader';
 
+
+
 import Button from '@material-ui/core/Button';
 
 import {useDB, useNormalizedApi} from './db'
 //import useAsync from "./useAsync";
 
+//todo:
+import alasqlAPI from "./alasql/index";
+//import alasql from "alasql";
 
 
 const drawerWidth = 360;
@@ -134,16 +139,27 @@ function Sidebar(props) {
   };
 
 
-  const fetchPlaylists = (text) => {
-    console.log("fetchPlaylists",props);
-    normalizedApi.fetchPlaylists(text)
-        .then(() => {
-          //props.onSuccess()
-        })
-        .catch(() => {
-          //props.onCancel()
-        })
-  };
+  var tables = {};
+  var user = '123028477'
+
+  async function fetchPlaylists()  {
+    var playlists  = await alasqlAPI.fetchPlaylists()
+   //console.log("fetchPlaylists",playlists);
+   try{
+
+     // alasql("CREATE TABLE cities (city string, pop number)");
+     // alasql("INSERT INTO cities VALUES ('Paris',2249975),('Berlin',3517424),('Madrid',3041579)");
+     // var r = alasql("SELECT * from cities");
+     //console.log("$r",r);
+   }
+   catch(e){console.error(e)}
+  }
+
+  async function followedArtists() {
+    var artists = await alasqlAPI.followedArtists()
+    //console.log("followedArtists", artists);
+  }
+
 
   var getSelectedPlays = function(retFlag){
     let pqry3 = db.getStoredQuery('ALL_PLAYLISTS');
@@ -230,6 +246,9 @@ function Sidebar(props) {
           {/*</Button>*/}
           <Button onClick={fetchPlaylists} color="primary">
             fetchPlaylists
+          </Button>
+          <Button onClick={followedArtists} color="primary">
+            followedArtists
           </Button>
           <Button onClick={getMySavedTracks} color="primary">
             getMySavedTracks

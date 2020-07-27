@@ -57,7 +57,7 @@ export default function SimpleTabs() {
 		setValue(newValue);
 	};
 	return (
-		<div className={classes.root}>
+		<div style={{width:"70em"}} className={classes.root}>
 			<AppBar position="static">
 				<Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
 					<Tab label="My Library" {...a11yProps(0)} />

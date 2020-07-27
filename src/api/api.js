@@ -74,14 +74,13 @@ var fakeFetch3 = function(){
 
 var fetchPlaylists =  function(){
     return new Promise(function(done, fail) {
-
         //testing: must turn cors off in browser
 
         $.ajax({
             url: 'http://localhost:8888/getUserPlaylists',
             type:"POST"
         }).done(function(payload){
-                console.log("retrieved: ",payload);
+                console.log("$retrieved: ",payload);
                 done(payload.items)
             })
         // fakeFetch2()
@@ -90,17 +89,15 @@ var fetchPlaylists =  function(){
 
 //testing: must turn cors off in browser
 
-var fetchArtistGenres =  function(playlists){
+var getMyFollowedArtists =  function(){
     return new Promise(function(done, fail) {
-
         //testing: must turn cors off in browser
-
         $.ajax({
-            url: 'http://localhost:8888/resolvePlaylists',
+            url: 'http://localhost:8888/getFollowedArtists',
             type:"POST",
-            data: {playlists:JSON.stringify(playlists)}
+            data: {}
         }).done(function(payload){
-            //console.log("retrieved: ",payload);
+            console.log("retrieved: ",payload);
             done(payload)
         })
     })
@@ -119,6 +116,24 @@ var getMySavedTracks =  function(){
         })
     })
 }
+
+var fetchArtistGenres =  function(playlists){
+    return new Promise(function(done, fail) {
+
+        //testing: must turn cors off in browser
+
+        $.ajax({
+            url: 'http://localhost:8888/resolvePlaylists',
+            type:"POST",
+            data: {playlists:JSON.stringify(playlists)}
+        }).done(function(payload){
+            //console.log("retrieved: ",payload);
+            done(payload)
+        })
+    })
+}
+
+
 
 
 var fetchEvents =  function(param){
@@ -182,5 +197,6 @@ export default {
     fetchPlaylists,
     fetchArtistGenres,
     fetchEvents,
-    getMySavedTracks
+    getMySavedTracks,
+    getMyFollowedArtists
 }

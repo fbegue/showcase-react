@@ -1,4 +1,5 @@
-import React from 'react';
+// import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 //import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -10,6 +11,10 @@ import ListItem from "@material-ui/core/ListItem";
 //import Box from '@material-ui/core/Box';
 import {useDB, useNormalizedApi} from './db'
 import MaterialTable from "material-table";
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import alasql from "alasql";
+import alasqlAPI from "./alasql/index";
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -62,22 +67,67 @@ export default function SimpleTabsLibrary() {
 		setValue(newValue);
 	};
 
-	let normalizedApi = useNormalizedApi()
-	let db = useDB();
 
-	let pqry = db.getStoredQuery('ALL_PLAYLISTS');
-	let playlists = db.executeQuery(pqry);
+	// let pqry = db.getStoredQuery('ALL_PLAYLISTS');
+	//todo:
+	var playlists = []
+
+	var user = '123028477'
+	//console.log('h343',alasqlAPI.tables["playlists"][{user}] );
+	playlists = alasqlAPI.tables["playlists"][{user}] ?  alasql("SELECT * from ? playlists",[alasqlAPI.tables["playlists"][{user}]]):[];
+	console.log("playlists",playlists);
+
+	//todo: concept w/ name of table subbed for t
+	var t = {};
+
+	var artists = []; var t = "artists";
+	artists = alasqlAPI.tables[t][{user}] ?  alasql("SELECT * from ? " + t,[alasqlAPI.tables[t][{user}]]):[];
+	console.log("artists",artists);
 
 	const setSelect = (g) => {
 		//console.log(g);
 		g.selected = !g.selected;
-		normalizedApi.updatePlaylist(g)
+		//normalizedApi.updatePlaylist(g)
 	};
 
-var exampleData = [
-		{ name: 'Mehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 },
-		{ name: 'Zerya Betül', surname: 'Baran', birthYear: 2017, birthCity: 34 },
-	];
+	//todo:
+	// A component is changing an uncontrolled input of type undefined to be controlled.
+
+	//this is an example of how to add a custom filter to material-table via:
+	//https://github.com/mbrn/material-table/issues/671
+
+	const CustomSelect = (props) => {
+		const [date, setDate] = useState(null);
+		console.log("CustomSelect",props);
+		const handleChange = (event) => {
+			setDate(event.target.value);
+			props.onFilterChanged(props.columnDef.tableData.id, event.target.value);
+		};
+		return (
+			<Select
+				labelId="demo-simple-select-label"
+				id="demo-simple-select"
+				value={date}
+				onChange={handleChange}
+			>
+				<MenuItem value={null}>&nbsp;&nbsp;&nbsp;</MenuItem>
+				{props.options.map((op, index) => (
+					<MenuItem key={index} value={op}>{op}</MenuItem>
+				))}
+			</Select>
+		);
+	};
+
+var generateOps = function(playlists){
+	var owners = [];
+	playlists.forEach(p =>{
+		owners.indexOf(p.owner.display_name)  === -1 ? owners.push(p.owner.display_name):{};
+	});
+		return owners;
+};
+
+// const Dummy = (props) => {return(<div></div>)}
+
 	return (
 		<div className={classes.root}>
 			<AppBar position="static">
@@ -87,33 +137,59 @@ var exampleData = [
 				</Tabs>
 			</AppBar>
 			<TabPanel value={value} index={0}>
-				Saved Artists
+				<MaterialTable
+					title=""
+					columns={[
+						{
+							field: 'images[0]',
+							title: '',
+							render: rowData => <img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
+							filtering:false,
+							width:"5em"
+						},
+						{ title: 'Name', field: 'name', filtering:false},
+						{ title: '# Tracks', field: 'tracks.total',	filtering:false},
+						{ title: 'Owner', field: 'owner.display_name',
+							filterComponent: (props) => <CustomSelect onFilterChanged={props.onFilterChanged} columnDef={props.columnDef} options={generateOps(playlists)} />,
+						}
+					]}
+					data={artists}
+					options={{
+						search: true,
+						filtering: true,
+						selection: true,
+						tableLayout:"fixed"
+					}}
+				/>
 			</TabPanel>
 			<TabPanel value={value} index={1}>
-				{/*<MaterialTable*/}
-				{/*	title="Basic Search Preview"*/}
-				{/*	columns={[*/}
-				{/*		{ title: 'Name', field: 'name' },*/}
-				{/*		{ title: '# Tracks', field: 'tracks.total' },*/}
-				{/*		{ title: 'Owner', field: 'owner.display_name'},*/}
-				{/*		// { title: 'Owner', field: 'owner.display_name', type: 'numeric' },*/}
-				{/*		// {*/}
-				{/*		// 	field: 'url',*/}
-				{/*		// 	title: 'Avatar',*/}
-				{/*		// 	render: rowData => <img src={rowData.url} style={{width: 50, borderRadius: '50%'}}/>*/}
-				{/*		// }*/}
-				{/*		// {*/}
-				{/*		// 	title: 'Birth Place',*/}
-				{/*		// 	field: 'birthCity',*/}
-				{/*		// 	// lookup: { 34: 'İstanbul', 63: 'Şanlıurfa' },*/}
-				{/*		// },*/}
-				{/*	]}*/}
-				{/*	data={playlists}*/}
-				{/*	// data={exampleData}*/}
-				{/*	options={{*/}
-				{/*		search: true*/}
-				{/*	}}*/}
-				{/*/>*/}
+				<MaterialTable
+					title=""
+					columns={[
+						{
+							field: 'images[0]',
+							title: '',
+							render: rowData => <img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
+							filtering:false,
+							width:"5em"
+						},
+						{ title: 'Name', field: 'name', filtering:false},
+						{ title: '# Tracks', field: 'tracks.total',	filtering:false},
+						{ title: 'Owner', field: 'owner.display_name',
+							 filterComponent: (props) => <CustomSelect onFilterChanged={props.onFilterChanged} columnDef={props.columnDef} options={generateOps(playlists)} />,
+						}
+					]}
+					data={playlists}
+					options={{
+						search: true,
+						filtering: true,
+						selection: true,
+						tableLayout:"fixed"
+					}}
+				/>
+
+				{/*old playlists mapping list*/}
+
 				{/*<List>*/}
 				{/*	{playlists.map((play, index) => (*/}
 				{/*		<ListItem*/}

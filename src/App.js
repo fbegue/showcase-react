@@ -287,15 +287,15 @@ function App(props) {
                 <SimpleTabs></SimpleTabs>
             </div>
 
-            <div>
-                <NestedList
-                    artists={artists}
-                    genres={genres}
-                />
-            </div>
-            <div>
-                <EventsList data={events} />
-            </div>
+            {/*<div>*/}
+            {/*    <NestedList*/}
+            {/*        artists={artists}*/}
+            {/*        genres={genres}*/}
+            {/*    />*/}
+            {/*</div>*/}
+            {/*<div>*/}
+            {/*    <EventsList data={events} />*/}
+            {/*</div>*/}
 
             {/*todo: list of nested lists?*/}
             {/*yeah no this isn't working very well - could be for an easy reason but idk */}
