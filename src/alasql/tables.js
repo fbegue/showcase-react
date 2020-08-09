@@ -3,6 +3,8 @@ var tables = {};
 tables["playlists"] = [];
 tables["artists"] = [];
 tables["events"] = [];
+tables["artistSearchSelection"] = [];
+
 
 //the users tables are about the selections users make
 //users has many types (contexts) of objects, but every user only has one of each 'context'

@@ -1,5 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 //todo: this shit is outdated AF but was so simple I couldn't refuse
+//https://github.com/mikechabot/react-tabify#color-theme
 //specifically it uses glamorous which has been ditched for emotion as a theme provider
 //not sure if I could rip that dependency out myself and just make this my thing or not...
 import { Tab, Tabs } from "react-tabify";
@@ -8,6 +9,9 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import {Context} from "./alasql/Store";
 import alasqlAPI from "./alasql";
+
+import ChipsArray from "./ChipsArray";
+import Search from './Search'
 
 // const styles = {
 // 	fontFamily: "sans-serif",
@@ -45,7 +49,15 @@ const theme = {
 	}
 };
 
+function getChips(genres){
 
+	var t = ""
+	genres.forEach(g =>{
+		t =t + g.name + ", "
+	})
+	return <span>{t}</span>
+
+};
 
 export default function Tabify() {
 
@@ -109,10 +121,15 @@ export default function Tabify() {
 		dispatch({type: 'select', payload:rows[0],user:user,context:'artists'});
 	}
 
+
+
 	return(
 		// style={styles}
 		<div>
 			<Tabs theme={theme} >
+				<Tab label="Search">
+					<Search></Search>
+				</Tab>
 				<Tab label="My Library">
 					<Tabs>
 						<Tab label="Saved Artists">
@@ -128,10 +145,15 @@ export default function Tabify() {
 										width:"5em"
 									},
 									{ title: 'Name', field: 'name', filtering:false},
-									{ title: '# Tracks', field: 'tracks.total',	filtering:false},
-									{ title: 'Owner', field: 'owner.display_name',
-										filterComponent: (props) => <CustomSelect onFilterChanged={props.onFilterChanged} columnDef={props.columnDef} options={generateOps(playlists)} />,
-									}
+									{
+										field: 'genres',
+										title: 'genres',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => <ChipsArray chipData={rowData.genres}/>,
+										filtering:false,
+										width:"20em"
+									},
+
 								]}
 								data={state[user + "_artists"]}
 								options={{

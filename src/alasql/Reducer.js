@@ -43,34 +43,59 @@ var eventsCollection = [{artist_id:1,name:"popArtist",genres:[{id:1,name:'pop'}]
 function noder(action){
 	//todo: am I messing this up somehow?
 	// console.log("$context", tables["users"][action.user]);
+
+	//prepare various tables
+
 	console.log("$context", tables["users"]["dacandyman01"]["artists"]);
 
 	var art = tables["users"]["dacandyman01"]["artists"].filter(r =>{
-	// var art = tables["users"][action.user]["artists"].filter(r =>{
-		return r.tableData.selected = true;
+		// var art = tables["users"][action.user]["artists"].filter(r =>{
+		//todo: was happening when putting together artist search
+		 //return r.tableData.checked === true;
+		return r.tableData && r.tableData.checked;
 	})
+
+	//this table tracks only 'selected' since it's user created input
+	var sel = tables["artistSearchSelection"];
 
 	//todo: skipping for now
 	//var alb = tables["users"][action.user]["albums"]
 	var alb  = [];
 
-	console.log("a",art);
-	console.log("b",alb);
+	console.log("art",art);
+	console.log("sel",sel);
 
-	//todo: not sure what I'm doing wrong here
-	//instead split into two steps
-	// r = alasql('SELECT id from ? a union select id from ? b join ? art_gen on art_gen.id = b.id',[art,alb, art_gen]);
-	var r1 = alasql('SELECT id from ? a union select id from ? b',[art,alb]);
+	//note: not sure what the deal with * is here but it ends up with empty {}s - idk
+	// var r1 = alasql('SELECT * from ? a union select * from ? b',[art,sel]);
+	var r1 = alasql('SELECT id, genres from ? a union select id, genres from ? b',[art,sel]);
 	console.log("r1",r1);
-	//todo: thought outer join would make empty genres rows
-	//- something else I'm thinking of or no?
-	var r2 = alasql('SELECT * from ? a join ? art_gen on art_gen.id = a.id',[r1,art_gen]);
-	r2.forEach(r =>{if(!(r.genres)){r.genres = []}})
-	console.log("r2",r2);
 
+	//todo: what is this all about anyways (art_gen)
+	//the whole idea of preserving the artist's genre info outside of the data objects I'm passing around?
+	//testing: for now literally just going to ignore the sql stuff I was setting up
+
+	// //------------------------------------------
+	// //todo: not sure what I'm doing wrong here
+	// //instead split into two steps
+	// // r = alasql('SELECT id from ? a union select id from ? b join ? art_gen on art_gen.id = b.id',[art,alb, art_gen]);
+	// var r1 = alasql('SELECT id from ? a union select id from ? b',[art,sel]);
+	// console.log("r1",r1);
+	//
+	// //todo: thought outer join would make empty genres rows
+	// //- something else I'm thinking of or no?
+	// var r2 = alasql('SELECT * from ? a join ? art_gen on art_gen.id = a.id',[r1,art_gen]);
+	// r2.forEach(r =>{if(!(r.genres)){r.genres = []}})
+    // //------------------------------------------
+
+	var r2 = r1;
+	//console.log("r2",r2);
 	console.log(action.type,r2);
 	return r2;
 }
+
+//todo(1): resetting events list every time to this copy we set on init
+//when we start updating events need to not forget this
+var eventsCopy = {};
 
 function getJoin(action){
 	var r = {};
@@ -101,15 +126,16 @@ function getJoin(action){
 			var jstr = function(ob){
 				return JSON.parse(JSON.stringify(ob))
 			};
-			console.log("$genres",genres);
+			console.log("genres selected",genres);
+
+			//----------------------------
 			//todo: yeah don't do this
 			//besides sql stuff, we need to figure out how to preserve these references
 
-			var events = JSON.parse(JSON.stringify(tables['events']))
-			console.log("$events",jstr(events));
-			//look at every genre of every event
-			//if it has at least one genre that's in our list, keep it
 
+			//todo(1):
+			var events = eventsCopy;
+			console.log("$events",jstr(events));
 			//with eventsCollection
 
 			// events = events.filter(e =>{
@@ -123,14 +149,17 @@ function getJoin(action){
 			// 	return false;
 			// })
 
-
+			//look at every genre of every artist of every performance of every event
+			//if any of the genres of any artist match our selected list, keep it
 			events = events.filter(e =>{
 				// e.performance.forEach(p =>{
 				var some = false;
+				//look at
 				for(var x = 0; x < e.performance.length;x++){
 					var p =  e.performance[x]
-					p.id === 74713137 ? console.log("$",p):{};
+					// p.id === 74713137 ? console.log("$",p):{};
 					some = p.artist.genres.some(g =>{
+						//console.log(g.id);
 						for(var y = 0; y < genres.length;y++){
 							if(g.id === genres[y].id){
 								return true;
@@ -138,10 +167,10 @@ function getJoin(action){
 						}
 						return false
 					})
-					p.id === 74713137 ? console.log("#$",some):{};
+					// p.id === 74713137 ? console.log("#$",some):{};
+
 					//if some is true, than stop looking thru the other performances
 					if(some){
-						console.log("#$",some)
 						break;
 					}
 				}
@@ -153,7 +182,7 @@ function getJoin(action){
 
 			return events;
 		default:
-			console.log("DEFAULT");
+			console.error("default reducer used by accident!");
 			r = {};
 			return r;
 	}
@@ -185,6 +214,8 @@ const Reducer = (state, action) => {
 					// })
 				});
 				tables[action.context] = tables[action.context].concat(action.payload);
+				//todo: preserving a copy of events
+				eventsCopy = JSON.parse(JSON.stringify(tables['events']));
 				return {
 					...state,
 					events: tables[action.context]
@@ -246,25 +277,38 @@ const Reducer = (state, action) => {
 		case 'select':
 			if(action.context === 'artists'){
 
-				//make the table record selected
-				//efficiency
-				//confusing here with action.context instead of type like above?
-				// tables["users"][action.user][action.context].forEach(r =>{
-				// 	if(r.id === action.payload.id){
-				// 		//r.selected = true;
-				// 	}
-				// })
-
 				//if the record is selected, it'll have record.tableData.checked = true;
-
+				//this means that we basically just tell events to update itself based
+				//on the new checked values
 
 				return {
 					...state,
 					//don't need to update the data itself b/c we handle that in table?
-					//we do need to update events tho
-					events: getJoin({type:"events"})
-					//node:  getJoin({type:"node"}),
+					events: getJoin({type:"events"}),
+					node:  getJoin({type:"node"})
 				};
+			}
+			//todo: weird 'i have two contexts, neither of which are table name
+			else if(action.context === 'artistSearchSelect' || action.context === 'artistSearchDeselect'){
+
+				console.log(action.context);
+				//handle the selection mutation on collection
+				if(action.context === 'artistSearchSelect'){
+					tables["artistSearchSelection"].push(action.payload);
+				}
+				else{
+					//todo:
+				}
+
+				//again we need to tell the table to update
+				//then tell events to update based on that
+				return {
+					...state,
+					artistSearchSelection:tables["artistSearchSelection"],
+					events: getJoin({type:"events"}),
+					node:  getJoin({type:"node"})
+				};
+
 			}
 
 			return {

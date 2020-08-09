@@ -6,6 +6,8 @@ const initialState = {
 	posts: [],
 	artists:[],
 	events:[],
+	artistSearchSelection:[],
+	node:[],
 	//testing:
 	dacandyman01_artists:[],
 	error: null

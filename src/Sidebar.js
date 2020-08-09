@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
@@ -14,15 +14,18 @@ import AddTodoDialog from './AddTodoDialog';
 import Drawer from '@material-ui/core/Drawer';
 import ListItemText from '@material-ui/core/ListItemText';
 import HashLoader from 'react-spinners/HashLoader';
-
-
 import Button from '@material-ui/core/Button';
+
+import ChipsArray from './ChipsArray'
+import Pie from './Pie'
+
 
 import {useDB, useNormalizedApi} from './db'
 //import useAsync from "./useAsync";
 
 //todo:
 import alasqlAPI from "./alasql/index";
+import {Context} from "./alasql/Store";
 //import alasql from "alasql";
 
 
@@ -172,6 +175,13 @@ function Sidebar(props) {
     //console.log("followedArtists", artists);
   }
 
+
+  //--------------------------------------------------
+  //starting to look at node reporting
+
+  const [globalState, dispatch] = useContext(Context);
+
+
   return (
       <div className={classes.drawer}>
         <div className={classes.toolbar}>
@@ -227,20 +237,26 @@ function Sidebar(props) {
         </div>
         <Divider />
         <List>
-          {todos.map((node, index) => (
-              <ListItem
-                  button
-                  key={node.id}
-                  onClick={() => setSelect(node)}
-              >
-                <Typography
-                    variant="subtitle1"
-                    color={node.selected ? 'secondary' : 'textPrimary'}
-                >
-                  {node.text} - <span style={{fontSize:"10px"}}></span>
-                </Typography>
-              </ListItem>
-          ))}
+          {/*todo: idea is to made node more sophisicated (able to report who gave what)*/}
+          {/*and then these list items are things like 'Saved Artists' and then genre chips*/}
+          {/*{todos.map((node, index) => (*/}
+          {/*    <ListItem*/}
+          {/*        button*/}
+          {/*        key={node.id}*/}
+          {/*        onClick={() => setSelect(node)}*/}
+          {/*    >*/}
+          {/*      <Typography*/}
+          {/*          variant="subtitle1"*/}
+          {/*          color={node.selected ? 'secondary' : 'textPrimary'}*/}
+          {/*      >*/}
+          {/*        {node.text} - <span style={{fontSize:"10px"}}></span>*/}
+          {/*      </Typography>*/}
+          {/*    </ListItem>*/}
+          {/*))}*/}
+          <Pie data={globalState.node}></Pie>
+          {globalState.node.map( a =>
+              <ChipsArray chipData={a.genres}></ChipsArray>
+          )}
         </List>
         {/*<List>*/}
         {/*  {props.playlists.map((play, index) => (*/}

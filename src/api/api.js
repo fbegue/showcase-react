@@ -101,7 +101,6 @@ var getMyFollowedArtists =  function(){
     })
 }
 
-
 var fetchEvents =  function(param){
     return new Promise(function(done, fail) {
 
@@ -126,6 +125,24 @@ var fetchEvents =  function(param){
     })
 }
 
+var completeArtist =  function(param){
+    return new Promise(function(done, fail) {
+        $.ajax({
+            url: 'http://localhost:8888/completeArtist',
+            type:"POST",
+            data: {artistQuery:param}
+        }).done(function(payload){
+            console.log("retrieved: ",payload);
+            done(payload.result.body.artists.items)
+        })
+
+        //testing:
+        // fakeFetch3().then(r =>{done(r)})
+    })
+}
+
+
+//-----------------------------------------------
 //deprecated vvv
 
 var getMySavedTracks =  function(){
@@ -158,6 +175,9 @@ var fetchArtistGenres =  function(playlists){
     })
 }
 
+
+//-----------------------------------------------
+//todos test stuff
 
 const addTodo = text =>
     delay(200).then(() => {
@@ -195,5 +215,6 @@ export default {
     fetchArtistGenres,
     fetchEvents,
     getMySavedTracks,
-    getMyFollowedArtists
+    getMyFollowedArtists,
+    completeArtist
 }
