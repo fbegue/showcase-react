@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
 import Typography from '@material-ui/core/Typography';
 import AddTodoDialog from './AddTodoDialog';
-import HashLoader from 'react-spinners/HashLoader';
 
+import Drawer from '@material-ui/core/Drawer';
+import ListItemText from '@material-ui/core/ListItemText';
+import HashLoader from 'react-spinners/HashLoader';
 
 
 import Button from '@material-ui/core/Button';
@@ -26,7 +26,7 @@ import alasqlAPI from "./alasql/index";
 //import alasql from "alasql";
 
 
-const drawerWidth = 360;
+const drawerWidth = "15em";
 
 const styles = theme => ({
   drawer: {
@@ -72,94 +72,32 @@ const tabs = ['active', 'completed', 'all']
 //const tabs = ['artists']
 
 function Sidebar(props) {
-  let normalizedApi = useNormalizedApi()
-  let db = useDB();
+  /**
+   * I have just no idea what I was doing in here
+   * looks like at some point I was using a proper 'Drawer' component
+   * but then got sidetracked into...something else
+   * - exported with drawer-like styles
+   * - looks like I took the todos example for react-use-database and shoved it in here
+   *
+   */
 
+
+//todo: not sure how/if this works
   const { classes } = props;
+
+//---------------------------------------
+// todos stuff
 
   let [addTodoDialogOpen, setAddTodoDialogOpen] = useState(false);
 
   const openAddTodoDialog = () => setAddTodoDialogOpen(true)
   const closeAddTodoDialog = () => setAddTodoDialogOpen(false)
 
-  //let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
-  //let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
+//---------------------------------------
+//outdated normalizedApi stuff
 
-
-
-   let [filter, setFilter] = useState('active');
-
-  //todo: set on page load?
-  // useEffect(() => {
-  //   fetchTodos(filter)
-  // }, [filter])
-
-  const filterQueries = {
-    'active': 'ACTIVE_TODOS',
-    'all': 'ALL_TODOS',
-    'completed': 'COMPLETED_TODOS'
-  }
-
- // let todos = db.executeStoredQuery(filterQueries[filter]);
-  let tqry = db.getStoredQuery('ALL_TODOS');
-  let todos = db.executeQuery(tqry);
-
-
-  const testTodo = (text) => {
-    console.log("test",props);
-    console.log(todos);
-
-    // let pqry3 = db.getStoredQuery('ALL_PLAYLISTS');
-    // let genres = db.executeQuery(pqry3);
-    // var selected = genres.filter(g =>{return g.selected});
-    // console.log("sel",selected);
-
-    //todo: move
-    // normalizedApi.fetchEvents(text)
-    //     .then(() => {
-    //       //props.onSuccess()
-    //     })
-    //     .catch(() => {
-    //       //props.onCancel()
-    //     })
-  };
-
-
-
-
-  const fetchEvents = (text) => {
-    console.log("fetchEvents",props);
-    normalizedApi.fetchEvents(text)
-        .then(() => {
-          //props.onSuccess()
-        })
-        .catch(() => {
-          //props.onCancel()
-        })
-  };
-
-
-  var tables = {};
-  var user = '123028477'
-
-  async function fetchPlaylists()  {
-    var playlists  = await alasqlAPI.fetchPlaylists()
-   //console.log("fetchPlaylists",playlists);
-   try{
-
-     // alasql("CREATE TABLE cities (city string, pop number)");
-     // alasql("INSERT INTO cities VALUES ('Paris',2249975),('Berlin',3517424),('Madrid',3041579)");
-     // var r = alasql("SELECT * from cities");
-     //console.log("$r",r);
-   }
-   catch(e){console.error(e)}
-  }
-
-  async function followedArtists() {
-    var artists = await alasqlAPI.followedArtists()
-    //console.log("followedArtists", artists);
-  }
-
+  let normalizedApi = useNormalizedApi()
+  let db = useDB();
 
   var getSelectedPlays = function(retFlag){
     let pqry3 = db.getStoredQuery('ALL_PLAYLISTS');
@@ -171,6 +109,13 @@ function Sidebar(props) {
       return selected.length
     }
     return selected;
+  };
+
+  const setSelect = (g) => {
+    //console.log(g);
+    g.selected = !g.selected;
+    normalizedApi.updatePlaylist(g)
+
   };
 
   const fetchArtistGenres = (text) => {
@@ -187,32 +132,6 @@ function Sidebar(props) {
         })
   };
 
-  const getMySavedTracks = (text) => {
-    //console.log("fetchArtistGenres",props);
-    normalizedApi.getMySavedTracks()
-        .then(() => {
-          //props.onSuccess()
-        })
-        .catch(() => {
-          //props.onCancel()
-        })
-  };
-
-  const showStore = (text) => {
-    console.log("showStore",props);
-    normalizedApi.showStore(text)
-        .then(() => {
-          //props.onSuccess()
-        })
-        .catch(() => {
-          //props.onCancel()
-        })
-  };
-  const setSelect = (g) => {
-    //console.log(g);
-    g.selected = !g.selected;
-    normalizedApi.updatePlaylist(g)
-  };
   const setSelectNode = (g) => {
     //console.log(g);
     g.selected = !g.selected;
@@ -220,7 +139,38 @@ function Sidebar(props) {
     //normalizedApi.updatePlaylist(g)
   };
 
+  let tqry = db.getStoredQuery('ALL_TODOS');
+  let todos = db.executeQuery(tqry);
 
+  //---------------------------------------
+
+  async function getem() {
+    ///await fetchEvents();
+    await fetchPlaylists()
+    await followedArtists()
+    await alasqlAPI.fetchEvents()
+    return 'done';
+  }
+
+  //testing:
+  var user = '123028477'
+
+  async function fetchPlaylists()  {
+    var playlists  = await alasqlAPI.fetchPlaylists(user)
+    //console.log("fetchPlaylists",playlists);
+    try{
+
+      // alasql("CREATE TABLE cities (city string, pop number)");
+      // alasql("INSERT INTO cities VALUES ('Paris',2249975),('Berlin',3517424),('Madrid',3041579)");
+      // var r = alasql("SELECT * from cities");
+      //console.log("$r",r);
+    }
+    catch(e){console.error(e)}
+  }
+  async function followedArtists() {
+    var artists = await alasqlAPI.followedArtists(user)
+    //console.log("followedArtists", artists);
+  }
 
   return (
       <div className={classes.drawer}>
@@ -238,24 +188,27 @@ function Sidebar(props) {
             {/*<Tab label="Completed" classes={{ root: classes.tabRoot }} />*/}
             <Tab label="All" classes={{ root: classes.tabRoot }}/>
           </Tabs>
+          {/*<Button onClick={getem} color="primary">*/}
+          {/*  GETEM*/}
+          {/*</Button>*/}
           {/*<Button onClick={testTodo} color="primary">*/}
           {/*  testTodo*/}
           {/*</Button>*/}
           {/*<Button onClick={fetchEvents} color="primary">*/}
           {/*  fetchEvents*/}
           {/*</Button>*/}
-          <Button onClick={fetchPlaylists} color="primary">
-            fetchPlaylists
-          </Button>
-          <Button onClick={followedArtists} color="primary">
-            followedArtists
-          </Button>
-          <Button onClick={getMySavedTracks} color="primary">
-            getMySavedTracks
-          </Button>
-          <Button onClick={fetchArtistGenres} color="primary">
-            fetchArtistGenres  ({getSelectedPlays('length')})
-          </Button>
+          {/*<Button onClick={fetchPlaylists} color="primary">*/}
+          {/*  fetchPlaylists*/}
+          {/*</Button>*/}
+          {/*<Button onClick={followedArtists} color="primary">*/}
+          {/*  followedArtists*/}
+          {/*</Button>*/}
+          {/*<Button onClick={getMySavedTracks} color="primary">*/}
+          {/*  getMySavedTracks*/}
+          {/*</Button>*/}
+          {/*<Button onClick={fetchArtistGenres} color="primary">*/}
+          {/*  fetchArtistGenres  ({getSelectedPlays('length')})*/}
+          {/*</Button>*/}
 
           {/*<Button onClick={showStore} color="primary">*/}
           {/*  showStore*/}

@@ -15,6 +15,9 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 
+import Store from './alasql/Store'
+
+
 
 
 //import $ from "jquery"
@@ -35,6 +38,8 @@ import {getUserPlaylists } from './testdata/getUserPlaylists.js'
 
 import 'brace/mode/json';
 import 'brace/theme/monokai';
+import Tabify from './Tabify'
+
 import List from "@material-ui/core/List";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import ListItem from "@material-ui/core/ListItem";
@@ -48,7 +53,9 @@ import ListItemText from "@material-ui/core/ListItemText";
 //import TreeView  from "./NestedList3"
 import EventsList from './EventsList'
 import { BrowserRouter } from 'react-router-dom'
-import SimpleTabs from "./SimpleTabs";
+import alasqlAPI from "./alasql";
+import alasql from "alasql";
+
 
 const drawerWidth = 360;
 
@@ -197,194 +204,153 @@ function App(props) {
     let pqry3 = db.getStoredQuery('ALL_GENRES');
     let genres = db.executeQuery(pqry3);
     let pqry4 = db.getStoredQuery('ALL_EVENTS');
-    let events = db.executeQuery(pqry4);
 
-    //todo: sets up nested list
-    events.forEach(function(e){
-        e.childrenKey = "performance"
-        // e.performance.forEach(p =>{
-        //   p.childrenKey = "genres"
-        // })
-    });
+    // let events = db.executeQuery(pqry4);
 
 
-    //todo: a) this is ugly as shit but I wonder if I really need anything more complicated?
-    //b) I had to add songkick_ids to getArtistGenres, but I guess we should be expecting those
-    //back anyways?
-
-    //filter events based on selected genres
-    //events have an array of performances, each performance has a single artist
-    //object with an id. we need to only keep events for which at least one performance's
-    //artist has a genre that is selected.
-
-    //the db's artists have an array of genre_ids. so determine acceptable artists
-    //ids by filtering them based on the selected genres. then filter events
-    //based on whether they have one of those artists in a performance
-
-    if(genres.length){
-        //selected genres's ids
-        var selected = genres.filter(g =>{return g.selected});
-        var ids = selected.map(g => g.id);
-
-        //artists who have one of the selected genres
-        var eartists = artists.filter(a => {
-            var ret = false;
-            for (var x = 0; x < a.genres.length; x++) {
-                if (ids.indexOf(a.genres[x]) !== -1) {  ret = true;break;}
-            }
-            return ret
-        });
-
-        var eids = eartists.map(g => g.id_songkick);
-
-        events = events.filter(e => {
-            var ret = false;
-            for(var x = 0; x < e.performance.length; x++){
-                var id = e.performance[x].artist.id;
-                if(eids.indexOf(id) !== -1){ret = true;break;}
-            }
-            return ret;
-        });
-
-        console.log("updated events",events);
-    }
-
-    console.log("events",events);
 
     //testing: example metro catalog
     var states = {"OH":[
-    {"displayName":"Columbus", "id":9480},
-    {"displayName":"Cleveland", "id":14700},
-    {"displayName":"Cincinnati", "id":22040},
-    {"displayName":"Dayton", "id":3673}]}
+            {"displayName":"Columbus", "id":9480},
+            {"displayName":"Cleveland", "id":14700},
+            {"displayName":"Cincinnati", "id":22040},
+            {"displayName":"Dayton", "id":3673}]}
 
     //{"displayName": "Salt Lake City", "id":13560}
     //{"displayName":"SF Bay Area", "id":26330}
 
-   // let todoIds = JSON.stringify(todos.map(t => t.id));
+    // let todoIds = JSON.stringify(todos.map(t => t.id));
 
     // useEffect(() => {
     //     setSelectedTodoId(todos[0] && todos[0].id)
     // }, [todoIds])
 
     return (
-        <div>
-
-            <MapArea states={states}/>
-        <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
-
+        <Store>
             <div>
-                <Sidebar
-                    playlists={playlists}
-                    // fetchTodosRequest={fetchTodosRequest}
-                    filter={filter}
-                    onFilterChange={setFilter}
-                    selectedTodo={selectedTodoId}
-                    onSelectedTodoChange={setSelectedTodoId}
-                />
-            </div>
-            <div>
-                <SimpleTabs></SimpleTabs>
-            </div>
 
-            {/*<div>*/}
-            {/*    <NestedList*/}
-            {/*        artists={artists}*/}
-            {/*        genres={genres}*/}
-            {/*    />*/}
-            {/*</div>*/}
-            {/*<div>*/}
-            {/*    <EventsList data={events} />*/}
-            {/*</div>*/}
+                {/*todo: region selection works, have menu of cities in ohio that doesn't*/}
+                {/*<MapArea states={states}/>*/}
+                <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
+                    <div>
+                        {/*won't respond to flex w/out div*/}
+                        {/*width comes from 'const drawerWidth' */}
+                        <Sidebar
+                            playlists={playlists}
+                            // fetchTodosRequest={fetchTodosRequest}
+                            filter={filter}
+                            onFilterChange={setFilter}
+                            selectedTodo={selectedTodoId}
+                            onSelectedTodoChange={setSelectedTodoId}
+                        />
+                    </div>
+                    <div style={{width:"50em"}}>
+                        <Tabify></Tabify>
+                    </div>
+                    {/*<span>*/}
+                    {/*    <SimpleTabs></SimpleTabs>*/}
+                    {/*</span>*/}
 
-            {/*todo: list of nested lists?*/}
-            {/*yeah no this isn't working very well - could be for an easy reason but idk */}
-            {/*like i can in no way actually click on anything in here*/}
-            {/*just seems like its not going to be THAT easy :)*/}
-            {/*google: list of nestedList material ui*/}
-            {/*https://stackoverflow.com/questions/48607844/multilevel-nested-list-in-material-ui-next*/}
-            <div>
-                {/*==============default=============================*/}
-                {/*<List>*/}
-                {/*  {events.map((event, index) => (*/}
-                {/*      <ListItem*/}
-                {/*          button*/}
-                {/*          key={event.id}*/}
-                {/*          onClick={(e) => props.onSelectedTodoChange(event.id)}*/}
-                {/*      >*/}
-                {/*        <Typography*/}
-                {/*            variant="subtitle1"*/}
-                {/*            color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}*/}
-                {/*        >*/}
-                {/*          {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>*/}
-                {/*        </Typography>*/}
-                {/*      </ListItem>*/}
-                {/*  ))}*/}
-                {/*</List>*/}
-                {/*==============default=============================*/}
+                    {/*<div>*/}
+                    {/*    <NestedList*/}
+                    {/*        artists={artists}*/}
+                    {/*        genres={genres}*/}
+                    {/*    />*/}
+                    {/*</div>*/}
 
+                    <div>
+                        <EventsList data={[]} />
+                    </div>
+
+                    {/*todo: list of nested lists?*/}
+                    {/*yeah no this isn't working very well - could be for an easy reason but idk */}
+                    {/*like i can in no way actually click on anything in here*/}
+                    {/*just seems like its not going to be THAT easy :)*/}
+                    {/*google: list of nestedList material ui*/}
+                    {/*https://stackoverflow.com/questions/48607844/multilevel-nested-list-in-material-ui-next*/}
+                    <div>
+                        {/*==============default=============================*/}
+                        {/*<List>*/}
+                        {/*  {events.map((event, index) => (*/}
+                        {/*      <ListItem*/}
+                        {/*          button*/}
+                        {/*          key={event.id}*/}
+                        {/*          onClick={(e) => props.onSelectedTodoChange(event.id)}*/}
+                        {/*      >*/}
+                        {/*        <Typography*/}
+                        {/*            variant="subtitle1"*/}
+                        {/*            color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}*/}
+                        {/*        >*/}
+                        {/*          {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>*/}
+                        {/*        </Typography>*/}
+                        {/*      </ListItem>*/}
+                        {/*  ))}*/}
+                        {/*</List>*/}
+                        {/*==============default=============================*/}
+
+                    </div>
+
+                    <div className={classes.contentAndToolbar}>
+                        {/*<AppBar position="relative" className={classes.appBar}>*/}
+                        {/*  <Toolbar>*/}
+                        {/*    <Typography variant="h6" color="inherit" noWrap>*/}
+                        {/*      Todo App*/}
+                        {/*    </Typography>*/}
+                        {/*  </Toolbar>*/}
+                        {/*</AppBar>*/}
+                        {/*<div className={classes.content}>*/}
+                        {/*  <div className={classes.todoDetail}>*/}
+                        {/*    <TodoDetail id={selectedTodoId}/>*/}
+                        {/*  </div>*/}
+                        {/*  <div className={classes.storeInspectors}>*/}
+                        {/*    <div className={classes.storeInspector}>*/}
+                        {/*    <ContainerDimensions>*/}
+                        {/*        { ({ height, width }) => (*/}
+                        {/*            <React.Fragment>*/}
+                        {/*              <div className={classes.storeInspectorHeader}>*/}
+                        {/*                Entity Store*/}
+                        {/*              </div>*/}
+                        {/*              <AceEditor*/}
+                        {/*                value={JSON.stringify(db.entities, 2, 2)}*/}
+                        {/*                mode="json"*/}
+                        {/*                theme="monokai"*/}
+                        {/*                width={width}*/}
+                        {/*                height={320}*/}
+                        {/*                readOnly*/}
+                        {/*                name="entities-json"*/}
+                        {/*                editorProps={{$blockScrolling: true}}*/}
+                        {/*              />*/}
+                        {/*            </React.Fragment>*/}
+                        {/*        ) }*/}
+                        {/*    </ContainerDimensions>*/}
+                        {/*    </div>*/}
+                        {/*    <div className={classes.storeInspector}>*/}
+                        {/*      <ContainerDimensions>*/}
+                        {/*          { ({ height, width }) => (*/}
+                        {/*            <React.Fragment>*/}
+                        {/*              <div className={classes.storeInspectorHeader}>*/}
+                        {/*                Query Store*/}
+                        {/*              </div>*/}
+                        {/*              <AceEditor*/}
+                        {/*                value={JSON.stringify(db.storedQueries, 2, 2)}*/}
+                        {/*                mode="json"*/}
+                        {/*                theme="monokai"*/}
+                        {/*                width={width}*/}
+                        {/*                height={320}*/}
+                        {/*                readOnly*/}
+                        {/*                name="stored-queries-json"*/}
+                        {/*                editorProps={{$blockScrolling: true}}*/}
+                        {/*              />*/}
+                        {/*            </React.Fragment>*/}
+                        {/*          ) }*/}
+                        {/*      </ContainerDimensions>*/}
+                        {/*    </div>*/}
+                        {/*  </div>*/}
+                        {/*</div>*/}
+                    </div>
+                </div>
             </div>
-
-            <div className={classes.contentAndToolbar}>
-                {/*<AppBar position="relative" className={classes.appBar}>*/}
-                {/*  <Toolbar>*/}
-                {/*    <Typography variant="h6" color="inherit" noWrap>*/}
-                {/*      Todo App*/}
-                {/*    </Typography>*/}
-                {/*  </Toolbar>*/}
-                {/*</AppBar>*/}
-                {/*<div className={classes.content}>*/}
-                {/*  <div className={classes.todoDetail}>*/}
-                {/*    <TodoDetail id={selectedTodoId}/>*/}
-                {/*  </div>*/}
-                {/*  <div className={classes.storeInspectors}>*/}
-                {/*    <div className={classes.storeInspector}>*/}
-                {/*    <ContainerDimensions>*/}
-                {/*        { ({ height, width }) => (*/}
-                {/*            <React.Fragment>*/}
-                {/*              <div className={classes.storeInspectorHeader}>*/}
-                {/*                Entity Store*/}
-                {/*              </div>*/}
-                {/*              <AceEditor*/}
-                {/*                value={JSON.stringify(db.entities, 2, 2)}*/}
-                {/*                mode="json"*/}
-                {/*                theme="monokai"*/}
-                {/*                width={width}*/}
-                {/*                height={320}*/}
-                {/*                readOnly*/}
-                {/*                name="entities-json"*/}
-                {/*                editorProps={{$blockScrolling: true}}*/}
-                {/*              />*/}
-                {/*            </React.Fragment>*/}
-                {/*        ) }*/}
-                {/*    </ContainerDimensions>*/}
-                {/*    </div>*/}
-                {/*    <div className={classes.storeInspector}>*/}
-                {/*      <ContainerDimensions>*/}
-                {/*          { ({ height, width }) => (*/}
-                {/*            <React.Fragment>*/}
-                {/*              <div className={classes.storeInspectorHeader}>*/}
-                {/*                Query Store*/}
-                {/*              </div>*/}
-                {/*              <AceEditor*/}
-                {/*                value={JSON.stringify(db.storedQueries, 2, 2)}*/}
-                {/*                mode="json"*/}
-                {/*                theme="monokai"*/}
-                {/*                width={width}*/}
-                {/*                height={320}*/}
-                {/*                readOnly*/}
-                {/*                name="stored-queries-json"*/}
-                {/*                editorProps={{$blockScrolling: true}}*/}
-                {/*              />*/}
-                {/*            </React.Fragment>*/}
-                {/*          ) }*/}
-                {/*      </ContainerDimensions>*/}
-                {/*    </div>*/}
-                {/*  </div>*/}
-                {/*</div>*/}
-            </div>
-        </div>
-        </div>
+        </Store>
     );
 }
 

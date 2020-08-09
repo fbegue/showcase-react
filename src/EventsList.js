@@ -1,4 +1,4 @@
-import React, {Component, useState} from 'react'
+import React, {Component, useContext, useState} from 'react'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
@@ -12,6 +12,7 @@ import Moment from 'moment';
 
 import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
+import {Context} from "./alasql/Store";
 
 function ChipsArray(props) {
 	//const classes = useStyles();
@@ -21,7 +22,11 @@ function ChipsArray(props) {
 
 	var classes = {root:"root",chip:"chip"}
 	const [chipData, setChipData] = React.useState(props.chipData);
-	console.log(typeof chipData[0].name);
+	if(chipData.length > 0){
+		console.log("$chipData",chipData);
+	}
+
+	//console.log(typeof chipData[0].name);
 
 	//leaving as example on how to interact with later
 	const handleDelete = chipToDelete => () => {
@@ -46,39 +51,22 @@ function ChipsArray(props) {
 	);
 }
 
-class EventsList extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {};
-		// function determineDepthOfObject(object) {
-		// 	let depth = 0;
-		// 	if (object.children) {
-		// 		object.children.forEach(x => {
-		// 			let temp = determineDepthOfObject(x);
-		// 			if (temp > depth) {
-		// 				depth = temp;
-		// 			}
-		// 		})
-		// 	}
-		// 	return depth + 1;
-		// }
-		// console.log("depth",determineDepthOfObject(menuItems.data[3]));
-	}
-
-
-
+function EventsList(){
 	// this method sets the current state of a menu item i.e whether
 	// it is in expanded or collapsed or a collapsed state
-	handleClick(item) {
-		this.setState(prevState => ({ [item]: !prevState[item] }));
-	}
 
+	const [state, setState] = useState({});
+	const [globalState, dispatch] = useContext(Context);
+
+	function handleClick(item) {
+		setState(prevState => ({ [item]: !prevState[item] }));
+	}
 
 
 	// if the menu item doesn't have any child, this method simply returns a clickable menu
 	// item that redirects to any location and if there is no child this method uses recursion to go until
 	// the last level of children and then returns the item by the first condition.
-	handler(children,key) {
+	function handler(children,key) {
 
 		var moment = function(dt,format){
 			//console.log("$m",Moment(dt).format(format));
@@ -90,20 +78,10 @@ class EventsList extends Component {
 			}else{return ""}
 		};
 
-		// var renderLevel = function(op){
-		// 	console.log("$",op);
-		// 	if(op.venue){return op.venue.displayName}
-		// 	if(op.artist){return op.artist.displayName}
-		// }
+		//todo:
+		//const { classes } = props;
+		// const { state } = this;
 
-		//was trying a depth-based style here.
-		// function getDepth(d){
-		// 	return {marginLeft: d + 'em',color: 'blue'}
-		// }
-		// style={getDepth(subOption.depth)}
-
-		const { classes } = this.props;
-		const { state } = this;
 		return children.map(subOption => {
 			if (!subOption.childrenKey) {
 				return (
@@ -133,7 +111,7 @@ class EventsList extends Component {
 			}
 			return (
 				<div key={subOption.name}>
-					<ListItem  button onClick={() => this.handleClick(subOption.id)}>
+					<ListItem  button onClick={() => handleClick(subOption.id)}>
 						<ListItemText
 							inset
 							primary={ subOption.displayName.toString().replace(/at.*/,"")}
@@ -156,32 +134,29 @@ class EventsList extends Component {
 						{state[subOption.name] ? <ExpandLess /> : <ExpandMore />}
 					</ListItem>
 					<Collapse in={state[subOption.id]} timeout="auto" unmountOnExit>
-						{this.handler( subOption[subOption.childrenKey],subOption.childrenKey, ) }
+						{handler( subOption[subOption.childrenKey],subOption.childrenKey, ) }
 					</Collapse>
 				</div>
 			);
 		});
 	}
-	render() {
-		//const { classes, drawerOpen, menuOptions } = this.props;
-		//todo:
-		var classes = {menuHeader:"menuHeader",list:"list"};
-		return (
-			<div className={classes.list}>
-				<List>
-					<ListItem  key="menuHeading" divider disableGutters>
-						<ListItemText
-							//className={classes.menuHeader}
-							// style={getStyle()}
-							inset
-							primary="Events"
-						/>
-					</ListItem>
-					{this.handler(this.props.data)}
-				</List>
-			</div>
-		);
-	}
+
+	var classes = {menuHeader:"menuHeader",list:"list"};
+	return (
+		<div className={classes.list}>
+			<List>
+				<ListItem  key="menuHeading" divider disableGutters>
+					<ListItemText
+						//className={classes.menuHeader}
+						// style={getStyle()}
+						inset
+						primary="Events"
+					/>
+				</ListItem>
+				{handler(globalState.events)}
+			</List>
+		</div>
+	);
 }
 // export default withStyles(styles)(MenuBar_class)
 export default EventsList

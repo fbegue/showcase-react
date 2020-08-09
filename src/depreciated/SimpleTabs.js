@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import SimpleTabsLibrary from "./SimpleTabsLibrary";
 //import Box from '@material-ui/core/Box';
 
+
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
 	return (
@@ -57,7 +58,7 @@ export default function SimpleTabs() {
 		setValue(newValue);
 	};
 	return (
-		<div style={{width:"70em"}} className={classes.root}>
+		<span style={{width:"70em"}} className={classes.root}>
 			<AppBar position="static">
 				<Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
 					<Tab label="My Library" {...a11yProps(0)} />
@@ -67,8 +68,12 @@ export default function SimpleTabs() {
 				</Tabs>
 			</AppBar>
 			<TabPanel value={value} index={0}>
-				<SimpleTabsLibrary></SimpleTabsLibrary>
+				{/*todo: was trying to nest these tabs here but doesn't play nicely*/}
+				{/*something I'm apparantly not fucking understanding about how Material UI genreates shit*/}
+				{/*validateDOMNesting(...): <div> cannot appear as a descendant of <p>.*/}
+					{/*<SimpleTabsLibrary></SimpleTabsLibrary>*/}
 			</TabPanel>
+			<SimpleTabsLibrary></SimpleTabsLibrary>
 			<TabPanel value={value} index={1}>
 				My Profile
 			</TabPanel>
@@ -78,6 +83,6 @@ export default function SimpleTabs() {
 			<TabPanel value={value} index={3}>
 				Billboards
 			</TabPanel>
-		</div>
+		</span>
 	);
 }

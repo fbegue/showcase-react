@@ -87,8 +87,6 @@ var fetchPlaylists =  function(){
     })
 }
 
-//testing: must turn cors off in browser
-
 var getMyFollowedArtists =  function(){
     return new Promise(function(done, fail) {
         //testing: must turn cors off in browser
@@ -102,6 +100,33 @@ var getMyFollowedArtists =  function(){
         })
     })
 }
+
+
+var fetchEvents =  function(param){
+    return new Promise(function(done, fail) {
+
+        param = {
+            metro:{displayName:"Columbus", id:9480},
+            dateFilter:{start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"}};
+
+        $.ajax({
+            url: 'http://localhost:8888/resolveEvents',
+            type:"POST",
+            data: {data:JSON.stringify(param)}
+            //todo:[Object: null prototype] when trying to read
+            //data: JSON.stringify(param)
+            //data: param
+        }).done(function(payload){
+            console.log("retrieved: ",payload);
+            done(payload)
+        })
+
+        //testing:
+        // fakeFetch3().then(r =>{done(r)})
+    })
+}
+
+//deprecated vvv
 
 var getMySavedTracks =  function(){
     return new Promise(function(done, fail) {
@@ -130,34 +155,6 @@ var fetchArtistGenres =  function(playlists){
             //console.log("retrieved: ",payload);
             done(payload)
         })
-    })
-}
-
-
-
-
-var fetchEvents =  function(param){
-    return new Promise(function(done, fail) {
-
-        //testing: must turn cors off in browser
-        param = {
-            metro:{displayName:"Columbus", id:9480},
-            dateFilter:{start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"}};
-
-        $.ajax({
-                    url: 'http://localhost:8888/resolveEvents',
-                    type:"POST",
-                     data: {data:JSON.stringify(param)}
-            //todo:[Object: null prototype] when trying to read
-             //data: JSON.stringify(param)
-            //data: param
-                }).done(function(payload){
-                    console.log("retrieved: ",payload);
-                    done(payload)
-                })
-
-        //testing:
-        // fakeFetch3().then(r =>{done(r)})
     })
 }
 
