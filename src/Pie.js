@@ -2,10 +2,9 @@
 import React from "react";
 import { VictoryChart,VictoryPie } from 'victory';
 import all_genres from "./alasql/all_genres";
-import {familyColors} from "./families";
+import {familyColors,familyGenre_map,genreFam_map} from "./families";
 
-var familyGenre_map = {};
-var genreFam_map= {};
+
 
 export default class Pie extends React.Component {
 
@@ -18,28 +17,6 @@ export default class Pie extends React.Component {
 			scatterData: this.getScatterData(),
 			sorted:[]
 		};
-
-
-		//------------------------------------------
-		//todo: need to be moving this somewhere else I'd think
-		//console.log("$all_genres",all_genres);
-
-
-		all_genres.forEach(function(t){
-			t.family.forEach(function(f){
-				if(!(familyGenre_map[f])){
-					familyGenre_map[f] = [];
-				}
-				familyGenre_map[f].push(t.name)
-			});
-			genreFam_map[t.name] = t.family
-
-		});
-
-		console.log("familyGenre_map",familyGenre_map);
-		console.log("genreFam_map",genreFam_map);
-		//------------------------------------------
-
 	}
 
 	//example of constantly updating state
@@ -78,24 +55,30 @@ export default class Pie extends React.Component {
 
 	//anytime the incoming props.data changes, I need to resort the data
 	sorted(){
+		//todo: this data.data is a result of passing agg here without
 		console.log("$",this.props.data);
 		//filter the newly updated value of node
 		var pieData = [];
 		var pie = {};
-		this.props.data.forEach(a =>{
-			var ret = false;
-			for(var z = 0; z< 	a.genres.length;z++){
-				var g = a.genres[z];
-				if(familyGenre_map[g.name]){
-					ret = g.name;
-					break;
+		if(this.props.data.length){
+			this.props.data.forEach(a =>{
+				var ret = false;
+				for(var z = 0; z< 	a.genres.length;z++){
+					var g = a.genres[z];
+					if(familyGenre_map[g.name]){
+						ret = g.name;
+						break;
+					}
+					//todo: check comp
 				}
-				//todo: check comp
-			}
-			if(ret){
-				!(pie[ret]) ? pie[ret] = 1:pie[ret]++
-			}
-		});
+				if(ret){
+					!(pie[ret]) ? pie[ret] = 1:pie[ret]++
+				}
+			});
+		}else{
+			//pie stays
+		}
+
 
 		console.log("$pie",pie);
 		Object.keys(pie).forEach(k =>{

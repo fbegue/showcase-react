@@ -39,36 +39,84 @@ var eventsCollection = [{artist_id:1,name:"popArtist",genres:[{id:1,name:'pop'}]
 //todo: this is called twice in succession
 // because getJoin action on node and events call it
 
-//produce an array which is the combination of all selected table values across all contexts
+//v1: produce an array which is the combination of all selected table values across all contexts
+//v2: maintain an array of node objects and update the objects based on the nodeContext field
+//the nodes themselves are simply filtered table data which are updated when asked to be
+
+
+//testing: 'nodes' is the data object for the state object 'node'
+//which itself just returns what noder calculates with 'nodes'
+var nodes = [];
+nodes.push({id:1,name:"agg",data:[]});
+
+//tells node spawns what id they should have
+var idmap = {
+	artists:2,
+	artistSearch:3
+	//when we do users, we're going to have to come up with some other kind of system..
+}
+
 function noder(action){
-	//todo: am I messing this up somehow?
-	// console.log("$context", tables["users"][action.user]);
+	console.log("noder",action);
 
-	//prepare various tables
+	//set tableContext
+	//if its a user = selection, the data is already set
+	//otherwise we need to filter on it to prepare it for aggregation update
 
-	console.log("$context", tables["users"]["dacandyman01"]["artists"]);
+	var tableContext = {};
+	if(action.context === 'artistSearch'){ //or many others...
+		tableContext = tables["users"][action.user][action.context];
+	}
+	else{
+		//todo: set these to selects from tables instead of these filters?
+		tableContext = tables["users"][action.user][action.context].filter(r =>{
+			return r.tableData && r.tableData.checked;
+		})
+	}
 
-	var art = tables["users"]["dacandyman01"]["artists"].filter(r =>{
-		// var art = tables["users"][action.user]["artists"].filter(r =>{
-		//todo: was happening when putting together artist search
-		 //return r.tableData.checked === true;
-		return r.tableData && r.tableData.checked;
+	console.log("tableContext",tableContext);
+
+	//if no nodes, add the new one.
+	//else look for it, and if we can't find it push a new one;
+
+	var n = {};
+	if(!(nodes.length)){
+		console.log("new node",action.context);
+		nodes.push({id:idmap[action.context],name:action.context,data:tableContext})
+	}
+	else{
+		n = _.findIndex(nodes,{name:action.context})
+		if(n===-1){
+			console.log("new node",action.context);
+			nodes.push({id:idmap[action.context],name:action.context,data:tableContext})
+		}else{
+			console.log("node update");
+			//todo: destroying this reference b/c not handling actual selection
+			nodes[n].data = tableContext;
+		}
+	}
+
+	//------------------------------------------------------------------
+	//calculate agg based on available nodes
+
+	//just union all the nodes' data right?
+	var u = [];
+	nodes.forEach(n =>{
+		n.name !== 'agg' ? u = u.concat(n.data):{};
 	})
+	n =_.find(nodes, {name:"agg"});
+	n.data = u;
 
-	//this table tracks only 'selected' since it's user created input
-	var sel = tables["artistSearchSelection"];
 
-	//todo: skipping for now
-	//var alb = tables["users"][action.user]["albums"]
-	var alb  = [];
-
-	console.log("art",art);
-	console.log("sel",sel);
+	//------------------------------------------------------------------
+	//todo: abandoning ala for now until I get a straighter data model/switch state mgmt method
 
 	//note: not sure what the deal with * is here but it ends up with empty {}s - idk
 	// var r1 = alasql('SELECT * from ? a union select * from ? b',[art,sel]);
-	var r1 = alasql('SELECT id, genres from ? a union select id, genres from ? b',[art,sel]);
-	console.log("r1",r1);
+	//todo: skipping using union here for now?
+	//need good way of generating these selection with nodes.length -1 unions..
+	//var r1 = alasql('SELECT id, genres from ? a union select id, genres from ? b',[art,sel]);
+	//console.log("r1",r1);
 
 	//todo: what is this all about anyways (art_gen)
 	//the whole idea of preserving the artist's genre info outside of the data objects I'm passing around?
@@ -85,12 +133,12 @@ function noder(action){
 	// //- something else I'm thinking of or no?
 	// var r2 = alasql('SELECT * from ? a join ? art_gen on art_gen.id = a.id',[r1,art_gen]);
 	// r2.forEach(r =>{if(!(r.genres)){r.genres = []}})
-    // //------------------------------------------
+	// //------------------------------------------
 
-	var r2 = r1;
-	//console.log("r2",r2);
-	console.log(action.type,r2);
-	return r2;
+
+	console.log(action.type,nodes);
+	return nodes;
+	//return r2;
 }
 
 //todo(1): resetting events list every time to this copy we set on init
@@ -118,7 +166,9 @@ function getJoin(action){
 			//todo: sqly stuff
 			//----------------------------
 			var genres = [];
-			n.forEach(r =>{
+			var n = _.find(nodes, {name:"agg"})
+
+			n.data.forEach(r =>{
 				r.genres.forEach(g =>{
 					genres.push(g)
 				})
@@ -218,6 +268,7 @@ const Reducer = (state, action) => {
 				eventsCopy = JSON.parse(JSON.stringify(tables['events']));
 				return {
 					...state,
+
 					events: tables[action.context]
 				};
 			}
@@ -249,64 +300,79 @@ const Reducer = (state, action) => {
 					//node:  getJoin({type:"node"}),
 				};
 			}
-		case 'artists':
-			//init
-			console.log('action.user context add:',action);
-			tables[action.user][action.type].push(action.payload);
-			return {
-				...state,
-				//todo: need to understand implications of this state return
-				//all I understand right now is that if I want a scope update, someone
-				//needs to return that var in a reducer action
-				//so basically right now: if your mutating something that results in a recalc of node,
-				//you need to go calculate and return the new value here
-				artists:  getJoin(action),
-				node:  getJoin({type:"node"}),
-				events:getJoin({type:"events"})
 
-			};
-		case 'albums':
-			tables[action.user][action.type].push(action.payload)
-			return {
-				...state,
-				// posts: state.posts.concat(action.payload)
-				albums: getJoin(action),
-				node:  getJoin({type:"node"}),
-				events:getJoin({type:"events"})
-			};
+		//todo: what did I think these were for again?
+		//--------------------------------------------------
+		// case 'artists':
+		// 	//init
+		// 	console.log('action.user context add:',action);
+		// 	tables[action.user][action.type].push(action.payload);
+		// 	return {
+		// 		...state,
+		// 		//todo: need to understand implications of this state return
+		// 		//all I understand right now is that if I want a scope update, someone
+		// 		//needs to return that var in a reducer action
+		// 		//so basically right now: if your mutating something that results in a recalc of node,
+		// 		//you need to go calculate and return the new value here
+		// 		artists:  getJoin(action),
+		// 		//todo:
+		// 		node:  getJoin({type:"node"}),
+		// 		events:getJoin({type:"events"})
+		//
+		// 	};
+		// case 'albums':
+		// 	tables[action.user][action.type].push(action.payload)
+		// 	return {
+		// 		...state,
+		// 		// posts: state.posts.concat(action.payload)
+		// 		albums: getJoin(action),
+		// 		node:  getJoin({type:"node"}),
+		// 		//events:getJoin({type:"events"})
+		// 	};
+		//--------------------------------------------------
+
+		//todo: these selection cases are interesting
+		//most everything is in a table which has record.tableData.checked being maintained on the records,
+		//so technically we dont' really need to do any updates to them as long as noder is cognicient of this fact
+		//and knows when it needs to check and update aggregate
+		//on the other hand, something like artistSearchSelect needs an actual data store b/c there's no table
 		case 'select':
 			if(action.context === 'artists'){
-
-				//if the record is selected, it'll have record.tableData.checked = true;
-				//this means that we basically just tell events to update itself based
-				//on the new checked values
 
 				return {
 					...state,
 					//don't need to update the data itself b/c we handle that in table?
-					events: getJoin({type:"events"}),
-					node:  getJoin({type:"node"})
+					events:  getJoin(Object.assign({},action,{type:"events"})),
+					node:  getJoin(Object.assign({},action,{type:"node"})),
 				};
 			}
-			//todo: weird 'i have two contexts, neither of which are table name
+
 			else if(action.context === 'artistSearchSelect' || action.context === 'artistSearchDeselect'){
 
-				console.log(action.context);
+				//needed to use the context to figure out which operation to do
+				var tableContext= "artistSearch"
+
 				//handle the selection mutation on collection
 				if(action.context === 'artistSearchSelect'){
-					tables["artistSearchSelection"].push(action.payload);
+					tables["users"][action.user][tableContext].push(action.payload);
 				}
 				else{
 					//todo:
 				}
 
-				//again we need to tell the table to update
-				//then tell events to update based on that
+				//user and context are reduced to their table addresses
+				//changing these properties here for signalling prevents us from entering with correct context
+				// action.user = "selection";
+				// action.context = "artistSearch";
+				//console.log(action);
 				return {
 					...state,
-					artistSearchSelection:tables["artistSearchSelection"],
-					events: getJoin({type:"events"}),
-					node:  getJoin({type:"node"})
+					//todo: naming convention for state objects
+					artistSearchSelection:tables["users"][action.user][tableContext],
+					//type was select, now its node
+					//recall events just calls noder right before, so it needs the same action
+					events: getJoin(Object.assign({},action,{type:"events",context:tableContext})),
+					node:  getJoin(Object.assign({},action,{type:"node",context:tableContext})),
 				};
 
 			}

@@ -9,7 +9,9 @@ import Tab from '@material-ui/core/Tab';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
 import Typography from '@material-ui/core/Typography';
+import { useTransition, animated } from "react-spring";
 import AddTodoDialog from './AddTodoDialog';
+import _ from "lodash";
 
 import Drawer from '@material-ui/core/Drawer';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -181,6 +183,63 @@ function Sidebar(props) {
 
   const [globalState, dispatch] = useContext(Context);
 
+  //todo: tried to avoid sending the entire globalState.node to pie
+  //but this won't resolve in time, which makes sense I suppose
+  //I need to find what I'm looking for ... would rather have dealt with an OBJECT (damnit Alex)
+  // var aggPointer = _.find(globalState.node,{name:'agg'})
+  // console.log("$aggPointer",aggPointer);
+
+  //--------------------------------------------------
+  //react-spring
+  let data = [
+    {
+      name: "Rare Wind"
+    },
+    {
+      name: "Saint Petersburg"
+    },
+    {
+      name: "Deep Blue"
+    },
+    {
+      name: "Ripe Malinka"
+    },
+    {
+      name: "Near Moon"
+    },
+    {
+      name: "Wild Apple"
+    }
+  ];
+  // const [rows, set] = useState(data);
+
+  //the y value we're generating here is the height at which the next item will spawn
+  //when you know how big each item is ahead of time, it's easy to just say
+  //'well whatever the index is * that pre-determined height is where it needs to go'
+  //todo: but here tho....
+  function getNodeHeight(node,i){
+    console.log("getNodeHeight",node);
+    //testing: determine height based on # of genres I guess?
+    //I really just want it to be automatic I guess ...
+    //like how am I supposed to know how big it's going to be?
+    const height = 30;
+    //testing: disabled
+    // const calc = height * node.genres.length * i;
+    const calc = height * i + 5
+    console.log("height",calc);
+    return calc
+  }
+  const transitions = useTransition(
+      globalState.node.map((data, i) => ({ ...data, y: getNodeHeight(data,i) })),
+      d => d.id,
+      {
+        from: { position: "absolute", opacity: 0 },
+        leave: { height: 10, opacity: 0 },
+        enter: ({ y }) => ({ y,  height: 1000,opacity: 1 }),
+        update: ({ y }) => ({ y })
+      }
+  );
+
 
   return (
       <div className={classes.drawer}>
@@ -253,10 +312,76 @@ function Sidebar(props) {
           {/*      </Typography>*/}
           {/*    </ListItem>*/}
           {/*))}*/}
-          <Pie data={globalState.node}></Pie>
-          {globalState.node.map( a =>
-              <ChipsArray chipData={a.genres}></ChipsArray>
-          )}
+
+          {/*todo: should just be passing 'agg'*/}
+          <Pie data={_.find(globalState.node,{name:'agg'})['data'] || []}></Pie>
+          {/*<Pie data={globalState.node}></Pie>*/}
+
+          {/*<ListItem*/}
+          {/*    button*/}
+          {/*    key="abc123"*/}
+          {/*    onClick={() => setSelect()}*/}
+          {/*    style={{border:"1px #00000036 solid", borderRadius:"5px"}}*/}
+          {/*>*/}
+          {/*  <Typography*/}
+          {/*      variant="subtitle1"*/}
+          {/*  >*/}
+          {/*    {globalState.node.map((node, index) => (*/}
+          {/*        <ChipsArray chipData={node.genres}></ChipsArray>*/}
+          {/*    ))}*/}
+          {/*  <span style={{fontSize:"10px"}}>test test test</span>*/}
+          {/*  </Typography>*/}
+          {/*</ListItem>*/}
+
+          {/*todo: couldn't change 'item' to 'node'?*/}
+          {/*todo: key seems to just be an index from 0?*/}
+          {transitions.map(({ item, props: { y, ...rest }, key }, index) => (
+              <animated.div
+                  key={key}
+                  class="card"
+                  style={{
+                    transform: y.interpolate(y => `translate3d(0,${y}px,0)`),
+                    ...rest
+                  }}
+              >
+                <ListItem
+                    button
+                    key={item.id}
+                    onClick={() => setSelect(item)}
+                    style={{border:"1px #00000036 solid", borderRadius:"5px"}}
+                >
+                  <Typography
+                      variant="subtitle1"
+                      color={item.selected ? 'secondary' : 'textPrimary'}
+                  >
+                    {item.name} - <span style={{fontSize:"10px"}}>{item.data.length}</span>
+                    {/*testing: disabled*/}
+                    {/*<ChipsArray chipData={item.genres}></ChipsArray>*/}
+                  </Typography>
+                </ListItem>
+              </animated.div>
+          ))}
+
+          {/*{globalState.node.map((node, index) => (*/}
+          {/*    <ListItem*/}
+          {/*        button*/}
+          {/*        key={node.id}*/}
+          {/*        onClick={() => setSelect(node)}*/}
+          {/*        style={{border:"1px #00000036 solid", borderRadius:"5px"}}*/}
+          {/*    >*/}
+          {/*      <Typography*/}
+          {/*          variant="subtitle1"*/}
+          {/*          color={node.selected ? 'secondary' : 'textPrimary'}*/}
+          {/*      >*/}
+          {/*        {node.id} - <span style={{fontSize:"10px"}}></span>*/}
+          {/*        <ChipsArray chipData={node.genres}></ChipsArray>*/}
+          {/*      </Typography>*/}
+          {/*    </ListItem>*/}
+          {/*))}*/}
+
+          {/*{globalState.node.map( a =>*/}
+          {/*    <ChipsArray chipData={a.genres}></ChipsArray>*/}
+          {/*)}*/}
         </List>
         {/*<List>*/}
         {/*  {props.playlists.map((play, index) => (*/}

@@ -3,7 +3,7 @@ var tables = {};
 tables["playlists"] = [];
 tables["artists"] = [];
 tables["events"] = [];
-tables["artistSearchSelection"] = [];
+// tables["artistSearchSelection"] = [];
 
 
 //the users tables are about the selections users make
@@ -16,6 +16,13 @@ tables["users"]["dacandyman01"] = {
 	//artists from albums
 	albums:  [],
 	node:[]
+}
+
+//testing: a user which is just the system that holds all non-user sourced selections?
+//these will be specifically named collections which we need to maintain (not just filter on b/c they are tables)
+//sort of the difference between 'selecting from MY data' (above) and 'selecting from some data' (below)
+tables["users"]["selection"] = {
+	artistSearch:[]
 }
 
 export default tables;

@@ -1,7 +1,7 @@
 import React from "react";
 import Chip from "@material-ui/core/Chip";
 import { makeStyles } from '@material-ui/core/styles';
-import {familyColors} from './families';
+import {familyColors,genreFam_map} from './families';
 
 //help understanding the override system
 //https://material-ui.com/customization/components/#overriding-styles-with-classes
@@ -22,10 +22,33 @@ const useStyles = makeStyles({
 	rock:{
 		backgroundColor:familyColors['rock']
 	},
-	country:{
-		backgroundColor:familyColors["country"]
+	latin:{
+		backgroundColor:familyColors["latin"]
 	},
-
+	folk:{
+		backgroundColor:familyColors["folk"]
+	},
+	metal:{
+		backgroundColor:familyColors["metal"]
+	},
+	blues:{
+		backgroundColor:familyColors["blues"]
+	},
+	reggae:{
+		backgroundColor:familyColors["reggae"]
+	},
+	world:{
+		backgroundColor:familyColors["world"]
+	},
+	jazz:{
+		backgroundColor:familyColors["jazz"]
+	},
+	punk:{
+		backgroundColor:familyColors["punk"]
+	},
+	classical:{
+		backgroundColor:familyColors["classical"]
+	},
 });
 
 
@@ -36,8 +59,8 @@ export default function ChipsArray(props) {
 	const classes = useStyles();
 
 	const [chipData, setChipData] = React.useState(props.chipData);
-	console.log("$chipData",props.chipData);
-	console.log(classes.colorPrimary);
+	//console.log("$chipData",props.chipData);
+	//console.log(classes.colorPrimary);
 	//console.log(typeof chipData[0].name);
 
 	//leaving as example on how to interact with later
@@ -45,6 +68,10 @@ export default function ChipsArray(props) {
 		setChipData(chips => chips.filter(chip => chip.key !== chipToDelete.key));
 	};
 
+
+	function getClass(data){
+		return classes[genreFam_map[data.name]]
+	}
 	return (
 
 		<div style={{maxWidth:"40em"}}>
@@ -59,7 +86,7 @@ export default function ChipsArray(props) {
 						color="primary"
 						classes={{
 							//root: classes.root,
-							colorPrimary:classes[data.name]
+							colorPrimary:getClass(data)
 							//todo: again really not fucking understanding this lol
 							//colorPrimary:classes.colorPrimary
 							//colorPrimary:getColor()

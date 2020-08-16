@@ -27,7 +27,7 @@ export default function Search() {
 
 	function add(artist){
 		console.log("adding",artist);
-		dispatch({type: 'select', payload:artist,context:'artistSearchSelect'});
+		dispatch({type: 'select', payload:artist,user:"selection",context:'artistSearchSelect'});
 	}
 
 	//todo:

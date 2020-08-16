@@ -13,8 +13,9 @@ import Moment from 'moment';
 import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
 import {Context} from "./alasql/Store";
+import ChipsArray from "./ChipsArray";
 
-function ChipsArray(props) {
+function ChipsArray_dep(props) {
 	//const classes = useStyles();
 	//todo: implement useStyles
 	//see 'chip array'

@@ -7,7 +7,7 @@ const initialState = {
 	artists:[],
 	events:[],
 	artistSearchSelection:[],
-	node:[],
+	node:[{id:1,name:"agg",data:[]}],
 	//testing:
 	dacandyman01_artists:[],
 	error: null
