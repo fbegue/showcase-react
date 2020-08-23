@@ -63,6 +63,8 @@ export default class Pie extends React.Component {
 		if(this.props.data.length){
 			this.props.data.forEach(a =>{
 				var ret = false;
+				//todo: replace when I do refactor of ChipsArray and families
+				//just look thru every one and try to find a exact match on the genre name
 				for(var z = 0; z< 	a.genres.length;z++){
 					var g = a.genres[z];
 					if(familyGenre_map[g.name]){

@@ -22,9 +22,11 @@ var familyGenre_map = {};
 var genreFam_map= {};
 //note: to avoid doing replaces on my all_genres source, just going to define a map and use it here
 //todo: but I guess that really isn't the issue tho is it? I need these families to be proper objects w/ ids I can register on
+//so plan on genres coming in as normal, but when we resolve them on the familyGenre map the normalized ones
 var familyNormal = {};
-familyNormal["hip hop"] = "hipHop"
-//and so on..
+familyNormal["hip hop"] = "hipHop";
+familyNormal["electro house"] = "electroHouse";
+familyNormal["r&b"] = "rhythmBlues";
 
 all_genres.forEach(function(t){
 	t.family.forEach(function(f){
@@ -36,10 +38,63 @@ all_genres.forEach(function(t){
 	genreFam_map[t.name] = t.family
 
 });
-// console.log("familyGenre_map",familyGenre_map);
-// console.log("genreFam_map",genreFam_map);
+
+var familyStyles = {
+	root: {
+		// background: 'black',
+		// borderRadius: "16px",
+		// margin:"2px",
+		color: 'white'
+	},
+	hipHop: {
+		backgroundColor: familyColors['hip hop']
+	},
+	electroHouse: {
+		backgroundColor: familyColors['electro house']
+	},
+	rhythmBlues: {
+		backgroundColor: familyColors["r&b"]
+	},
+	pop: {
+		backgroundColor: familyColors['pop']
+	},
+	rock: {
+		backgroundColor: familyColors['rock']
+	},
+	latin: {
+		backgroundColor: familyColors["latin"]
+	},
+	folk: {
+		backgroundColor: familyColors["folk"]
+	},
+	metal: {
+		backgroundColor: familyColors["metal"]
+	},
+	blues: {
+		backgroundColor: familyColors["blues"]
+	},
+	reggae: {
+		backgroundColor: familyColors["reggae"]
+	},
+	world: {
+		backgroundColor: familyColors["world"]
+	},
+	jazz: {
+		backgroundColor: familyColors["jazz"]
+	},
+	punk: {
+		backgroundColor: familyColors["punk"]
+	},
+	classical: {
+		backgroundColor: familyColors["classical"]
+	}
+};
+
+
+console.log("$familyGenre_map",familyGenre_map);
+console.log("$genreFam_map",genreFam_map);
 //------------------------------------------
 
 export {
-	families,familyColors,familyGenre_map,genreFam_map
+	families,familyColors,familyGenre_map,genreFam_map, familyStyles,familyNormal
 }
