@@ -12,6 +12,7 @@ import alasqlAPI from "./alasql";
 
 import ChipsArray from "./ChipsArray";
 import Search from './Search'
+import util from "./util/util";
 
 // const styles = {
 // 	fontFamily: "sans-serif",
@@ -77,6 +78,18 @@ export default function Tabify() {
 			},err =>{
 				console.log(err);
 			})
+		alasqlAPI.fetchPlaylistsResolved()
+			.then(r =>{
+				dispatch({type: 'init', payload: r,user:user,context:'playlists'});
+			},err =>{
+				console.log(err);
+			})
+		// alasqlAPI.fetchPlaylists()
+		// 	.then(r =>{
+		// 		dispatch({type: 'init', payload: r,user:user,context:'playlists'});
+		// 	},err =>{
+		// 		console.log(err);
+		// 	})
 	}, []);
 
 	//todo:
@@ -113,13 +126,40 @@ export default function Tabify() {
 		return owners;
 	};
 
-	var handleSelect = function(rows){
+	var handleSelectSaved = function(rows){
 		//todo: confused on how to get selected row?
 		//seems like it should be pretty simple?
 		//for now just take one - otherwise do a delta? :(
 		console.log("selected",rows.length);
 		dispatch({type: 'select', payload:rows[0],user:user,context:'artists'});
 	}
+
+	var handleSelectPlaylist= function(rows){
+		//todo: confused on how to get selected row?
+		//seems like it should be pretty simple?
+		//for now just take one - otherwise do a delta? :(
+		console.log("selected",rows.length);
+		dispatch({type: 'select', payload:rows[0],user:user,context:'artists'});
+	}
+
+	var prepPlay = function(playob){
+
+		//todo:
+		//for every artist in the playlist, get the family freq for them
+		//then use playob.artistFreq to weight the result to produce some family
+		//chips that best represent the playlist
+
+		//todo: also do something for unique genres?
+		//like top 5 or most common ones? idk
+
+		//var f = util.familyFreq(playob);
+		//console.log("$f",f);
+
+		//testing:
+		return 	<ChipsArray chipData={playob.artists[0].genres}/>
+	}
+
+
 
 
 
@@ -162,11 +202,44 @@ export default function Tabify() {
 									selection: true,
 									tableLayout:"fixed"
 								}}
-								onSelectionChange={(rows) => handleSelect(rows)}
+								onSelectionChange={(rows) => handleSelectSaved(rows)}
 							/>
 
 						</Tab>
-						<Tab label="Playlists">Tab 1 Content 2</Tab>
+						<Tab label="Playlists">
+							<MaterialTable
+								title=""
+								columns={[
+									{
+										field: 'images[0]',
+										title: '',
+										render: rowData => <img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
+										filtering:false,
+										width:"5em"
+									},
+									{ title: 'Name', field: 'name', filtering:false},
+									{
+										field: 'genres',
+										title: 'genres',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => prepPlay(rowData),
+										filtering:false,
+										width:"20em"
+									},
+
+								]}
+								data={state[user + "_playlists"]}
+								options={{
+									search: true,
+									filtering: true,
+									selection: true,
+									tableLayout:"fixed"
+								}}
+								onSelectionChange={(rows) => handleSelectPlaylist(rows)}
+							/>
+
+
+						</Tab>
 						<Tab label="Subtab 1.3">Tab 1 Content 3</Tab>
 					</Tabs>
 				</Tab>

@@ -16,11 +16,26 @@ import tables from './tables'
 const alasqlAPI = {
 
 	fetchPlaylists: async (user) => {
-		const [state, dispatch] = useContext(Context);
 		let playlists = await api.fetchPlaylists(user).catch(e =>console.log(e));
-		playlists.items = [{id: 99, text: "playlist99"},{id: 98, text: "playlist98"}]
+		//playlists.items = [{id: 99, text: "playlist99"},{id: 98, text: "playlist98"}]
 		console.log("fetchPlaylists", playlists);
-		dispatch({type: 'SET_CONTEXT', payload: playlists,user:user,context:'myPlaylists'});
+		return playlists
+	},
+	fetchPlaylistsResolved: async (user) => {
+		let playlistObs = await api.fetchPlaylistsResolved(user).catch(e =>console.log(e));
+		//testing: managing this stuff could be complicated
+		//not sure exactly where artistFreq goes but it seems so small that I can just keep it as sidekick I think - right?
+		//point of at least keeping artistFreq seperate is that these artists should be pulled from a local db of some kind
+		//NOT passed around on the playlist object itself
+
+		var playlists = [];
+		playlistObs.forEach(ob =>{
+			var p = Object.assign({},ob.playlist)
+			p.artistFreq = ob.artistFreq;
+			p.artists = ob.resolved;
+			playlists.push(p);
+		})
+		console.log("fetchPlaylistsResolved", playlists);
 		return playlists
 	},
 	followedArtists: async (user) => {
@@ -36,6 +51,7 @@ const alasqlAPI = {
 
 		return artists
 	},
+
 	fetchEvents: async (user) => {
 		let events = await api.fetchEvents(user).catch(e =>console.log(e));
 		console.log("events", events);

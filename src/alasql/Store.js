@@ -10,6 +10,7 @@ const initialState = {
 	node:[{id:1,name:"agg",data:[]}],
 	//testing:
 	dacandyman01_artists:[],
+	dacandyman01_playlists:[],
 	error: null
 };
 

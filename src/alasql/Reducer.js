@@ -292,6 +292,26 @@ const Reducer = (state, action) => {
 					//node:  getJoin({type:"node"}),
 				};
 			}
+			else if(action.context === 'playlists'){
+
+				//register with global artists
+				tables[action.context] = tables[action.context].concat(action.payload);
+
+				//register for user
+				//todo: set up id only relations for user
+				//just the whole thing for now
+				//var ids = _.map(artists, function(a){return a.id;});
+				tables["users"][action.user][action.context] = action.payload;
+
+
+				var key = action.user + '_' + action.context;
+				console.log("stated",key);
+				return {
+					...state,
+					[key]: tables["users"][action.user][action.context]
+					//node:  getJoin({type:"node"}),
+				};
+			}
 			//testing: albums
 			else{
 				return {

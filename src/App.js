@@ -6,6 +6,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Sidebar from './Sidebar';
+import Panels from './Panels'
 import FilterBar from './FilterBar';
 import NestedList from './NestedList';
 import MapArea from './MapArea';
@@ -228,7 +229,6 @@ function App(props) {
     return (
         <Store>
             <div>
-
                 {/*todo: region selection works, have menu of cities in ohio that doesn't*/}
                 {/*<MapArea states={states}/>*/}
                 <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>

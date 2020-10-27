@@ -85,7 +85,23 @@ var fetchPlaylists =  function(){
             })
         // fakeFetch2()
     })
-}
+};
+
+var fetchPlaylistsResolved =  function(){
+    return new Promise(function(done, fail) {
+        //testing: must turn cors off in browser
+        $.ajax({
+            url: 'http://localhost:8888/resolvePlaylists',
+            type:"POST"
+        }).done(function(payload){
+            console.log("$retrieved",payload);
+            done(payload)
+        })
+        // fakeFetch2()
+    })
+};
+
+
 
 var getMyFollowedArtists =  function(){
     return new Promise(function(done, fail) {
@@ -108,17 +124,35 @@ var fetchEvents =  function(param){
             metro:{displayName:"Columbus", id:9480},
             dateFilter:{start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"}};
 
-        $.ajax({
-            url: 'http://localhost:8888/resolveEvents',
-            type:"POST",
-            data: {data:JSON.stringify(param)}
-            //todo:[Object: null prototype] when trying to read
-            //data: JSON.stringify(param)
-            //data: param
-        }).done(function(payload){
-            console.log("retrieved: ",payload);
-            done(payload)
+        //note: cors bullshit
+        //ended up going back to using the extension to allow requests to be made w/out cors
+        //b/c if you change the mode here, you can't send fucking json? ffs
+        //https://stackoverflow.com/questions/54016068/empty-body-in-fetch-post-request
+
+        fetch('http://localhost:8888/resolveEvents', {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+             mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'Content-Type': 'application/json'
+            },
+             body: JSON.stringify(param)
+        }).then(res => res.json())
+            .then(function(res){
+            console.log("retrieved: ",res);
+            done(res)
         })
+
+        // $.ajax({
+        //     url: 'http://localhost:8888/resolveEvents',
+        //     type:"POST",
+        //     data: {data:JSON.stringify(param)}
+        //     //todo:[Object: null prototype] when trying to read
+        //     //data: JSON.stringify(param)
+        //     //data: param
+        // }).then(function(payload){
+        //     console.log("retrieved: ",payload);
+        //     done(payload)
+        // })
 
         //testing:
         // fakeFetch3().then(r =>{done(r)})
@@ -212,7 +246,7 @@ export default {
     updateTodo,
     deleteTodo,
     fetchPlaylists,
-    fetchArtistGenres,
+    fetchPlaylistsResolved,
     fetchEvents,
     getMySavedTracks,
     getMyFollowedArtists,
