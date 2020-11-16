@@ -1,4 +1,4 @@
-import React, {Component, useContext, useState} from 'react'
+import React, {Component, useContext, useEffect, useState} from 'react'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
@@ -14,6 +14,12 @@ import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
 import {Context} from "./alasql/Store";
 import ChipsArray from "./ChipsArray";
+
+
+import Player, {play,player} from './Player'
+import {Control} from "./index";
+import MusicNoteIcon from '@material-ui/icons/MusicNote';
+
 
 function ChipsArray_dep(props) {
 	//const classes = useStyles();
@@ -53,16 +59,43 @@ function ChipsArray_dep(props) {
 }
 
 function EventsList(){
+
+	//testing: probably shouldn't put this HERE exactly...
+
+
+
 	// this method sets the current state of a menu item i.e whether
 	// it is in expanded or collapsed or a collapsed state
 
 	const [state, setState] = useState({});
 	const [globalState, dispatch] = useContext(Context);
+	let control = Control.useContainer()
+
+	function handlePlay(item) {
+		console.log("$handlePlay",item);
+		control.setId(item.spotifyTopFive[0])
+		control.setId(item.spotifyTopFive[0])
+		control.togglePlay(!control.play)
+	}
+
 
 	function handleClick(item) {
 		setState(prevState => ({ [item]: !prevState[item] }));
 	}
 
+
+	function unHolyDrill(item){
+		//console.log("$unHolyDrill",item);
+		// var ret = false;
+		// item.performance.forEach()
+		for(var x = 0; x < item.performance.length;x++){
+			var ip = item.performance[x];
+			if(ip.artist.spotifyTopFive){
+				return true
+			}
+		}
+		return false;
+	};
 
 	// if the menu item doesn't have any child, this method simply returns a clickable menu
 	// item that redirects to any location and if there is no child this method uses recursion to go until
@@ -99,6 +132,7 @@ function EventsList(){
 										// className={classes.inline}
 										color="textPrimary"
 									>
+										{subOption.artist.spotifyTopFive && <button onClick={() => handlePlay(subOption.artist)} >play</button>}
 										<ChipsArray chipData={subOption.artist.genres}>
 										</ChipsArray>
 									</Typography>
@@ -113,6 +147,7 @@ function EventsList(){
 			return (
 				<div key={subOption.name}>
 					<ListItem  button onClick={() => handleClick(subOption.id)}>
+						{unHolyDrill(subOption) && <MusicNoteIcon style={{"position":"absolute","left":"49px","top":"10px"}} fontSize={'small'}/>}
 						<ListItemText
 							inset
 							primary={ subOption.displayName.toString().replace(/at.*/,"")}
@@ -145,6 +180,7 @@ function EventsList(){
 	var classes = {menuHeader:"menuHeader",list:"list"};
 	return (
 		<div className={classes.list}>
+<div>metro {control.metro}</div>
 			<List>
 				<ListItem  key="menuHeading" divider disableGutters>
 					<ListItemText

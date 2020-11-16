@@ -57,48 +57,40 @@ export default class Pie extends React.Component {
 
 	//anytime the incoming props.data changes, I need to resort the data
 	sorted(){
-		//todo: this data.data is a result of passing agg here without
 		console.log("$",this.props.data);
 		//filter the newly updated value of node
 		var pieData = [];
 		var pie = {};
 		if(this.props.data.length){
-			var f = util.familyFreq(this.props.data);
-			console.log("$f",f);
-			if(f){
-				!(pie[f]) ? pie[f] = 1:pie[f]++
-			}
 
-			// this.props.data.forEach(a =>{
-			// 	//take every artist and look at all their genres to figure out which family best represents them
-			// 	//todo: how to do tie-breakers / how to value thresholds
-			//
-			// 	//todo: particularly, need to make sure that just b/c a band has a more genres defined
-			// 	//that doesn't mean that it is more influential - which will be a problem for bands
-			// 	//that have more than one major family name
-			//
-			// 	var fmap = {};
-			// 	for(var z = 0; z< a.genres.length;z++){
-			// 		if(a.genres[z].family_name){
-			// 			if(!(fmap[a.genres[z].family_name])){
-			// 				fmap[a.genres[z].family_name] = 1
-			// 			}else{
-			// 				fmap[a.genres[z].family_name]++;
-			// 			}
-			// 		}
-			// 	}
-			// 	//check the family map defined and see who has the highest score
-			// 	if(!(_.isEmpty(fmap))){
-			// 		//convert map to array (uses entries and ES6 'computed property names')
-			// 		//and find the max
-			// 		var arr = [];
-			// 		Object.entries(fmap).forEach(tup =>{var r = {[tup[0]]:tup[1]};arr.push(r);});
-			// 		var m = _.maxBy(arr,function(r){return Object.values(r)[0]});
-			// 		var f = Object.keys(m)[0];
-			// 		console.log("%",f);
-			// 		!(pie[f]) ? pie[f] = 1:pie[f]++
-			// 	}
-			// });
+			//note: dealing with both playlists and artists in agg now
+			this.props.data.forEach(a =>{
+				if(a.familyFreq){
+					!(pie[a.familyFreq]) ? pie[a.familyFreq] = 1:pie[a.familyFreq]++
+				}else if(a.artists){
+
+					//need to determine what families to put into pie based on playlist content
+					//fortunately we already need to do this for the full listing in the table
+					//todo: hard part is representing a playlist proportionately next to "another node type object"
+					//todo: and, proportionately within itself
+					//for example, I just take the to 3 right now - where #1 could = 50 but #2 = 2
+
+
+					//I have the familyAgg for each artist - so just make a ranking of these then?
+					//take top 5
+					var rank = util.makeRank(a.artists,a.artistFreq,"familyAgg");
+					//console.log("$rank",rank);
+
+					//testing: non-proportionate ranks
+					for(var x =0;x < rank.length && x < 3 ; x++){
+						var fam = Object.keys(rank[x])[0];
+						!(pie[fam]) ? pie[fam] = 1:pie[fam]++
+					}
+
+				}else{
+					console.error("malformed data passed to pie",this.props.data.length);
+				}
+			 })
 		}else{
 			//pie stays
 		}

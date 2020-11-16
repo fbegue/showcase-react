@@ -52,7 +52,8 @@ nodes.push({id:1,name:"agg",data:[]});
 //tells node spawns what id they should have
 var idmap = {
 	artists:2,
-	artistSearch:3
+	artistSearch:3,
+	playlists:4
 	//when we do users, we're going to have to come up with some other kind of system..
 }
 
@@ -142,7 +143,11 @@ function noder(action){
 }
 
 //todo(1): resetting events list every time to this copy we set on init
+//need to figure out how to preserve these references
 //when we start updating events need to not forget this
+
+
+
 var eventsCopy = {};
 
 function getJoin(action){
@@ -163,70 +168,116 @@ function getJoin(action){
 			var n = noder(action)
 			console.log("$noder",n);
 
-			//todo: sqly stuff
-			//----------------------------
-			var genres = [];
-			var n = _.find(nodes, {name:"agg"})
-
-			n.data.forEach(r =>{
-				r.genres.forEach(g =>{
-					genres.push(g)
-				})
-			})
-			var jstr = function(ob){
-				return JSON.parse(JSON.stringify(ob))
-			};
-			console.log("genres selected",genres);
-
-			//----------------------------
-			//todo: yeah don't do this
-			//besides sql stuff, we need to figure out how to preserve these references
-
-
 			//todo(1):
+			var jstr = function(ob){return JSON.parse(JSON.stringify(ob))};
 			var events = eventsCopy;
 			console.log("$events",jstr(events));
-			//with eventsCollection
 
-			// events = events.filter(e =>{
-			// 	for(var x = 0; x < e.genres.length;x++){
-			// 		for(var y = 0; y < genres.length;y++){
-			// 			if(genres[y].id === e.genres[x].id){
-			// 				return true
-			// 			}
-			// 		}
-			// 	}
-			// 	return false;
-			// })
+			//todo: sqly stuff (this looks like shit)
 
-			//look at every genre of every artist of every performance of every event
-			//if any of the genres of any artist match our selected list, keep it
-			events = events.filter(e =>{
-				// e.performance.forEach(p =>{
-				var some = false;
-				//look at
-				for(var x = 0; x < e.performance.length;x++){
-					var p =  e.performance[x]
-					// p.id === 74713137 ? console.log("$",p):{};
-					some = p.artist.genres.some(g =>{
-						//console.log(g.id);
-						for(var y = 0; y < genres.length;y++){
-							if(g.id === genres[y].id){
-								return true;
-							}
-						}
-						return false
+
+			var n = _.find(nodes, {name:"agg"})
+
+			//gather all the genres from all the nodes
+
+			//note: now I'm dealing with two types of objects on agg (1)
+			//(since I'm adding the playlist in here now)
+
+			//---------------------------------------------
+			//by familyAgg
+			//get all families that represent current node content
+			var families = [];
+
+			n.data.forEach(r =>{
+				if(r.familyAgg){
+					families.indexOf(r.familyAgg) === -1 ? families.push(r.familyAgg):{};
+				}else if(r.artists){
+					//process playlist's artists for genres
+					r.artists.forEach(a =>{
+						families.indexOf(a.familyAgg) === -1 ? families.push(a.familyAgg):{};
 					})
-					// p.id === 74713137 ? console.log("#$",some):{};
-
-					//if some is true, than stop looking thru the other performances
-					if(some){
-						break;
-					}
 				}
-				return some;
-			})
-			//----------------------------
+			});
+
+
+			console.log("$families",families);
+
+			//todo: this is 'just restore old events' if there's nothing to process here
+			if(families.length > 0){
+				//for every event, if any of the performances has a familyAgg
+				//that is within our filtered set, keep the event
+				events = events.filter(e =>{
+					var some = false;
+					for(var x = 0; x < e.performance.length;x++){
+						//console.log("e",e.performance[x].artist.familyAgg);
+						if(families.indexOf(e.performance[x].artist.familyAgg) !== -1){
+							some = true;
+							break;
+						}
+					}
+					return some;
+				})
+			}
+
+
+			//---------------------------------------------
+
+			function byGenres(){
+				var genres = [];
+				n.data.forEach(r =>{
+					if(r.genres){
+						//process artist for genres
+						r.genres.forEach(g =>{
+							genres.push(g)
+						})
+					}else if(r.artists){
+						//process playlist's artists for genres
+						r.artists.forEach(a =>{
+							a.genres && a.genres.forEach(g =>{
+								genres.push(g)
+							})
+						})
+					}
+				});
+
+				var jstr = function(ob){
+					return JSON.parse(JSON.stringify(ob))
+				};
+				console.log("genres selected",genres);
+
+
+				//look at every genre of every artist of every performance of every event
+				//if any of the genres of any artist match our selected list, keep it
+				events = events.filter(e =>{
+					// e.performance.forEach(p =>{
+					var some = false;
+					//look at
+					for(var x = 0; x < e.performance.length;x++){
+						var p =  e.performance[x]
+						// p.id === 74713137 ? console.log("$",p):{};
+						some = p.artist.genres.some(g =>{
+							//console.log(g.id);
+							for(var y = 0; y < genres.length;y++){
+								if(g.id === genres[y].id){
+									return true;
+								}
+							}
+							return false
+						})
+						// p.id === 74713137 ? console.log("#$",some):{};
+
+						//if some is true, than stop looking thru the other performances
+						if(some){
+							break;
+						}
+					}
+					return some;
+				})
+			}
+			//byGenres();
+
+
+			//---------------------------------------------
 
 			console.log("$$events",jstr(events));
 
@@ -294,8 +345,27 @@ const Reducer = (state, action) => {
 			}
 			else if(action.context === 'playlists'){
 
-				//register with global artists
+				//register with global playlists
 				tables[action.context] = tables[action.context].concat(action.payload);
+
+				//todo: register with global artists
+				//starting to get a little weird here...should we really be parsing thru each playlist here?
+
+
+				// if(typeof tables["artists"] !== 'array'){
+				// 	console.log("retype");tables["artists"] = [];}
+
+				action.payload.forEach(p =>{
+					//don't add repeats
+					p.artists.forEach(a =>{
+						if (!(tables["artists"].some(e => e.id === a.id))) {
+							tables["artists"].push(a);
+							// tables["artists"] = tables["artists"].concat(p.artists);
+						}
+					});
+
+				})
+				console.log("$check",tables["artists"]);
 
 				//register for user
 				//todo: set up id only relations for user
@@ -366,7 +436,15 @@ const Reducer = (state, action) => {
 					node:  getJoin(Object.assign({},action,{type:"node"})),
 				};
 			}
+			if(action.context === 'playlists'){
 
+				return {
+					...state,
+					//don't need to update the data itself b/c we handle that in table?
+					events:  getJoin(Object.assign({},action,{type:"events"})),
+					node:  getJoin(Object.assign({},action,{type:"node"})),
+				};
+			}
 			else if(action.context === 'artistSearchSelect' || action.context === 'artistSearchDeselect'){
 
 				//needed to use the context to figure out which operation to do

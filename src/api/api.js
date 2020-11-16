@@ -72,6 +72,8 @@ var fakeFetch3 = function(){
     })
 };
 
+//user methods
+
 var fetchPlaylists =  function(){
     return new Promise(function(done, fail) {
         //testing: must turn cors off in browser
@@ -101,8 +103,6 @@ var fetchPlaylistsResolved =  function(){
     })
 };
 
-
-
 var getMyFollowedArtists =  function(){
     return new Promise(function(done, fail) {
         //testing: must turn cors off in browser
@@ -116,6 +116,8 @@ var getMyFollowedArtists =  function(){
         })
     })
 }
+
+//event methods
 
 var fetchEvents =  function(param){
     return new Promise(function(done, fail) {
@@ -159,6 +161,8 @@ var fetchEvents =  function(param){
     })
 }
 
+//methods
+
 var completeArtist =  function(param){
     return new Promise(function(done, fail) {
         $.ajax({
@@ -175,6 +179,18 @@ var completeArtist =  function(param){
     })
 }
 
+var getArtistTopTracks  =  function(id){
+    return new Promise(function(done, fail) {
+        $.ajax({
+            url: 'http://localhost:8888/getArtistTopTracks',
+            type:"POST",
+            data: {id:id}
+        }).done(function(payload){
+            //console.log("retrieved: ",payload);
+            done(payload)
+        })
+    })
+}
 
 //-----------------------------------------------
 //deprecated vvv
@@ -209,6 +225,22 @@ var fetchArtistGenres =  function(playlists){
     })
 }
 
+
+var getToken =  function(playlists){
+    return new Promise(function(done, fail) {
+
+        //testing: must turn cors off in browser
+
+        $.ajax({
+            url: 'http://localhost:8888/getToken',
+            type:"POST",
+            // data: {playlists:JSON.stringify(playlists)}
+        }).done(function(payload){
+            console.log("retrieved token: ",payload);
+            done(payload)
+        })
+    })
+}
 
 //-----------------------------------------------
 //todos test stuff
@@ -250,5 +282,8 @@ export default {
     fetchEvents,
     getMySavedTracks,
     getMyFollowedArtists,
-    completeArtist
+    completeArtist,
+    getArtistTopTracks,
+    getToken
+
 }

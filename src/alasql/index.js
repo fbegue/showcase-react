@@ -12,7 +12,6 @@ import {Context} from './Store'
 //fix this
 import tables from './tables'
 
-
 const alasqlAPI = {
 
 	fetchPlaylists: async (user) => {
@@ -44,6 +43,10 @@ const alasqlAPI = {
 		//var playlists = {};playlists.items = [{id: 99, text: "playlist99"},{id: 98, text: "playlist98"}]
 		console.log("followedArtists", artists);
 
+		artists.forEach(a =>{
+
+		})
+
 		//NO you can't call these unless I'm in a component ;)
 
 		// const [state, dispatch] = useContext(Context);
@@ -51,11 +54,15 @@ const alasqlAPI = {
 
 		return artists
 	},
-
 	fetchEvents: async (user) => {
 		let events = await api.fetchEvents(user).catch(e =>console.log(e));
 		console.log("events", events);
 		return events
+	},
+	getArtistTopTracks: async (id) => {
+		let tracks = await api.getArtistTopTracks(id).catch(e =>console.log(e));
+		console.log("events", tracks);
+		return tracks
 	}
 
 }

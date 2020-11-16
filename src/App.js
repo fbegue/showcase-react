@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -11,15 +11,17 @@ import FilterBar from './FilterBar';
 import NestedList from './NestedList';
 import MapArea from './MapArea';
 import './App.css'
-
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 
-import Store from './alasql/Store'
+import Store, {Context} from './alasql/Store'
 
+//
+import Player,{} from './Player'
+import {Control} from './index'
 
-
+import Map from './Map'
 
 //import $ from "jquery"
 //import {$} from './libraries/jquery.min'
@@ -180,63 +182,62 @@ var initMap = function(){
 
 setTimeout(e =>{  initMap();},2000);
 
+function TestComp(props) {
+    let control = Control.useContainer();
+     const [state, dispatch] = useContext(Context);
+    useEffect(() => {
+        console.log("componentDidMount");
+        //todo: endless loop
+        //confusing b/c I dont' get why this doesn't happen in Tabify then.
+        //like I would get 'you updating the state of a component that relies, so loop'
+        //but I'm missing something here...
+
+        //moving the call outside of store = "invalid attempt to destructure non-iterable instance"
+        //not to sure what that means - when I removed 'store' it was the same error but different place
+        //so maybe something to do with provider lookups?
+
+        alasqlAPI.fetchEvents()
+            .then(r =>{
+                dispatch({type: 'init', payload: r,context:'events'});
+            },err =>{
+                console.log(err);
+            })
+        return function cleanup() {
+            console.log("componentWillUnmount");
+        };
+    });
+
+    return (
+        <div>
+            {/*<button onClick={() => control.selectMetro(1)}>*/}
+            {/*    Click me: {control.metro}*/}
+            {/*</button>*/}
+        </div>
+    )
+}
+
 function App(props) {
 
     const { classes } = props;
     let [filter, setFilter] = useState('active');
     let [selectedTodoId, setSelectedTodoId] = useState();
 
-    let normalizedApi = useNormalizedApi()
-    let db = useDB();
-
-    // let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
-    // //let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
-    //
-    // useEffect(() => {
-    //     fetchTodos(filter)
-    // }, [filter])
-    //
-    // let todos = db.executeStoredQuery(filterQueries[filter]);
-
-    let pqry = db.getStoredQuery('ALL_PLAYLISTS');
-    let playlists = db.executeQuery(pqry);
-    let pqry2 = db.getStoredQuery('ALL_ARTISTS');
-    let artists = db.executeQuery(pqry2);
-    let pqry3 = db.getStoredQuery('ALL_GENRES');
-    let genres = db.executeQuery(pqry3);
-    let pqry4 = db.getStoredQuery('ALL_EVENTS');
-
-    // let events = db.executeQuery(pqry4);
-
-
-
-    //testing: example metro catalog
-    var states = {"OH":[
-            {"displayName":"Columbus", "id":9480},
-            {"displayName":"Cleveland", "id":14700},
-            {"displayName":"Cincinnati", "id":22040},
-            {"displayName":"Dayton", "id":3673}]}
-
-    //{"displayName": "Salt Lake City", "id":13560}
-    //{"displayName":"SF Bay Area", "id":26330}
-
-    // let todoIds = JSON.stringify(todos.map(t => t.id));
-
-    // useEffect(() => {
-    //     setSelectedTodoId(todos[0] && todos[0].id)
-    // }, [todoIds])
+    let control = Control.useContainer()
 
     return (
         <Store>
+            <div style={{position: "sticky",top: "0", borderBottom: "1px solid black", zIndex: "1"}}>
+                <Player  id={control.id} play={control.play}/> </div>
+            <Map></Map>
+            {/*<TestComp/>*/}
+
             <div>
-                {/*todo: region selection works, have menu of cities in ohio that doesn't*/}
-                {/*<MapArea states={states}/>*/}
                 <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
                     <div>
                         {/*won't respond to flex w/out div*/}
                         {/*width comes from 'const drawerWidth' */}
                         <Sidebar
-                            playlists={playlists}
+                            // playlists={playlists}
                             // fetchTodosRequest={fetchTodosRequest}
                             filter={filter}
                             onFilterChange={setFilter}
@@ -351,6 +352,7 @@ function App(props) {
                 </div>
             </div>
         </Store>
+
     );
 }
 
@@ -359,3 +361,6 @@ App.propTypes = {
 };
 
 export default withStyles(styles)(App);
+// export {
+//     useControl
+// }

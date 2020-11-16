@@ -1,5 +1,17 @@
+import {useDB, useNormalizedApi} from "../db";
 
+let normalizedApi = useNormalizedApi()
+let db = useDB();
 
+let pqry = db.getStoredQuery('ALL_PLAYLISTS');
+let playlists = db.executeQuery(pqry);
+let pqry2 = db.getStoredQuery('ALL_ARTISTS');
+let artists = db.executeQuery(pqry2);
+let pqry3 = db.getStoredQuery('ALL_GENRES');
+let genres = db.executeQuery(pqry3);
+let pqry4 = db.getStoredQuery('ALL_EVENTS');
+
+//------------------------------------------------------
 
 // var user_f = [ {id:1, context: "myLibArtists",artists:[1,3]}];
 // var user_j = [ {id: 2, context: "myLibArtists",artists:[1,2,3]}];

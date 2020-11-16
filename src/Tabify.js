@@ -13,6 +13,9 @@ import alasqlAPI from "./alasql";
 import ChipsArray from "./ChipsArray";
 import Search from './Search'
 import util from "./util/util";
+import tables from "./alasql/tables";
+import _ from "lodash";
+
 
 // const styles = {
 // 	fontFamily: "sans-serif",
@@ -23,6 +26,7 @@ import util from "./util/util";
 //whatever fuck it for now
 var color = "#000000";
 var materialColor = "#3f51b5";
+
 const theme = {
 	tabs: {
 		color: color,
@@ -65,6 +69,7 @@ export default function Tabify() {
 	//todo: move this somewhere else higher up
 	const [state, dispatch] = useContext(Context);
 	useEffect(() => {
+
 		//testing:
 		alasqlAPI.followedArtists(user)
 			.then(r =>{
@@ -84,6 +89,18 @@ export default function Tabify() {
 			},err =>{
 				console.log(err);
 			})
+
+		//note: decided I would do this on demand for clicks around the app
+		//(so currently not in use)
+		//but for events - I would do the lookup on the server ahead of time
+		// alasqlAPI.getArtistTopTracks('2dI9IuajQnLR5dLxHjTTqU')
+		// 	.then(r =>{
+		// 		console.log("$getArtistTopTracks",r);
+		// 	},err =>{
+		// 		console.log(err);
+		// 	})
+
+
 		// alasqlAPI.fetchPlaylists()
 		// 	.then(r =>{
 		// 		dispatch({type: 'init', payload: r,user:user,context:'playlists'});
@@ -139,29 +156,72 @@ export default function Tabify() {
 		//seems like it should be pretty simple?
 		//for now just take one - otherwise do a delta? :(
 		console.log("selected",rows.length);
-		dispatch({type: 'select', payload:rows[0],user:user,context:'artists'});
+		dispatch({type: 'select', payload:rows[0],user:user,context:'playlists'});
 	}
 
-	var prepPlay = function(playob){
-
-		//todo:
-		//for every artist in the playlist, get the family freq for them
-		//then use playob.artistFreq to weight the result to produce some family
-		//chips that best represent the playlist
-
-		//todo: also do something for unique genres?
-		//like top 5 or most common ones? idk
-
-		//var f = util.familyFreq(playob);
-		//console.log("$f",f);
-
-		//testing:
-		return 	<ChipsArray chipData={playob.artists[0].genres}/>
+	function getRandomInt(max) {
+		max = 99999999;
+		return Math.floor(Math.random() * Math.floor(max));
 	}
+	var prepPlay = function(playob,mode){
 
 
 
+		var chips = [];
 
+		switch(mode) {
+			case 'families':
+				//for every artist in the playlist, get the family freq on them w/ familyFreq.
+				//use makeRank to produce an array of families that represents the weight of artists' genres' families over the playlist
+				//now take the chips that best represent the playlist
+
+				//todo: repeated code (Pie.js also needs this rank to determine node content)
+				//@ else if(a.artists)
+
+				//take top 5
+				var rank = util.makeRank(playob.artists,playob.artistFreq,"familyAgg");
+
+
+				for(var x =0;x < rank.length ; x++){
+					chips.push({id:getRandomInt(),name:Object.keys(rank[x])[0]})
+				}
+				break;
+			case 'artists':
+				//separate chips for top artists
+
+				var artists = [];
+				var artistsSorted = [];
+				Object.keys(playob.artistFreq).forEach(k =>{
+					//todo: should be faster lookup on actual db
+					tables["artists"].forEach(a =>{
+						k === a.id ?  artists.push({id:a.id,name:a.name,freq:playob.artistFreq[k]}):{};
+					})
+				})
+				artistsSorted = _.sortBy(artists, function (r) {return r.freq}).reverse()
+
+				//take top 3
+				//console.log("$artists",artistsSorted);
+				for(var x =0;x < 3 && x < artistsSorted.length  ; x++){
+					chips.push({id:getRandomInt(),name:artistsSorted[x].name})
+				}
+				break;
+			case'genres':
+				//todo: chips for top 5 unique genres
+				//not sure exactly how to represent this...really I want to like
+				//click and expand on th family names? top genre's doesn't really make any sense
+				//displayed if disconnected from families?
+
+				var rank = util.makeRank2(playob.artists,playob.artistFreq);
+				for(var x =0;x < 3 && x < rank.length  ; x++){
+					chips.push({id:getRandomInt(),name:Object.keys(rank[x])[0]})
+				}
+				break;
+			default:
+			// code block
+		}
+
+		return 	<ChipsArray chipData={chips}/>
+	}
 
 	return(
 		// style={styles}
@@ -219,10 +279,26 @@ export default function Tabify() {
 									},
 									{ title: 'Name', field: 'name', filtering:false},
 									{
-										field: 'genres',
-										title: 'genres',
+										field: 'families',
+										title: 'families',
 										//ender: rowData => getChips(rowData.genres),
-										render: rowData => prepPlay(rowData),
+										render: rowData => prepPlay(rowData,'families'),
+										filtering:false,
+										width:"20em"
+									},
+									{
+										field: 'artists',
+										title: 'Top Artists',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => prepPlay(rowData,'artists'),
+										filtering:false,
+										width:"20em"
+									},
+									{
+										field: 'genres',
+										title: 'Top Genres',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => prepPlay(rowData,'genres'),
 										filtering:false,
 										width:"20em"
 									},

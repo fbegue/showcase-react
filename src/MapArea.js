@@ -65,6 +65,8 @@ const styles = theme => ({
 const tabs = ['active', 'completed', 'all']
 //const tabs = ['artists']
 
+
+
 function MapArea(props) {
   let normalizedApi = useNormalizedApi()
   let db = useDB();
