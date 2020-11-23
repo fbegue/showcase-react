@@ -119,12 +119,17 @@ var getMyFollowedArtists =  function(){
 
 //event methods
 
-var fetchEvents =  function(param){
+var fetchEvents =  function(req){
     return new Promise(function(done, fail) {
 
-        param = {
-            metro:{displayName:"Columbus", id:9480},
-            dateFilter:{start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"}};
+        //testing: dateFilter
+        var t = {start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"};
+        req.dateFilter = t;
+
+        //example req
+        // req = {
+        //     metro:{displayName:"Columbus", id:9480},
+        //     dateFilter:t};
 
         //note: cors bullshit
         //ended up going back to using the extension to allow requests to be made w/out cors
@@ -137,7 +142,7 @@ var fetchEvents =  function(param){
             headers: {
                 'Content-Type': 'application/json'
             },
-             body: JSON.stringify(param)
+             body: JSON.stringify(req)
         }).then(res => res.json())
             .then(function(res){
             console.log("retrieved: ",res);

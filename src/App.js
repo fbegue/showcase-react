@@ -184,9 +184,13 @@ setTimeout(e =>{  initMap();},2000);
 
 function TestComp(props) {
     let control = Control.useContainer();
-     const [state, dispatch] = useContext(Context);
+     //const [state, dispatch] = useContext(Context);
     useEffect(() => {
         console.log("componentDidMount");
+
+
+
+
         //todo: endless loop
         //confusing b/c I dont' get why this doesn't happen in Tabify then.
         //like I would get 'you updating the state of a component that relies, so loop'
@@ -196,22 +200,27 @@ function TestComp(props) {
         //not to sure what that means - when I removed 'store' it was the same error but different place
         //so maybe something to do with provider lookups?
 
-        alasqlAPI.fetchEvents()
-            .then(r =>{
-                dispatch({type: 'init', payload: r,context:'events'});
-            },err =>{
-                console.log(err);
-            })
+        //update: now this is going to run one time only at application mount
+        //except we're going to trigger it by setting an initial metro_id value
+        //control.selectMetro(9480)
+
+
+        // alasqlAPI.fetchEvents()
+        //     .then(r =>{
+        //         dispatch({type: 'init', payload: r,context:'events'});
+        //     },err =>{
+        //         console.log(err);
+        //     })
         return function cleanup() {
             console.log("componentWillUnmount");
         };
-    });
+    },[]);
 
     return (
         <div>
-            {/*<button onClick={() => control.selectMetro(1)}>*/}
-            {/*    Click me: {control.metro}*/}
-            {/*</button>*/}
+            <button onClick={() => control.selectMetro(1)}>
+                Click me: {control.metro}
+            </button>
         </div>
     )
 }
@@ -228,7 +237,7 @@ function App(props) {
         <Store>
             <div style={{position: "sticky",top: "0", borderBottom: "1px solid black", zIndex: "1"}}>
                 <Player  id={control.id} play={control.play}/> </div>
-            <Map></Map>
+
             {/*<TestComp/>*/}
 
             <div>

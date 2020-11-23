@@ -54,8 +54,8 @@ const alasqlAPI = {
 
 		return artists
 	},
-	fetchEvents: async (user) => {
-		let events = await api.fetchEvents(user).catch(e =>console.log(e));
+	fetchEvents: async (req) => {
+		let events = await api.fetchEvents(req).catch(e =>console.log(e));
 		console.log("events", events);
 		return events
 	},

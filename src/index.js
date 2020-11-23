@@ -17,7 +17,7 @@ function useControl(initialState = 0) {
     //seeeems fine just to just export them here?
     //maybe he was demo'ing side-effects?
     // let [metro, selectMetro] = useState(null);
-    let [metro, _selectMetro] = useState(null);
+    let [metro, _selectMetro] = useState(9480);
 
     let togglePlay = () => _togglePlay(!play)
     let setId = (id) => _setId(id);

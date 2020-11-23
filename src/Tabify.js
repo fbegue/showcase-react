@@ -15,6 +15,7 @@ import Search from './Search'
 import util from "./util/util";
 import tables from "./alasql/tables";
 import _ from "lodash";
+import {Control} from "./index";
 
 
 // const styles = {
@@ -68,6 +69,7 @@ export default function Tabify() {
 
 	//todo: move this somewhere else higher up
 	const [state, dispatch] = useContext(Context);
+
 	useEffect(() => {
 
 		//testing:
@@ -77,12 +79,7 @@ export default function Tabify() {
 			},err =>{
 				console.log(err);
 			})
-		alasqlAPI.fetchEvents()
-			.then(r =>{
-				dispatch({type: 'init', payload: r,context:'events'});
-			},err =>{
-				console.log(err);
-			})
+
 		alasqlAPI.fetchPlaylistsResolved()
 			.then(r =>{
 				dispatch({type: 'init', payload: r,user:user,context:'playlists'});
@@ -107,7 +104,26 @@ export default function Tabify() {
 		// 	},err =>{
 		// 		console.log(err);
 		// 	})
-	}, []);
+	},[]);
+
+
+	//-----------------------------
+	let control = Control.useContainer();
+
+	useEffect(() => {
+		console.log("useEffect fetchEvents on control.metro dependency update",control.metro);
+		//todo: put date picker
+
+		alasqlAPI.fetchEvents({metro:{id:control.metro}})
+			.then(r =>{
+				dispatch({type: 'init', payload: r,context:'events'});
+			},err =>{
+				console.log(err);
+			})
+	},[control.metro])
+
+	//-----------------------------
+
 
 	//todo:
 	var playlists = [];

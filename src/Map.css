@@ -1,3 +1,10 @@
 ellipse:hover{
     cursor:pointer;
 }
+
+.selected{
+    background-color:#80808026
+}
+.unselected{
+    background-color:initial;
+}

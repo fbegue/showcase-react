@@ -27,7 +27,8 @@ import {useDB, useNormalizedApi} from './db'
 
 //todo:
 import alasqlAPI from "./alasql/index";
-import {Context} from "./alasql/Store";
+import Store, {Context} from "./alasql/Store";
+import Map from "./Map";
 //import alasql from "alasql";
 
 
@@ -244,19 +245,25 @@ function Sidebar(props) {
   return (
       <div className={classes.drawer}>
         <div className={classes.toolbar}>
-          <Tabs
-              value={tabs.indexOf(props.filter)}
-              onChange={(e, i) => props.onFilterChange(tabs[i])}
-              indicatorColor="primary"
-              textColor="primary"
-              variant="fullWidth"
-              className={classes.tabs}
-              classes={{flexContainer: classes.tabsFlexContainer}}
-          >
-            {/*<Tab label="Active" classes={{ root: classes.tabRoot }} />*/}
-            {/*<Tab label="Completed" classes={{ root: classes.tabRoot }} />*/}
-            <Tab label="All" classes={{ root: classes.tabRoot }}/>
-          </Tabs>
+          <Map></Map>
+
+          {/*note: old testin stuff */}
+
+          {/*<Tabs*/}
+          {/*    value={tabs.indexOf(props.filter)}*/}
+          {/*    onChange={(e, i) => props.onFilterChange(tabs[i])}*/}
+          {/*    indicatorColor="primary"*/}
+          {/*    textColor="primary"*/}
+          {/*    variant="fullWidth"*/}
+          {/*    className={classes.tabs}*/}
+          {/*    classes={{flexContainer: classes.tabsFlexContainer}}*/}
+          {/*>*/}
+          {/*  /!*<Tab label="Active" classes={{ root: classes.tabRoot }} />*!/*/}
+          {/*  /!*<Tab label="Completed" classes={{ root: classes.tabRoot }} />*!/*/}
+          {/*  <Tab label="All" classes={{ root: classes.tabRoot }}/>*/}
+          {/*</Tabs>*/}
+
+
           {/*<Button onClick={getem} color="primary">*/}
           {/*  GETEM*/}
           {/*</Button>*/}
@@ -283,16 +290,18 @@ function Sidebar(props) {
           {/*  showStore*/}
           {/*</Button>*/}
 
-          <div style={{marginBottom:"1em"}} className={classes.addTodoButton}>
-            <IconButton onClick={openAddTodoDialog} color="primary" component="span">
-              <AddIcon />
-            </IconButton>
-            <AddTodoDialog
-                open={addTodoDialogOpen}
-                onCancel={closeAddTodoDialog}
-                onSuccess={closeAddTodoDialog}
-            />
-          </div>
+          {/*<div style={{marginBottom:"1em"}} className={classes.addTodoButton}>*/}
+          {/*  <IconButton onClick={openAddTodoDialog} color="primary" component="span">*/}
+          {/*    <AddIcon />*/}
+          {/*  </IconButton>*/}
+          {/*  <AddTodoDialog*/}
+          {/*      open={addTodoDialogOpen}*/}
+          {/*      onCancel={closeAddTodoDialog}*/}
+          {/*      onSuccess={closeAddTodoDialog}*/}
+          {/*  />*/}
+          {/*</div>*/}
+
+
         </div>
         <Divider />
         <List>

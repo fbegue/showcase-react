@@ -14,12 +14,12 @@ import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
 import {Context} from "./alasql/Store";
 import ChipsArray from "./ChipsArray";
-
+import { makeStyles } from '@material-ui/core/styles';
 
 import Player, {play,player} from './Player'
 import {Control} from "./index";
 import MusicNoteIcon from '@material-ui/icons/MusicNote';
-
+import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
 
 function ChipsArray_dep(props) {
 	//const classes = useStyles();
@@ -58,11 +58,14 @@ function ChipsArray_dep(props) {
 	);
 }
 
-function EventsList(){
+const useStyles = makeStyles({
+	root: {
 
-	//testing: probably shouldn't put this HERE exactly...
+	},
+});
 
-
+function EventsList() {
+	const classesPlay = useStyles();
 
 	// this method sets the current state of a menu item i.e whether
 	// it is in expanded or collapsed or a collapsed state
@@ -97,6 +100,15 @@ function EventsList(){
 		return false;
 	};
 
+	function showPlay(sub){
+		return <div>
+			<span className={'play-events'}> {(sub.artist.spotifyTopFive ? <PlayCircleOutlineIcon fontSize={'small'} onClick={() => handlePlay(sub.artist)}> </PlayCircleOutlineIcon>:<div></div>)}</span>
+			<span>{sub.displayName}</span>
+		</div>
+        // return <span>{sub.displayName}</span>
+		// return (sub.artist.spotifyTopFive ? <PlayCircleOutlineIcon onClick={() => handlePlay(sub.artist)}> </PlayCircleOutlineIcon>:{})
+	};
+
 	// if the menu item doesn't have any child, this method simply returns a clickable menu
 	// item that redirects to any location and if there is no child this method uses recursion to go until
 	// the last level of children and then returns the item by the first condition.
@@ -123,19 +135,25 @@ function EventsList(){
 						<ListItemText
 							style={{marginLeft:"2em"}}
 							inset
-							primary={ subOption.displayName}
+							primary={ showPlay(subOption)}
 							secondary={
 								<React.Fragment>
-									<Typography
-										component="span"
-										variant="body2"
-										// className={classes.inline}
-										color="textPrimary"
-									>
-										{subOption.artist.spotifyTopFive && <button onClick={() => handlePlay(subOption.artist)} >play</button>}
-										<ChipsArray chipData={subOption.artist.genres}>
-										</ChipsArray>
-									</Typography>
+									<div style={{display:"flex"}}>
+										<div>
+										</div>
+										<div>
+											<Typography
+												component="span"
+												variant="body2"
+												// className={classes.inline}
+												color="textPrimary"
+											>
+												<ChipsArray chipData={subOption.artist.genres}>
+												</ChipsArray>
+											</Typography>
+										</div>
+									</div>
+
 									{/*{subOption.venue.displayName} -*/}
 									{/*{subOption.location.city.toString().replace(", US","")}*/}
 								</React.Fragment>

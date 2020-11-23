@@ -21,3 +21,11 @@
   margin: .1em;
 }
 
+.play-events{
+  top: 6px;
+  position: relative;
+  padding-right:.5em;
+}
+.play-events:hover{
+cursor:pointer;
+}

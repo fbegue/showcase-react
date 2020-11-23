@@ -314,7 +314,10 @@ const Reducer = (state, action) => {
 					// 	p.childrenKey = "genres"
 					// })
 				});
-				tables[action.context] = tables[action.context].concat(action.payload);
+
+				//testing: just going to clean this out for now
+				// tables[action.context] = tables[action.context].concat(action.payload);
+				tables[action.context] = action.payload
 				//todo: preserving a copy of events
 				eventsCopy = JSON.parse(JSON.stringify(tables['events']));
 				return {
