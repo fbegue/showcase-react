@@ -2,20 +2,12 @@ import * as alasql from 'alasql';
 import _ from "lodash";
 import tables from './tables'
 import alasqlAPI from "./index";
+import { GLOBAL_STATE_VAR } from './withApolloProvider';
 
-//the user has made these artist selections in the tabs
-//noder will provide us a union on these to sets
+//------------------------------------------------------
+//utilities
 
-
-// var user = {
-// 	// artists: [{id:1},{id:3}],
-// 	// //artists from albums
-// 	// albums:  [{id:1},{id:2}],
-// 	artists: [],
-// 	//artists from albums
-// 	albums:  [],
-// 	node:[]
-// }
+function jstr(a){return JSON.parse(JSON.stringify(a))}
 
 var art_gen = [{id:1,genres:[{id:1,name:'pop'}]},{id:2,genres:[{id:3,name:'rock'}]},{id:3,genres:[{id:2,name:'rap'}]}];
 
@@ -46,100 +38,265 @@ var eventsCollection = [{artist_id:1,name:"popArtist",genres:[{id:1,name:'pop'}]
 
 //testing: 'nodes' is the data object for the state object 'node'
 //which itself just returns what noder calculates with 'nodes'
-var nodes = [];
-nodes.push({id:1,name:"agg",data:[]});
 
-//tells node spawns what id they should have
+//todo: these don't mean much rn
+// tells node spawns what id they should have
+//when we do users, we're going to have to come up with some other kind of system..
+
+//-----------------------------------------------------
+//node init
 var idmap = {
-	artists:2,
+	agg:0,
+	saved:1,
+	top:2,
 	artistSearch:3,
-	playlists:4
-	//when we do users, we're going to have to come up with some other kind of system..
+	playlists:4,
 }
 
-function noder(action){
-	console.log("noder",action);
+let nodes = [];
+var sources = ['top','saved','agg','playlists']
+var sources_subset = ['top','saved','playlists']
 
-	//set tableContext
+sources.forEach(s =>{
+	nodes.push({id:idmap[s],name:s,data:[]})
+})
+
+//testing: who are guests?
+var guest = {id:123028477,name:"Dan"};
+//testing:'main' user
+var mainUser = {id:'dacandyman01',name:"Franky"};
+//testing:
+sources_subset.forEach(s =>{
+	//todo: add new id
+	nodes.push({id:idmap[s] + 99,name:guest.id + "_" + s,data:[]})
+})
+
+//-----------------------------------------------------
+
+
+function noder(action){
+	console.log("noder started",action);
+	console.log("current nodes",jstr(nodes.length));
+	console.log("current tables",jstr(tables));
+	//set tableContext based on action.context
 	//if its a user = selection, the data is already set
 	//otherwise we need to filter on it to prepare it for aggregation update
 
-	var tableContext = {};
-	if(action.context === 'artistSearch'){ //or many others...
-		tableContext = tables["users"][action.user][action.context];
+
+	//todo: this guy doesn't have multiple 'users' to keep track of
+	//not sure why it would belong here exactly..
+
+
+	//have to look in ALL the user tables now for selections
+	//we'll set the tableContext to all applicable objects from all users?
+
+	//note: used to make new nodes based on the context being passed
+	//now I'm looking at combining multiple of what I considered to be 'contexts' together
+	//for now we're getting these from a type I'm assigining straight to the object:
+	// playlists
+	// artists > saved | term | term
+
+	//still I had this vision of putting all this contextual identity information in relational tables,
+	//making sure I was passing around only standarized artist objects. hhmmmm
+	//technically this SHOULD be allowed b/c I will also want to have more than 1 instance of an artist
+	//if it gets added from multiple locations, right?
+
+	//==================================================================
+	//note: UPDATE redesign this structure so that primary user tables are handled
+	//with a 'select from all applicable tables' but secondary user stuff has its own nodes
+
+	//==================================================================
+	//note: UPDATE yeah wtf am I doing here again? this looks crazy wasteful
+
+	//todo: infer proper types
+	//we use a mix of 'source' and the spotify provided object 'type' rn
+
+	//every one of these node updates has to go over multiple users
+	//except selection based ones
+
+
+	if(action.context === 'artistSearch'){
+		//todo: put this on hold for now (broken everywhere else)
+		console.warn("skipped artistSearch");
+		//tableContext = tables["users"][action.user.id][action.context];
 	}
 	else{
-		//todo: set these to selects from tables instead of these filters?
-		tableContext = tables["users"][action.user][action.context].filter(r =>{
-			return r.tableData && r.tableData.checked;
-		})
-	}
+		Object.keys(tables["users"]).forEach(uid =>{
+			//see: tables for ideas
+			if(uid === 'selection'){//handled elsewhere?
+				//we get away with not taking care of this here b/c we take care of it above, right?
+				// not conflating the point of it...
+			}else{
+				var nodeName = {};
+				if(uid === mainUser.id){
+					nodeName['playlists'] = 'playlists'
+					nodeName['top'] = 'top'
+					nodeName['saved'] = 'saved'
+				}else{
+					nodeName['playlists'] =  guest.id + "_" +'playlists'
+					nodeName['top'] =  guest.id + "_" +'top'
+					nodeName['saved'] =  guest.id + "_" +'saved'
+				}
+				if(action.context === 'playlists') {
+					var n = _.find(nodes, {name: nodeName['playlists']})
+					console.log(uid);
+					console.log(action.context);
+					console.log(tables["users"][uid][action.context]);
+					n.data = tables["users"][uid][action.context].filter(r => {
+						return r.tableData && r.tableData.checked;
+					})
+				}else{
+					//set data for each node
+					// var sources = ['top','saved','agg','playlists','guest']
+					var special = ['top','saved']
 
-	console.log("tableContext",tableContext);
+					special.forEach(s =>{
+						var n = _.find(nodes, {name: nodeName[s]});
+						console.log("current node value",jstr(n.data));
 
-	//if no nodes, add the new one.
-	//else look for it, and if we can't find it push a new one;
+						//testing:
+						//look at the current data
+						//figure out what the new data looks like
+						//make the arrays equal by adding or removing elements
+						//as items get checked/unchecked, the array size will decrease and increase
+                        //if update > current, we added an item. so just take the difference and add
+						//if update < current, we subtracted
 
-	var n = {};
-	if(!(nodes.length)){
-		console.log("new node",action.context);
-		nodes.push({id:idmap[action.context],name:action.context,data:tableContext})
-	}
-	else{
-		n = _.findIndex(nodes,{name:action.context})
-		if(n===-1){
-			console.log("new node",action.context);
-			nodes.push({id:idmap[action.context],name:action.context,data:tableContext})
-		}else{
-			console.log("node update");
-			//todo: destroying this reference b/c not handling actual selection
-			nodes[n].data = tableContext;
-		}
-	}
+						function arr_diff (a1, a2) {
 
-	//------------------------------------------------------------------
-	//calculate agg based on available nodes
+							var a = [], diff = [];
 
-	//just union all the nodes' data right?
+							for (var i = 0; i < a1.length; i++) {
+								a[a1[i]] = true;
+							}
+
+							for (var i = 0; i < a2.length; i++) {
+								if (a[a2[i]]) {
+									delete a[a2[i]];
+								} else {
+									a[a2[i]] = true;
+								}
+							}
+
+							for (var k in a) {
+								diff.push(k);
+							}
+
+							return diff;
+						}
+
+						function filterInPlace(array,update) {
+							//debugger;
+							//difference by means subtract, not just...whatever I'm looking for
+							//having trouble remembering array ops this morning
+							//var dif = [];
+							if(array.length < update.length){
+								var dif = _.differenceBy(update, array,'id');
+								console.log("$d",dif);
+								dif.forEach(a =>{array.push(a)})
+							}
+						}
+
+						function fn(el,array2){
+							array2.forEach(a =>{
+								if(a.id === el.id){return false}
+							})
+						}
+
+
+						var update = tables["users"][uid][action.context].filter(r => {
+							var t = false;
+							//todo: (1) don't have source on top stuff yet
+							//should just be teeing off that here completely
+							if(s === 'top'){t = r['term']}
+							else{t = r['source'] === s}
+							return r.tableData && r.tableData.checked && t
+						})
+
+
+
+						//testing: think I stopped destroying refs, but no luck :(
+						console.log("$update",jstr(update));
+						filterInPlace(n.data,update)
+						console.log("next node value",jstr(n.data));
+
+						//testing: apollo reactive
+						//console.log("$action",action.state);
+						//var test =_.find(action.state.node, {name:"saved"});
+						//var i = _.findIndex(action.state.node, {name:"saved"});
+						//console.log(i);
+
+						// var copy = jstr(action.state.node)
+						// var test =_.find(copy, {name:"saved"});
+						// test.data = n.data;
+						// GLOBAL_STATE_VAR({...action.state,node:copy})
+
+
+						n.data = tables["users"][uid][action.context].filter(r => {
+							var t = false;
+							//todo: (1) don't have source on top stuff yet
+							//should just be teeing off that here completely
+							if(s === 'top'){t = r['term']}
+							else{t = r['source'] === s}
+							return r.tableData && r.tableData.checked && t
+						})
+					})
+				}
+			}//todo: selection
+		})//iterate over users
+	}//todo: selection
+
+
+//------------------------------------------------------------------
+//calculate agg based on available nodes
+
+//just union all the nodes' data right?
+//this works for artists but not playlists
+//setup agg nodes right here
+
 	var u = [];
+//&& n.name !== 'playlists'
 	nodes.forEach(n =>{
-		n.name !== 'agg' ? u = u.concat(n.data):{};
+		n.name !== 'agg'  ? u = u.concat(n.data):{};
 	})
-	n =_.find(nodes, {name:"agg"});
+
+	var n =_.find(nodes, {name:"agg"});
 	n.data = u;
 
 
-	//------------------------------------------------------------------
-	//todo: abandoning ala for now until I get a straighter data model/switch state mgmt method
+//------------------------------------------------------------------
+//todo: abandoning ala for now until I get a straighter data model/switch state mgmt method
 
-	//note: not sure what the deal with * is here but it ends up with empty {}s - idk
-	// var r1 = alasql('SELECT * from ? a union select * from ? b',[art,sel]);
-	//todo: skipping using union here for now?
-	//need good way of generating these selection with nodes.length -1 unions..
-	//var r1 = alasql('SELECT id, genres from ? a union select id, genres from ? b',[art,sel]);
-	//console.log("r1",r1);
+//note: not sure what the deal with * is here but it ends up with empty {}s - idk
+// var r1 = alasql('SELECT * from ? a union select * from ? b',[art,sel]);
+//todo: skipping using union here for now?
+//need good way of generating these selection with nodes.length -1 unions..
+//var r1 = alasql('SELECT id, genres from ? a union select id, genres from ? b',[art,sel]);
+//console.log("r1",r1);
 
-	//todo: what is this all about anyways (art_gen)
-	//the whole idea of preserving the artist's genre info outside of the data objects I'm passing around?
-	//testing: for now literally just going to ignore the sql stuff I was setting up
+//todo: what is this all about anyways (art_gen)
+//the whole idea of preserving the artist's genre info outside of the data objects I'm passing around?
+//testing: for now literally just going to ignore the sql stuff I was setting up
 
-	// //------------------------------------------
-	// //todo: not sure what I'm doing wrong here
-	// //instead split into two steps
-	// // r = alasql('SELECT id from ? a union select id from ? b join ? art_gen on art_gen.id = b.id',[art,alb, art_gen]);
-	// var r1 = alasql('SELECT id from ? a union select id from ? b',[art,sel]);
-	// console.log("r1",r1);
-	//
-	// //todo: thought outer join would make empty genres rows
-	// //- something else I'm thinking of or no?
-	// var r2 = alasql('SELECT * from ? a join ? art_gen on art_gen.id = a.id',[r1,art_gen]);
-	// r2.forEach(r =>{if(!(r.genres)){r.genres = []}})
-	// //------------------------------------------
+// //------------------------------------------
+// //todo: not sure what I'm doing wrong here
+// //instead split into two steps
+// // r = alasql('SELECT id from ? a union select id from ? b join ? art_gen on art_gen.id = b.id',[art,alb, art_gen]);
+// var r1 = alasql('SELECT id from ? a union select id from ? b',[art,sel]);
+// console.log("r1",r1);
+//
+// //todo: thought outer join would make empty genres rows
+// //- something else I'm thinking of or no?
+// var r2 = alasql('SELECT * from ? a join ? art_gen on art_gen.id = a.id',[r1,art_gen]);
+// r2.forEach(r =>{if(!(r.genres)){r.genres = []}})
+// //------------------------------------------
 
 
-	console.log(action.type,nodes);
+	//make sure agg is always on top
+	nodes = nodes.sort((n1,n2) => {return n1.id - n2.id})
+	console.log(action.type + " node recalc:",nodes);
 	return nodes;
-	//return r2;
+//return r2;
 }
 
 //todo(1): resetting events list every time to this copy we set on init
@@ -153,20 +310,23 @@ var eventsCopy = {};
 function getJoin(action){
 	var r = {};
 	switch (action.type) {
+		//todo: I believe these were meant to maintain the super collections
+		//and take advantage of the whole relational bit, but they never panned out
+		//seems like I'm doing this work in "select"?
 		case 'artists':
-			console.log([tables[action.user][action.type]]);
-			r = alasql('SELECT * from ? t join ? art_gen on art_gen.id = t.id', [tables[action.user][action.type], art_gen]);
+			console.log([tables[action.user.id][action.type]]);
+			r = alasql('SELECT * from ? t join ? art_gen on art_gen.id = t.id', [tables[action.user.id][action.type], art_gen]);
 			console.log(action.type,r);
 			return r;
 		case 'albums':
-			r = alasql('SELECT * from ? t join ? art_gen on art_gen.id = t.id', [tables[action.user][action.type], art_gen]);
+			r = alasql('SELECT * from ? t join ? art_gen on art_gen.id = t.id', [tables[action.user.id][action.type], art_gen]);
 			console.log(action.type,r);
 			return r;
 		case 'node':
 			return noder(action)
 		case 'events':
 			var n = noder(action)
-			console.log("$noder",n);
+			//console.log("$noder",n);
 
 			//todo(1):
 			var jstr = function(ob){return JSON.parse(JSON.stringify(ob))};
@@ -222,58 +382,58 @@ function getJoin(action){
 
 			//---------------------------------------------
 
-			function byGenres(){
-				var genres = [];
-				n.data.forEach(r =>{
-					if(r.genres){
-						//process artist for genres
-						r.genres.forEach(g =>{
+		function byGenres(){
+			var genres = [];
+			n.data.forEach(r =>{
+				if(r.genres){
+					//process artist for genres
+					r.genres.forEach(g =>{
+						genres.push(g)
+					})
+				}else if(r.artists){
+					//process playlist's artists for genres
+					r.artists.forEach(a =>{
+						a.genres && a.genres.forEach(g =>{
 							genres.push(g)
 						})
-					}else if(r.artists){
-						//process playlist's artists for genres
-						r.artists.forEach(a =>{
-							a.genres && a.genres.forEach(g =>{
-								genres.push(g)
-							})
-						})
-					}
-				});
+					})
+				}
+			});
 
-				var jstr = function(ob){
-					return JSON.parse(JSON.stringify(ob))
-				};
-				console.log("genres selected",genres);
+			var jstr = function(ob){
+				return JSON.parse(JSON.stringify(ob))
+			};
+			console.log("genres selected",genres);
 
 
-				//look at every genre of every artist of every performance of every event
-				//if any of the genres of any artist match our selected list, keep it
-				events = events.filter(e =>{
-					// e.performance.forEach(p =>{
-					var some = false;
-					//look at
-					for(var x = 0; x < e.performance.length;x++){
-						var p =  e.performance[x]
-						// p.id === 74713137 ? console.log("$",p):{};
-						some = p.artist.genres.some(g =>{
-							//console.log(g.id);
-							for(var y = 0; y < genres.length;y++){
-								if(g.id === genres[y].id){
-									return true;
-								}
+			//look at every genre of every artist of every performance of every event
+			//if any of the genres of any artist match our selected list, keep it
+			events = events.filter(e =>{
+				// e.performance.forEach(p =>{
+				var some = false;
+				//look at
+				for(var x = 0; x < e.performance.length;x++){
+					var p =  e.performance[x]
+					// p.id === 74713137 ? console.log("$",p):{};
+					some = p.artist.genres.some(g =>{
+						//console.log(g.id);
+						for(var y = 0; y < genres.length;y++){
+							if(g.id === genres[y].id){
+								return true;
 							}
-							return false
-						})
-						// p.id === 74713137 ? console.log("#$",some):{};
-
-						//if some is true, than stop looking thru the other performances
-						if(some){
-							break;
 						}
+						return false
+					})
+					// p.id === 74713137 ? console.log("#$",some):{};
+
+					//if some is true, than stop looking thru the other performances
+					if(some){
+						break;
 					}
-					return some;
-				})
-			}
+				}
+				return some;
+			})
+		}
 			//byGenres();
 
 
@@ -295,6 +455,12 @@ var stateOb = {
 	myArtists:"user selections of artists",
 	node: "this is watching all of the user selections and making inferences based on that"
 }
+
+//note: reducer rewrite
+//starting to feel like we just place all kinds of artists into USER_artists and just run filters
+//in order to produce certain states which are looking at pieces of it
+//todo: change name from init (obviously)
+
 const Reducer = (state, action) => {
 	switch (action.type) {
 		case 'init':
@@ -335,14 +501,20 @@ const Reducer = (state, action) => {
 				//todo: set up id only relations for user
 				//just the whole thing for now
 				//var ids = _.map(artists, function(a){return a.id;});
-				tables["users"][action.user][action.context] = action.payload;
 
+				//testing: maybe this should just be additive
+				//tables["users"][action.user][action.context] = action.payload;
+				//console.log("$context",tables["users"][action.user][action.context]);
+				console.log("$",tables);
+				console.log("$",action.user.id);
+				console.log("$",tables["users"][action.user.id]);
+				tables["users"][action.user.id][action.context] = tables["users"][action.user.id][action.context].concat(action.payload)
 
-				var key = action.user + '_' + action.context;
+				var key = action.user.id + '_' + action.context;
 				console.log("stated",key);
 				return {
 					...state,
-					[key]: tables["users"][action.user][action.context]
+					[key]: tables["users"][action.user.id][action.context]
 					//node:  getJoin({type:"node"}),
 				};
 			}
@@ -374,14 +546,14 @@ const Reducer = (state, action) => {
 				//todo: set up id only relations for user
 				//just the whole thing for now
 				//var ids = _.map(artists, function(a){return a.id;});
-				tables["users"][action.user][action.context] = action.payload;
+				tables["users"][action.user.id][action.context] = action.payload;
 
 
-				var key = action.user + '_' + action.context;
+				var key = action.user.id + '_' + action.context;
 				console.log("stated",key);
 				return {
 					...state,
-					[key]: tables["users"][action.user][action.context]
+					[key]: tables["users"][action.user.id][action.context]
 					//node:  getJoin({type:"node"}),
 				};
 			}
@@ -389,7 +561,7 @@ const Reducer = (state, action) => {
 			else{
 				return {
 					...state,
-					albums: tables["users"][action.user][action.context]
+					albums: tables["users"][action.user.id][action.context]
 					//node:  getJoin({type:"node"}),
 				};
 			}
@@ -435,6 +607,7 @@ const Reducer = (state, action) => {
 				return {
 					...state,
 					//don't need to update the data itself b/c we handle that in table?
+					//testing
 					events:  getJoin(Object.assign({},action,{type:"events"})),
 					node:  getJoin(Object.assign({},action,{type:"node"})),
 				};
@@ -455,10 +628,10 @@ const Reducer = (state, action) => {
 
 				//handle the selection mutation on collection
 				if(action.context === 'artistSearchSelect'){
-					tables["users"][action.user][tableContext].push(action.payload);
+					tables["users"][action.user.id][tableContext].push(action.payload);
 				}
 				else{
-					//todo:
+					//todo: handle removal
 				}
 
 				//user and context are reduced to their table addresses
@@ -469,7 +642,7 @@ const Reducer = (state, action) => {
 				return {
 					...state,
 					//todo: naming convention for state objects
-					artistSearchSelection:tables["users"][action.user][tableContext],
+					artistSearchSelection:tables["users"][action.user.id][tableContext],
 					//type was select, now its node
 					//recall events just calls noder right before, so it needs the same action
 					events: getJoin(Object.assign({},action,{type:"events",context:tableContext})),
@@ -478,11 +651,12 @@ const Reducer = (state, action) => {
 
 			}
 
-			return {
-				...state,
-				// posts: state.posts.concat(action.payload)
-				artists: getJoin(action)
-			};
+		//testing: preeetty sure I just left this here by mistake
+		// return {
+		// 	...state,
+		// 	// posts: state.posts.concat(action.payload)
+		// 	artists: getJoin(action)
+		// };
 		case 'REMOVE_POST':
 			return {
 				...state,

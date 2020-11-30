@@ -91,7 +91,7 @@ export default function ChipsArray(props) {
 
 	return (
 
-		<div style={{maxWidth:"40em"}}>
+		<span style={{maxWidth:"40em"}}>
 			{chipData.map(data => {
 				//let icon = <TagFacesIcon />;
 				return (
@@ -99,7 +99,7 @@ export default function ChipsArray(props) {
 						key={data.id}
 						// icon={icon}
 						label={data.name}
-						// className={classes.chip}
+						className={classes.chip}
 						color="primary"
 						classes={{
 							//root: classes.root,
@@ -113,6 +113,6 @@ export default function ChipsArray(props) {
 					/>
 				);
 			})}
-		</div>
+		</span>
 	);
 }

@@ -1,10 +1,13 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState,useRef} from 'react';
 //todo: this shit is outdated AF but was so simple I couldn't refuse
 //https://github.com/mikechabot/react-tabify#color-theme
 //specifically it uses glamorous which has been ditched for emotion as a theme provider
 //not sure if I could rip that dependency out myself and just make this my thing or not...
 import { Tab, Tabs } from "react-tabify";
 import MaterialTable from "material-table";
+import { makeStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
+import Slider from "@material-ui/core/Slider";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import {Context} from "./alasql/Store";
@@ -16,7 +19,10 @@ import util from "./util/util";
 import tables from "./alasql/tables";
 import _ from "lodash";
 import {Control} from "./index";
-
+import DiscreteSlider from "./Slider";
+import {initUser} from './alasql/Store';
+import { GLOBAL_UI_VAR } from './alasql/withApolloProvider';
+import {useQuery,useReactiveVar} from "@apollo/react-hooks";
 
 // const styles = {
 // 	fontFamily: "sans-serif",
@@ -65,20 +71,70 @@ function getChips(genres){
 
 };
 
+
+
+
 export default function Tabify() {
 
 	//todo: move this somewhere else higher up
 	const [state, dispatch] = useContext(Context);
 
-	useEffect(() => {
+	//const params = JSON.parse(localStorage.getItem('params'));
+	//console.log("$params",params);
+	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
+	console.log("$globalUI",globalUI);
 
-		//testing:
-		alasqlAPI.followedArtists(user)
+	function useDidUpdateEffect(fn,inputs) {
+		const didMountRef = useRef(false);
+		console.log("$useDidUpdateEffect");
+		useEffect(() => {
+			if (didMountRef.current)
+			{ 	console.log("2nd mount w/ token change!!");
+				fn()
+			}
+			else{
+				console.log("$current",true);
+				didMountRef.current = true;
+
+			}
+
+		}, inputs);
+	}
+
+	//todo: make a private github gist about the utility of this - BUT NOT HERE :p
+	//prevent useeffect from triggering on first render
+	//essentially adding a dependency of '2nd render = true'
+	//https://stackoverflow.com/questions/53179075/with-useeffect-how-can-i-skip-applying-an-effect-upon-the-initial-render
+	var slow = function(){ setTimeout(e=>{console.log("slow!");fetchTabContent()},2000)}
+	//useDidUpdateEffect(slow,[globalUI])
+
+	//testing:
+	function fetchTabContent(){
+		var userProms = [];
+		userProms.push(alasqlAPI.followedArtists(user))
+		userProms.push(alasqlAPI.getTopArtists(user))
+		Promise.all(userProms)
 			.then(r =>{
-				dispatch({type: 'init', payload: r,user:user,context:'artists'});
+
+				//testing: assigning object identity
+				//probably should be happening on the back
+				r[0].forEach(a =>{a.source = 'saved'})
+				r[1].forEach(a =>{a.source = 'top'})
+
+				//terms have terms, so we don't need to delineate there
+				var pay = [];pay = pay.concat(r[0]);pay= pay.concat(r[1])
+				//unwind getTopArtists before initing
+				dispatch({type: 'init', payload:pay,user:user,context:'artists'});
 			},err =>{
 				console.log(err);
 			})
+
+		// alasqlAPI.getTopArtists(user)
+		// 	.then(r =>{
+		// 		dispatch({type: 'init', payload: r,user:user,context:'artists'});
+		// 	},err =>{
+		// 		console.log(err);
+		// 	})
 
 		alasqlAPI.fetchPlaylistsResolved()
 			.then(r =>{
@@ -104,30 +160,91 @@ export default function Tabify() {
 		// 	},err =>{
 		// 		console.log(err);
 		// 	})
+	}
+
+	//testing:
+	useEffect(() => {
+
+		var userProms = [];
+		userProms.push(alasqlAPI.followedArtists(user))
+		userProms.push(alasqlAPI.getTopArtists(user))
+		Promise.all(userProms)
+			.then(r =>{
+
+				//testing: assigning object identity
+				//probably should be happening on the back
+				r[0].forEach(a =>{a.source = 'saved'})
+				r[1].forEach(a =>{a.source = 'top'})
+
+				//terms have terms, so we don't need to delineate there
+				var pay = [];pay = pay.concat(r[0]);pay= pay.concat(r[1])
+				//unwind getTopArtists before initing
+				dispatch({type: 'init', payload:pay,user:user,context:'artists'});
+			},err =>{
+				console.log(err);
+			})
+
+		// alasqlAPI.getTopArtists(user)
+		// 	.then(r =>{
+		// 		dispatch({type: 'init', payload: r,user:user,context:'artists'});
+		// 	},err =>{
+		// 		console.log(err);
+		// 	})
+
+		//testing:works fine
+		alasqlAPI.fetchPlaylistsResolved()
+			.then(r =>{
+				dispatch({type: 'init', payload: r,user:user,context:'playlists'});
+			},err =>{
+				console.log(err);
+			})
+
+		//note: decided I would do this on demand for clicks around the app
+		//(so currently not in use)
+		//but for events - I would do the lookup on the server ahead of time
+		// alasqlAPI.getArtistTopTracks('2dI9IuajQnLR5dLxHjTTqU')
+		// 	.then(r =>{
+		// 		console.log("$getArtistTopTracks",r);
+		// 	},err =>{
+		// 		console.log(err);
+		// 	})
+
+		//testing:works fine
+		// alasqlAPI.fetchPlaylists()
+		// 	.then(r =>{
+		// 		dispatch({type: 'init', payload: r,user:user,context:'playlists'});
+		// 	},err =>{
+		// 		console.log(err);
+		// 	})
 	},[]);
 
 
 	//-----------------------------
 	let control = Control.useContainer();
 
-	useEffect(() => {
-		console.log("useEffect fetchEvents on control.metro dependency update",control.metro);
-		//todo: put date picker
-
-		alasqlAPI.fetchEvents({metro:{id:control.metro}})
-			.then(r =>{
-				dispatch({type: 'init', payload: r,context:'events'});
-			},err =>{
-				console.log(err);
-			})
-	},[control.metro])
+	//testing:
+	//todo: we're setting deps = metro here so this autoruns
+	// useEffect(() => {
+	// 	console.log("useEffect fetchEvents on control.metro dependency update",control.metro);
+	// 	//todo: put date picker
+	//
+	// 	alasqlAPI.fetchEvents({metro:{id:control.metro}})
+	// 		.then(r =>{
+	// 			dispatch({type: 'init', payload: r,context:'events'});
+	// 		},err =>{
+	// 			console.log(err);
+	// 		})
+	// },[control.metro])
 
 	//-----------------------------
-
+	//sending this along 'seemed' to work but didn't test hard
+	//testing: apollo reactive (dispatch below)
+	//const globalState = useReactiveVar(GLOBAL_STATE_VAR);
+	//-----------------------------
 
 	//todo:
 	var playlists = [];
-	var user = 'dacandyman01';
+	var user = {id:'dacandyman01',name:"Franky"};
 
 	const CustomSelect = (props) => {
 		const [date, setDate] = useState("");
@@ -160,11 +277,24 @@ export default function Tabify() {
 	};
 
 	var handleSelectSaved = function(rows){
-		//todo: confused on how to get selected row?
-		//seems like it should be pretty simple?
-		//for now just take one - otherwise do a delta? :(
-		console.log("selected",rows.length);
-		dispatch({type: 'select', payload:rows[0],user:user,context:'artists'});
+		//confused on how to get selected row? seems like it should be pretty simple?
+		//turns out I'm just accessing the 'checked' rows directly later, so null payload here
+		//console.log("selected",rows.length);
+		//testing: wanted to somehow reuse the dispatch here
+		//but can't (easily - maybe could pass the current state value here)
+		//access the current state value
+
+		dispatch({type: 'select', payload:null,user:user,context:'artists'});
+		//dispatch({type: 'select', payload:null,user:user,context:'artists',state:state:globalState});
+	}
+	var handleSelectGuest = function(rows){
+		//confused on how to get selected row? seems like it should be pretty simple?
+		//turns out I'm just accessing the 'checked' rows directly later, so null payload here
+		//console.log("selected",rows.length);
+
+		dispatch({type: 'select', payload:null,user:user,context:'artists'});
+
+
 	}
 
 	var handleSelectPlaylist= function(rows){
@@ -239,13 +369,35 @@ export default function Tabify() {
 		return 	<ChipsArray chipData={chips}/>
 	}
 
+
+	//terms
+	const [term, setTerm] = useState('medium');
+	function handleChange(event, newValue) {
+		console.log("$newValue",newValue);
+		setTerm(newValue);
+	}
+
+	//testing: not being sent yet
+	var guest = {id:123028477,name:"Dan"};
+	function setStatic(){
+		alasqlAPI.fetchStaticUser()
+			.then(r =>{
+				initUser(guest);
+				dispatch({type: 'init', user:guest,payload:r[0].data,context:'artists'});
+			},err =>{
+				console.log(err);
+			})
+	}
+
+
 	return(
 		// style={styles}
 		<div>
 			<Tabs theme={theme} >
-				<Tab label="Search">
-					<Search></Search>
-				</Tab>
+				{/*todo: disabled for now (broke in multiple places)*/}
+				{/*<Tab label="Search">*/}
+				{/*	<Search></Search>*/}
+				{/*</Tab>*/}
 				<Tab label="My Library">
 					<Tabs>
 						<Tab label="Saved Artists">
@@ -271,14 +423,14 @@ export default function Tabify() {
 									},
 
 								]}
-								data={state[user + "_artists"]}
+								data={state[user.id + "_artists"]}
 								options={{
 									search: true,
 									filtering: true,
 									selection: true,
 									tableLayout:"fixed"
 								}}
-								onSelectionChange={(rows) => handleSelectSaved(rows)}
+								onSelectionChange={(rows) => handleSelectSaved(rows,'saved')}
 							/>
 
 						</Tab>
@@ -320,7 +472,7 @@ export default function Tabify() {
 									},
 
 								]}
-								data={state[user + "_playlists"]}
+								data={state[user.id + "_playlists"]}
 								options={{
 									search: true,
 									filtering: true,
@@ -337,14 +489,86 @@ export default function Tabify() {
 				</Tab>
 				<Tab label="My Profile">
 					<Tabs>
-						<Tab label="Subtab 2.1">Tab 2 Content 1</Tab>
+						<Tab label="Your Top Artists">
+							{/*<div>{term.toString()}</div>*/}
+							<DiscreteSlider handleChange={(v) =>{setTerm(v)}}/>
+							<MaterialTable
+								title=""
+								columns={[
+									{
+										field: 'images[0]',
+										title: '',
+										render: rowData => <img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
+										filtering:false,
+										width:"5em"
+									},
+									{ title: 'Name', field: 'name', filtering:false},
+									{
+										field: 'genres',
+										title: 'genres',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => <ChipsArray chipData={rowData.genres}/>,
+										filtering:false,
+										width:"20em"
+									},
+
+								]}
+								data={state[user.id + "_artists"].filter(i =>{return i.term === term})}
+								options={{
+									search: true,
+									filtering: true,
+									selection: true,
+									tableLayout:"fixed"
+								}}
+								onSelectionChange={(rows) => handleSelectSaved(rows,'top')}
+							/>
+
+						</Tab>
 						<Tab label="Subtab 2.2">Tab 2 Content 2</Tab>
 						<Tab label="Subtab 2.3">Tab 2 Content 3</Tab>
 					</Tabs>
 				</Tab>
 				<Tab label="My Friends">
 					<Tabs>
-						<Tab label="Subtab 3.1">Tab 3 Content 1</Tab>
+						<Tab label="Look Dan your very own tab">
+
+							<button onClick={setStatic}>getstuff</button>
+							<DiscreteSlider handleChange={(v) =>{setTerm(v)}}/>
+
+							{/*todo: disable for now until content shown*/}
+							{state[guest.id + "_artists"] && <MaterialTable
+								title=""
+								columns={[
+									{
+										field: 'images[0]',
+										title: '',
+										render: rowData => <img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
+										filtering:false,
+										width:"5em"
+									},
+									{ title: 'Name', field: 'name', filtering:false},
+									{
+										field: 'genres',
+										title: 'genres',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => <ChipsArray chipData={rowData.genres}/>,
+										filtering:false,
+										width:"20em"
+									},
+
+								]}
+								data={state[guest.id + "_artists"].filter(i =>{return i.term === term})}
+								options={{
+									search: true,
+									filtering: true,
+									selection: true,
+									tableLayout:"fixed"
+								}}
+								onSelectionChange={(rows) => handleSelectGuest(rows,'top')}
+							/>
+							}
+
+						</Tab>
 						<Tab label="Subtab 3.2">Tab 3 Content 2</Tab>
 						<Tab label="Subtab 3.3">Tab 3 Content 3</Tab>
 					</Tabs>

@@ -59,6 +59,15 @@ const alasqlAPI = {
 		console.log("events", events);
 		return events
 	},
+	getTopArtists: async (req) => {
+		let map = await api.getTopArtists(req).catch(e =>console.log(e));
+		console.log("getTopArtists termmap", map);
+		return map
+	},
+	fetchStaticUser: async (req) => {
+		let res = await api.fetchStaticUser(req).catch(e =>console.log(e));
+		return res
+	},
 	getArtistTopTracks: async (id) => {
 		let tracks = await api.getArtistTopTracks(id).catch(e =>console.log(e));
 		console.log("events", tracks);

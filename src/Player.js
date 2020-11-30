@@ -2,6 +2,7 @@ import React, {useEffect,useState} from 'react';
 import api from "./api/api";
 import SpotifyPlayer from 'react-spotify-web-playback';
 import Store from "./alasql/Store";
+//import './styles_player'
 
 
 //play is a promise function which de-refs the input object and
@@ -28,7 +29,8 @@ function Main(props) {
 	//'spotify:track:7xGfFoTpQ2E7fRF5lN10tr'
 	//todo: doesn't seem to work
 	//autoPlay={true}
-	return(<SpotifyPlayer token={token} uris={['spotify:track:' + props.id]} callback={callback} play={props.play} />)
+	return(
+		<SpotifyPlayer token={token} uris={['spotify:track:' + props.id]} callback={callback} play={props.play} />)
 
 
 

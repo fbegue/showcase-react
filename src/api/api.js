@@ -82,9 +82,9 @@ var fetchPlaylists =  function(){
             url: 'http://localhost:8888/getUserPlaylists',
             type:"POST"
         }).done(function(payload){
-                console.log("$retrieved: ",payload);
-                done(payload.items)
-            })
+            console.log("$retrieved: ",payload);
+            done(payload.items)
+        })
         // fakeFetch2()
     })
 };
@@ -117,6 +117,26 @@ var getMyFollowedArtists =  function(){
     })
 }
 
+//static user methods
+
+var fetchStaticUser =  function(req){
+    return new Promise(function(done, fail) {
+
+        fetch('http://localhost:8888/fetchStaticUser', {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({user:"Dan"})
+        }).then(res => res.json())
+            .then(function(res){
+                console.log("retrieved: ",res);
+                done(res)
+            })
+    })
+}
+
 //event methods
 
 var fetchEvents =  function(req){
@@ -138,16 +158,16 @@ var fetchEvents =  function(req){
 
         fetch('http://localhost:8888/resolveEvents', {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
-             mode: 'cors', // no-cors, *cors, same-origin
+            mode: 'cors', // no-cors, *cors, same-origin
             headers: {
                 'Content-Type': 'application/json'
             },
-             body: JSON.stringify(req)
+            body: JSON.stringify(req)
         }).then(res => res.json())
             .then(function(res){
-            console.log("retrieved: ",res);
-            done(res)
-        })
+                console.log("retrieved: ",res);
+                done(res)
+            })
 
         // $.ajax({
         //     url: 'http://localhost:8888/resolveEvents',
@@ -166,7 +186,50 @@ var fetchEvents =  function(req){
     })
 }
 
+
+var getTopArtists =  function(req){
+    return new Promise(function(done, fail) {
+
+        fetch('http://localhost:8888/getTopArtists', {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        }).then(res => res.json())
+            .then(function(res){
+                console.log("retrieved: ",res);
+                done(res)
+            })
+    })
+}
+
 //methods
+
+var setAccessToken =  function(tokenOb){
+    return new Promise(function(done, fail) {
+        console.log("$setAccessToken",tokenOb);
+        //console.warn("$setAccessToken FAKING ");
+        //var temp = "BQAx9x8Z3OCZDHx5whMSaKHFrOE-l57Z_L4wQB_3Je1ggqsGpzDUw80_tc6jq4ESp4ODyxGk2EabGtKkxFeEnwjFp46jwezyRJGgkTOpi4yfl6f87pdzo0LbDZ9PjwoE3hk58r856cvfAlAObE5qBVqPxpp0ADmPWWbJchuJVsB1vbtFpXSP5p8pSRD5t_rF4RNWcZfYEpIxdLSymL2Ji8bdm_9Ds61aWcGb1v3MGxlcjCMnnQtlQofj7E9uno1G3HnvEmjmQCEKjR6Htmzvyjtu5lc";
+
+        fetch('http://localhost:8888/setAccessToken', {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({access_token:tokenOb.access_token})
+            //todo: pass whole body for expiry notice?
+            //body: JSON.stringify({token:{...token,access_token:temp}})
+          // body: JSON.stringify({access_token:temp})
+        })
+            // .then(res => res.json())
+            .then(function(res){
+                console.log("login response: ",res);
+                done(res)
+            })
+    })
+}
 
 var completeArtist =  function(param){
     return new Promise(function(done, fail) {
@@ -289,6 +352,9 @@ export default {
     getMyFollowedArtists,
     completeArtist,
     getArtistTopTracks,
-    getToken
+    getToken,
+    getTopArtists,
+    fetchStaticUser,
+    setAccessToken
 
 }

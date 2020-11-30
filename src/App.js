@@ -16,10 +16,17 @@ import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 
 import Store, {Context} from './alasql/Store'
-
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import RedirectPage from './RedirectPage';
 //
 import Player,{} from './Player'
 import {Control} from './index'
+import withApolloProvider from './alasql/withApolloProvider';
+import api from "./api/api";
+
+//
+import { GLOBAL_UI_VAR } from './alasql/withApolloProvider';
+import {useQuery,useReactiveVar} from "@apollo/react-hooks";
 
 import Map from './Map'
 
@@ -55,9 +62,12 @@ import ListItemText from "@material-ui/core/ListItemText";
 
 //import TreeView  from "./NestedList3"
 import EventsList from './EventsList'
-import { BrowserRouter } from 'react-router-dom'
 import alasqlAPI from "./alasql";
 import alasql from "alasql";
+
+//
+import SpotifyWebApi from 'spotify-web-api-js';
+const spotifyApi = new SpotifyWebApi();
 
 
 const drawerWidth = 360;
@@ -105,82 +115,6 @@ const styles = theme => ({
         height: 170
     }
 });
-
-const filterQueries = {
-    'active': 'ACTIVE_TODOS',
-    'all': 'ALL_TODOS',
-    'completed': 'COMPLETED_TODOS'
-}
-
-// https://github.com/ArnonEilat/countries/tree/master/static/jqvmap
-var initMap = function(){
-    console.log("initMap");
-    // console.log(window.jQuery);
-    // console.log(window.JQVMap);
-
-    var $ = window.jQuery;
-    console.log($('#vmap'));
-    $.JQVMap = window.JQVMap;
-    $('#vmap').vectorMap({
-        map: 'usa_en',
-        backgroundColor: null,
-        borderColor: 'black',
-        color: 'lightgrey',
-        selectedColor:  'darkgrey',
-        hoverColor: 'darkgrey',
-        enableZoom: false,
-        showTooltip: false,
-        multiSelectRegion:true,
-        colors: {
-            oh: 'lightblue',
-            ut: 'lightblue',
-            ca: 'lightblue'
-        },
-        onRegionClick: function(event, code, region){
-            //the event comes from vmap silly :)
-            //event.preventDefault();
-
-            console.log("hey!",code + "|" + region);
-        },
-        onRegionSelect: function(event, code, region){
-            console.log("onRegionSelect!",code);
-            // $scope.vmapSelection.push(code)
-            // console.log($scope.vmapSelection);
-            // $scope.digestIt();
-        },
-        onRegionDeselect: function(event, code, region){
-            console.log("onRegionDeselect!",code );
-            // let i = $scope.vmapSelection.indexOf(code)
-            // $scope.vmapSelection.splice(i,1);
-            // console.log($scope.vmapSelection);
-            // $scope.digestIt();
-        }
-        // showLabels:true,
-        // hoverColor: 'lightgrey',
-        // multiSelectRegion:true,
-        // selectedRegions: ['CA','NY'],
-    });
-}
-
-//todo: wait for external scripts w/ async
-//being loaded by index.html <scripts>
-//pretty sure this is good only b/c setTimeout won't execute until the page is loaded?
-
-//tried to use effect in a custom hook (useScript.js) but couldn't ever get the order right
-//only runs once w/ no dependencies
-// https://css-tricks.com/run-useeffect-only-once/
-
-// var urls = ['https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js',
-//     'https://cdnjs.cloudflare.com/ajax/libs/jqvmap/1.5.1/jquery.vmap.min.js',
-//     'https://cdnjs.cloudflare.com/ajax/libs/jqvmap/1.5.1/maps/jquery.vmap.usa.js']
-// useScript(urls,callback)
-// useScript('https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js',callback);
-
-//tried helmet as well, same deal
-// https://codesandbox.io/s/l9qmrwxqzq?file=/src/index.js:61-99
-
-
-setTimeout(e =>{  initMap();},2000);
 
 function TestComp(props) {
     let control = Control.useContainer();
@@ -231,17 +165,87 @@ function App(props) {
     let [filter, setFilter] = useState('active');
     let [selectedTodoId, setSelectedTodoId] = useState();
 
-    let control = Control.useContainer()
+    //let control = Control.useContainer()
+
+    //login
+
+    // function getHashParams() {
+    //     var hashParams = {};
+    //     var e, r = /([^&;=]+)=?([^&;]*)/g,
+    //         q = window.location.hash.substring(1);
+    //     e = r.exec(q)
+    //     while (e) {
+    //         hashParams[e[1]] = decodeURIComponent(e[2]);
+    //         e = r.exec(q);
+    //     }
+    //     return hashParams;
+    // }
+    //
+    // const params = getHashParams();
+    // const token = params.access_token;
+    // if (token) {
+    //     spotifyApi.setAccessToken(token);
+    // }
+    //
+    // let [loggedIn, setLoggedIn] = useState(!!token);
+
+    //testing: hide in .env
+    //https://stackoverflow.com/questions/49579028/adding-an-env-file-to-react-project
+
+    var REACT_APP_CLIENT_ID="0e7ef13646c9410293a0119e652b35f7"
+    var REACT_APP_AUTHORIZE_URL= "https://accounts.spotify.com/authorize"
+    var REACT_APP_REDIRECT_URL= "http://localhost:3000/redirect"
+
+    let all_scopes = ["playlist-read-private", "playlist-modify-private", "playlist-modify-public", "playlist-read-collaborative", "user-modify-playback-state", "user-read-currently-playing", "user-read-playback-state", "user-top-read", "user-read-recently-played", "app-remote-control", "streaming", "user-read-birthdate", "user-read-email", "user-read-private", "user-follow-read", "user-follow-modify", "user-library-modify", "user-library-read"];
+    let scopes = ["playlist-read-private","user-library-read","user-top-read"];
+    function getScopes(){
+        //https://developer.spotify.com/documentation/general/guides/scopes/
+        return "ugc-image-upload user-read-recently-played user-top-read user-read-playback-position user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative user-follow-modify user-follow-read user-library-modify user-library-read user-read-email user-read-private"
+        //return scopes.join(" ")
+    }
+    const handleLogin = () => {
+        window.location = `${REACT_APP_AUTHORIZE_URL}?client_id=${REACT_APP_CLIENT_ID}&redirect_uri=${REACT_APP_REDIRECT_URL}&response_type=token&show_dialog=true&scope=` + encodeURIComponent(getScopes()) ;
+    };
+
+    const params = JSON.parse(localStorage.getItem('params'));
+
+    //
+    const globalUI = useReactiveVar(GLOBAL_UI_VAR);
+    console.log("$globalUI-App",globalUI);
+    //console.log(globalUI.accessToken.accessToken !== undefined);
+    //TODO: STANDARDIZE TOKEN NAMES :p
+    //let [auth, setAuth] = useState(false);
+
+    // if(globalUI.access_token.hasOwnProperty('access_token')){
+    //     console.log("setAuth");
+    //     setAuth(true)
+    // }
+    // console.log(globalUI.access_token.hasOwnProperty('access_token'));
+    // function test(){
+    //     return globalUI.access_token.hasOwnProperty('accessToken');
+    // }
+
 
     return (
         <Store>
-            <div style={{position: "sticky",top: "0", borderBottom: "1px solid black", zIndex: "1"}}>
-                <Player  id={control.id} play={control.play}/> </div>
-
+            {/*<div style={{position: "sticky",top: "0", borderBottom: "1px solid black", zIndex: "1"}}>*/}
+            {/*    <Player  id={control.id} play={control.play}/> </div>*/}
             {/*<TestComp/>*/}
-
+            <BrowserRouter>
+                <div className="main">
+                    <Switch>
+                        {/*<Route path="/" component={Home} exact={true} />*/}
+                        <Route path="/redirect" component={RedirectPage} />
+                        {/*<Route path="/dashboard" component={Dashboard} />*/}
+                        {/*<Route component={NotFoundPage} />*/}
+                    </Switch>
+                </div>
+            </BrowserRouter>
             <div>
-                <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
+                {/*<div style={{position: "sticky",top: "0", borderBottom: "1px solid black", zIndex: "1"}}>*/}
+                {/*    <Player  id={control.id} play={control.play}/> </div>*/}
+
+                 <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
                     <div>
                         {/*won't respond to flex w/out div*/}
                         {/*width comes from 'const drawerWidth' */}
@@ -255,7 +259,23 @@ function App(props) {
                         />
                     </div>
                     <div style={{width:"50em"}}>
+                        {/*href='http://localhost:3000/login'*/}
+
+                        {!(params && params.access_token) &&
+                        <button onClick={handleLogin}>
+                            Login to spotify
+                        </button>
+                        }
+                        {params && params.access_token &&
+                        <button onClick={handleLogin}>
+                            Logged in {params.access_token}
+                        </button>
+                        }
+                        {/*testing:*/}
+                        {params && params.access_token &&
                         <Tabify></Tabify>
+                        }
+                        {/*{ auth && <Tabify></Tabify>}*/}
                     </div>
                     {/*<span>*/}
                     {/*    <SimpleTabs></SimpleTabs>*/}
@@ -369,7 +389,7 @@ App.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(App);
+export default withStyles(styles)(withApolloProvider(App));
 // export {
 //     useControl
 // }

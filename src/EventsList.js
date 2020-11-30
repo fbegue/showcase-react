@@ -20,6 +20,7 @@ import Player, {play,player} from './Player'
 import {Control} from "./index";
 import MusicNoteIcon from '@material-ui/icons/MusicNote';
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
+import Map from './Map';
 
 function ChipsArray_dep(props) {
 	//const classes = useStyles();
@@ -105,7 +106,7 @@ function EventsList() {
 			<span className={'play-events'}> {(sub.artist.spotifyTopFive ? <PlayCircleOutlineIcon fontSize={'small'} onClick={() => handlePlay(sub.artist)}> </PlayCircleOutlineIcon>:<div></div>)}</span>
 			<span>{sub.displayName}</span>
 		</div>
-        // return <span>{sub.displayName}</span>
+		// return <span>{sub.displayName}</span>
 		// return (sub.artist.spotifyTopFive ? <PlayCircleOutlineIcon onClick={() => handlePlay(sub.artist)}> </PlayCircleOutlineIcon>:{})
 	};
 
@@ -138,21 +139,16 @@ function EventsList() {
 							primary={ showPlay(subOption)}
 							secondary={
 								<React.Fragment>
-									<div style={{display:"flex"}}>
-										<div>
-										</div>
-										<div>
-											<Typography
-												component="span"
-												variant="body2"
-												// className={classes.inline}
-												color="textPrimary"
-											>
-												<ChipsArray chipData={subOption.artist.genres}>
-												</ChipsArray>
-											</Typography>
-										</div>
-									</div>
+
+									{/*<div style={{display:"flex"}}>*/}
+									{/*	<div>*/}
+									{/*	</div>*/}
+									{/*	<div>*/}
+
+									<ChipsArray chipData={subOption.artist.genres}>
+									</ChipsArray>
+									{/*	</div>*/}
+									{/*</div>*/}
 
 									{/*{subOption.venue.displayName} -*/}
 									{/*{subOption.location.city.toString().replace(", US","")}*/}
@@ -172,7 +168,7 @@ function EventsList() {
 							secondary={
 								<React.Fragment>
 									<Typography
-										component="span"
+										component={'span'}
 										variant="body2"
 										// className={classes.inline}
 										color="textPrimary"
@@ -195,21 +191,49 @@ function EventsList() {
 		});
 	}
 
-	var classes = {menuHeader:"menuHeader",list:"list"};
+
+
+	const [open, setOpen] = React.useState(true);
+	const handleClickConfig = () => {
+		setOpen(!open);
+	};
+
+	var classes = {menuHeader:"menuHeader",list:"list",root:"root",nested:"nested"};
 	return (
-		<div className={classes.list}>
-<div>metro {control.metro}</div>
-			<List>
-				<ListItem  key="menuHeading" divider disableGutters>
-					<ListItemText
-						//className={classes.menuHeader}
-						// style={getStyle()}
-						inset
-						primary="Events"
-					/>
-				</ListItem>
-				{handler(globalState.events)}
-			</List>
+		<div style={{display:"flex",flexDirection:"column"}}>
+			<div>
+				<List
+					component="nav"
+					aria-labelledby="nested-list-subheader"
+					className={classes.root}
+				>
+				</List>
+			</div>
+
+			<div>
+				<List>
+					<ListItem button divider onClick={handleClickConfig}>
+						<ListItemText primary={<div>Location & Date {control.metro}</div>} />
+						{open ? <ExpandLess /> : <ExpandMore />}
+					</ListItem>
+					<Collapse in={open} timeout="auto" unmountOnExit>
+						<Map></Map>
+					</Collapse>
+					{/*<ListItem button divider onClick={handleClickConfig}>*/}
+					{/*	<ListItemText primary="Inbox" />*/}
+					{/*	{open ? <ExpandLess /> : <ExpandMore />}*/}
+					{/*</ListItem>*/}
+					{/*<Collapse in={open} timeout="auto" unmountOnExit>*/}
+					{/*	<List component="div" disablePadding>*/}
+					{/*		<ListItem button className={classes.nested}>*/}
+					{/*			<ListItemText primary="Starred" />*/}
+					{/*		</ListItem>*/}
+					{/*	</List>*/}
+					{/*</Collapse>*/}
+
+					{handler(globalState.events)}
+				</List>
+			</div>
 		</div>
 	);
 }

@@ -21,6 +21,8 @@ tables["users"]["dacandyman01"] = {
 //testing: a user which is just the system that holds all non-user sourced selections?
 //these will be specifically named collections which we need to maintain (not just filter on b/c they are tables)
 //sort of the difference between 'selecting from MY data' (above) and 'selecting from some data' (below)
+
+//so revisisting this - seems like a good idea ...
 tables["users"]["selection"] = {
 	artistSearch:[]
 }

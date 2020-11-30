@@ -65,16 +65,16 @@ export default class Pie extends React.Component {
 
 			//note: dealing with both playlists and artists in agg now
 			this.props.data.forEach(a =>{
-				if(a.familyFreq){
-					!(pie[a.familyFreq]) ? pie[a.familyFreq] = 1:pie[a.familyFreq]++
+				//if it was an artist, we just take its family agg
+				if(a.familyAgg){
+					!(pie[a.familyAgg]) ? pie[a.familyAgg] = 1:pie[a.familyAgg]++
+					//for playlists we need to determine what families to put into pie based on playlist content
 				}else if(a.artists){
 
-					//need to determine what families to put into pie based on playlist content
 					//fortunately we already need to do this for the full listing in the table
 					//todo: hard part is representing a playlist proportionately next to "another node type object"
 					//todo: and, proportionately within itself
 					//for example, I just take the to 3 right now - where #1 could = 50 but #2 = 2
-
 
 					//I have the familyAgg for each artist - so just make a ranking of these then?
 					//take top 5
