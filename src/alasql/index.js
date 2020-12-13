@@ -20,8 +20,8 @@ const alasqlAPI = {
 		console.log("fetchPlaylists", playlists);
 		return playlists
 	},
-	fetchPlaylistsResolved: async (user) => {
-		let playlistObs = await api.fetchPlaylistsResolved(user).catch(e =>console.log(e));
+	fetchPlaylistsResolved: async (req) => {
+		let playlistObs = await api.fetchPlaylistsResolved(req).catch(e =>console.log(e));
 		//testing: managing this stuff could be complicated
 		//not sure exactly where artistFreq goes but it seems so small that I can just keep it as sidekick I think - right?
 		//point of at least keeping artistFreq seperate is that these artists should be pulled from a local db of some kind
@@ -37,9 +37,9 @@ const alasqlAPI = {
 		console.log("fetchPlaylistsResolved", playlists);
 		return playlists
 	},
-	followedArtists: async (user) => {
+	followedArtists: async (req) => {
 
-		let artists = await api.getMyFollowedArtists(user).catch(e =>console.log(e));
+		let artists = await api.getMyFollowedArtists(req).catch(e =>console.log(e));
 		//var playlists = {};playlists.items = [{id: 99, text: "playlist99"},{id: 98, text: "playlist98"}]
 		console.log("followedArtists", artists);
 

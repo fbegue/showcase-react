@@ -21,6 +21,9 @@ import {Control} from "./index";
 import MusicNoteIcon from '@material-ui/icons/MusicNote';
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
 import Map from './Map';
+import PlaylistAddIcon from "@material-ui/icons/PlaylistAdd";
+import Button from '@material-ui/core/Button';
+
 
 function ChipsArray_dep(props) {
 	//const classes = useStyles();
@@ -110,6 +113,24 @@ function EventsList() {
 		// return (sub.artist.spotifyTopFive ? <PlayCircleOutlineIcon onClick={() => handlePlay(sub.artist)}> </PlayCircleOutlineIcon>:{})
 	};
 
+
+	function playlistFromEvents(){
+		console.log("playlistFromEvents");
+	}
+
+	//todo: maybe make this like a row of buttons? idk
+	function CreatePlay(){
+		return (
+			<Button size="small" onClick={playlistFromEvents} variant="contained">
+				<div style={{display:"flex"}}>
+					<div ><PlaylistAddIcon fontSize={'small'}/> </div>
+					<div>Save Playlist</div>
+				</div>
+			</Button>
+		)
+	}
+
+
 	// if the menu item doesn't have any child, this method simply returns a clickable menu
 	// item that redirects to any location and if there is no child this method uses recursion to go until
 	// the last level of children and then returns the item by the first condition.
@@ -194,21 +215,26 @@ function EventsList() {
 
 
 	const [open, setOpen] = React.useState(true);
+	const [open2, setOpen2] = React.useState(true);
 	const handleClickConfig = () => {
 		setOpen(!open);
+	};
+	const handleClickConfig2 = () => {
+		setOpen2(!open2);
 	};
 
 	var classes = {menuHeader:"menuHeader",list:"list",root:"root",nested:"nested"};
 	return (
 		<div style={{display:"flex",flexDirection:"column"}}>
-			<div>
-				<List
-					component="nav"
-					aria-labelledby="nested-list-subheader"
-					className={classes.root}
-				>
-				</List>
-			</div>
+			{/*<div>*/}
+			{/*	<List*/}
+			{/*		component="nav"*/}
+			{/*		aria-labelledby="nested-list-subheader"*/}
+			{/*		className={classes.root}*/}
+			{/*	>*/}
+			{/*		*/}
+			{/*	</List>*/}
+			{/*</div>*/}
 
 			<div>
 				<List>
@@ -230,8 +256,16 @@ function EventsList() {
 					{/*		</ListItem>*/}
 					{/*	</List>*/}
 					{/*</Collapse>*/}
+					<ListItem button divider onClick={handleClickConfig2}>
+						<ListItemText primary={'Events'} />
+						{open2 ? <ExpandLess /> : <ExpandMore />}
+					</ListItem>
+					<Collapse in={open2} timeout="auto" unmountOnExit>
+						{/*todo: beware of float?*/}
+						<div style={{marginTop:"1em",float:"right"}} key={'special'}><CreatePlay/></div>
+						{handler(globalState.events)}
+					</Collapse>
 
-					{handler(globalState.events)}
 				</List>
 			</div>
 		</div>

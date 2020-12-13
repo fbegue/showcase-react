@@ -5,6 +5,8 @@ import {getUserPlaylists} from "../testdata/getUserPlaylists";
 import {getArtistGenres} from "../testdata/getArtistGenres";
 import {getMetroEvents} from "../testdata/getMetroEvents";
 import $ from 'jquery';
+import {useReactiveVar} from "@apollo/react-hooks";
+import {GLOBAL_UI_VAR} from "../alasql/withApolloProvider";
 
 const host = "http://localhost:8888";
 
@@ -89,28 +91,38 @@ var fetchPlaylists =  function(){
     })
 };
 
-var fetchPlaylistsResolved =  function(){
+var fetchPlaylistsResolved =  function(req){
     return new Promise(function(done, fail) {
-        //testing: must turn cors off in browser
-        $.ajax({
-            url: 'http://localhost:8888/resolvePlaylists',
-            type:"POST"
-        }).done(function(payload){
-            console.log("$retrieved",payload);
-            done(payload)
-        })
+        console.log("fetchPlaylistsResolved",req.user);
+        fetch('http://localhost:8888/resolvePlaylists', {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({auth:req.auth,user:req.user})
+        }).then(res => res.json())
+            .then(function(res){
+                console.log("retrieved: ",res);
+                done(res)
+            })
+
         // fakeFetch2()
     })
 };
 
-var getMyFollowedArtists =  function(){
+var getMyFollowedArtists =  function(req){
     return new Promise(function(done, fail) {
         //testing: must turn cors off in browser
-        $.ajax({
-            url: 'http://localhost:8888/getFollowedArtists',
-            type:"POST",
-            data: {}
-        }).done(function(payload){
+        fetch('http://localhost:8888/getFollowedArtists', {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({auth:req.auth,user:req.user})
+        }).then(res => res.json())
+        .then(function(payload){
             console.log("retrieved: ",payload);
             done(payload)
         })
@@ -119,242 +131,237 @@ var getMyFollowedArtists =  function(){
 
 //static user methods
 
-var fetchStaticUser =  function(req){
-    return new Promise(function(done, fail) {
+    var fetchStaticUser =  function(req){
+        return new Promise(function(done, fail) {
 
-        fetch('http://localhost:8888/fetchStaticUser', {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-            mode: 'cors', // no-cors, *cors, same-origin
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({user:"Dan"})
-        }).then(res => res.json())
-            .then(function(res){
-                console.log("retrieved: ",res);
-                done(res)
-            })
-    })
-}
+            fetch('http://localhost:8888/fetchStaticUser', {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({user:"Dan"})
+            }).then(res => res.json())
+                .then(function(res){
+                    console.log("retrieved: ",res);
+                    done(res)
+                })
+        })
+    }
 
 //event methods
 
-var fetchEvents =  function(req){
-    return new Promise(function(done, fail) {
+    var fetchEvents =  function(req){
+        return new Promise(function(done, fail) {
 
-        //testing: dateFilter
-        var t = {start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"};
-        req.dateFilter = t;
+            //testing: dateFilter
+            var t = {start:"2020-03-11T16:36:07.100Z",end:"2020-03-16T16:36:07.100Z"};
+            req.dateFilter = t;
 
-        //example req
-        // req = {
-        //     metro:{displayName:"Columbus", id:9480},
-        //     dateFilter:t};
+            //example req
+            // req = {
+            //     metro:{displayName:"Columbus", id:9480},
+            //     dateFilter:t};
 
-        //note: cors bullshit
-        //ended up going back to using the extension to allow requests to be made w/out cors
-        //b/c if you change the mode here, you can't send fucking json? ffs
-        //https://stackoverflow.com/questions/54016068/empty-body-in-fetch-post-request
+            //note: cors bullshit
+            //ended up going back to using the extension to allow requests to be made w/out cors
+            //b/c if you change the mode here, you can't send fucking json? ffs
+            //https://stackoverflow.com/questions/54016068/empty-body-in-fetch-post-request
 
-        fetch('http://localhost:8888/resolveEvents', {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-            mode: 'cors', // no-cors, *cors, same-origin
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(req)
-        }).then(res => res.json())
-            .then(function(res){
-                console.log("retrieved: ",res);
-                done(res)
-            })
+            fetch('http://localhost:8888/resolveEvents', {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(req)
+            }).then(res => res.json())
+                .then(function(res){
+                    console.log("retrieved: ",res);
+                    done(res)
+                })
 
-        // $.ajax({
-        //     url: 'http://localhost:8888/resolveEvents',
-        //     type:"POST",
-        //     data: {data:JSON.stringify(param)}
-        //     //todo:[Object: null prototype] when trying to read
-        //     //data: JSON.stringify(param)
-        //     //data: param
-        // }).then(function(payload){
-        //     console.log("retrieved: ",payload);
-        //     done(payload)
-        // })
+            // $.ajax({
+            //     url: 'http://localhost:8888/resolveEvents',
+            //     type:"POST",
+            //     data: {data:JSON.stringify(param)}
+            //     //todo:[Object: null prototype] when trying to read
+            //     //data: JSON.stringify(param)
+            //     //data: param
+            // }).then(function(payload){
+            //     console.log("retrieved: ",payload);
+            //     done(payload)
+            // })
 
-        //testing:
-        // fakeFetch3().then(r =>{done(r)})
-    })
-}
+            //testing:
+            // fakeFetch3().then(r =>{done(r)})
+        })
+    }
 
 
-var getTopArtists =  function(req){
-    return new Promise(function(done, fail) {
-
-        fetch('http://localhost:8888/getTopArtists', {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-            mode: 'cors', // no-cors, *cors, same-origin
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        }).then(res => res.json())
-            .then(function(res){
-                console.log("retrieved: ",res);
-                done(res)
-            })
-    })
-}
+    var getTopArtists =  function(req){
+        return new Promise(function(done, fail) {
+            fetch('http://localhost:8888/getTopArtists', {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(req)
+            }).then(res => res.json())
+                .then(function(res){
+                    console.log("retrieved: ",res);
+                    done(res)
+                })
+        })
+    }
 
 //methods
 
-var setAccessToken =  function(tokenOb){
-    return new Promise(function(done, fail) {
-        console.log("$setAccessToken",tokenOb);
-        //console.warn("$setAccessToken FAKING ");
-        //var temp = "BQAx9x8Z3OCZDHx5whMSaKHFrOE-l57Z_L4wQB_3Je1ggqsGpzDUw80_tc6jq4ESp4ODyxGk2EabGtKkxFeEnwjFp46jwezyRJGgkTOpi4yfl6f87pdzo0LbDZ9PjwoE3hk58r856cvfAlAObE5qBVqPxpp0ADmPWWbJchuJVsB1vbtFpXSP5p8pSRD5t_rF4RNWcZfYEpIxdLSymL2Ji8bdm_9Ds61aWcGb1v3MGxlcjCMnnQtlQofj7E9uno1G3HnvEmjmQCEKjR6Htmzvyjtu5lc";
+    var getAuth =  function(code){
+        return new Promise(function(done, fail) {
+            console.log("code for accessToken fetch",code);
 
-        fetch('http://localhost:8888/setAccessToken', {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-            mode: 'cors', // no-cors, *cors, same-origin
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({access_token:tokenOb.access_token})
-            //todo: pass whole body for expiry notice?
-            //body: JSON.stringify({token:{...token,access_token:temp}})
-          // body: JSON.stringify({access_token:temp})
-        })
-            // .then(res => res.json())
-            .then(function(res){
-                console.log("login response: ",res);
-                done(res)
+            fetch('http://localhost:8888/getAuth', {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({code:code})
             })
-    })
-}
-
-var completeArtist =  function(param){
-    return new Promise(function(done, fail) {
-        $.ajax({
-            url: 'http://localhost:8888/completeArtist',
-            type:"POST",
-            data: {artistQuery:param}
-        }).done(function(payload){
-            console.log("retrieved: ",payload);
-            done(payload.result.body.artists.items)
+                .then(res => res.json())
+                .then(function(res){
+                    console.log("login response: ",res);
+                    done(res)
+                })
         })
+    }
 
-        //testing:
-        // fakeFetch3().then(r =>{done(r)})
-    })
-}
+    var completeArtist =  function(param){
+        return new Promise(function(done, fail) {
+            $.ajax({
+                url: 'http://localhost:8888/completeArtist',
+                type:"POST",
+                data: {artistQuery:param}
+            }).done(function(payload){
+                console.log("retrieved: ",payload);
+                done(payload.result.body.artists.items)
+            })
 
-var getArtistTopTracks  =  function(id){
-    return new Promise(function(done, fail) {
-        $.ajax({
-            url: 'http://localhost:8888/getArtistTopTracks',
-            type:"POST",
-            data: {id:id}
-        }).done(function(payload){
-            //console.log("retrieved: ",payload);
-            done(payload)
+            //testing:
+            // fakeFetch3().then(r =>{done(r)})
         })
-    })
-}
+    }
+
+    var getArtistTopTracks  =  function(id){
+        return new Promise(function(done, fail) {
+            $.ajax({
+                url: 'http://localhost:8888/getArtistTopTracks',
+                type:"POST",
+                data: {id:id}
+            }).done(function(payload){
+                //console.log("retrieved: ",payload);
+                done(payload)
+            })
+        })
+    }
 
 //-----------------------------------------------
 //deprecated vvv
 
-var getMySavedTracks =  function(){
-    return new Promise(function(done, fail) {
-        //testing: must turn cors off in browser
-        $.ajax({
-            url: 'http://localhost:8888/getMySavedTracks',
-            type:"POST",
-            data: {}
-        }).done(function(payload){
-            //console.log("retrieved: ",payload);
-            done(payload.items)
+    var getMySavedTracks =  function(){
+        return new Promise(function(done, fail) {
+            //testing: must turn cors off in browser
+            $.ajax({
+                url: 'http://localhost:8888/getMySavedTracks',
+                type:"POST",
+                data: {}
+            }).done(function(payload){
+                //console.log("retrieved: ",payload);
+                done(payload.items)
+            })
         })
-    })
-}
+    }
 
-var fetchArtistGenres =  function(playlists){
-    return new Promise(function(done, fail) {
+    var fetchArtistGenres =  function(playlists){
+        return new Promise(function(done, fail) {
 
-        //testing: must turn cors off in browser
+            //testing: must turn cors off in browser
 
-        $.ajax({
-            url: 'http://localhost:8888/resolvePlaylists',
-            type:"POST",
-            data: {playlists:JSON.stringify(playlists)}
-        }).done(function(payload){
-            //console.log("retrieved: ",payload);
-            done(payload)
+            $.ajax({
+                url: 'http://localhost:8888/resolvePlaylists',
+                type:"POST",
+                data: {playlists:JSON.stringify(playlists)}
+            }).done(function(payload){
+                //console.log("retrieved: ",payload);
+                done(payload)
+            })
         })
-    })
-}
+    }
 
 
-var getToken =  function(playlists){
-    return new Promise(function(done, fail) {
+    var getToken =  function(playlists){
+        return new Promise(function(done, fail) {
 
-        //testing: must turn cors off in browser
+            //testing: must turn cors off in browser
 
-        $.ajax({
-            url: 'http://localhost:8888/getToken',
-            type:"POST",
-            // data: {playlists:JSON.stringify(playlists)}
-        }).done(function(payload){
-            console.log("retrieved token: ",payload);
-            done(payload)
+            $.ajax({
+                url: 'http://localhost:8888/getToken',
+                type:"POST",
+                // data: {playlists:JSON.stringify(playlists)}
+            }).done(function(payload){
+                console.log("retrieved token: ",payload);
+                done(payload)
+            })
         })
-    })
-}
+    }
 
 //-----------------------------------------------
 //todos test stuff
 
-const addTodo = text =>
-    delay(200).then(() => {
-        const todo = {
-            id: counter++,
-            text,
-            completed: false
-        };
-        fakeDatabase.todos.push(todo);
-        return todo;
-    });
+    const addTodo = text =>
+        delay(200).then(() => {
+            const todo = {
+                id: counter++,
+                text,
+                completed: false
+            };
+            fakeDatabase.todos.push(todo);
+            return todo;
+        });
 
-const updateTodo = (id, {text, completed}) =>
-    delay(200).then(() => {
-        const todo = fakeDatabase.todos.find(t => t.id === id);
-        todo.text = text === undefined ? todo.text : text;
-        todo.completed = completed === undefined ? todo.completed : completed;
-        return todo;
-    });
+    const updateTodo = (id, {text, completed}) =>
+        delay(200).then(() => {
+            const todo = fakeDatabase.todos.find(t => t.id === id);
+            todo.text = text === undefined ? todo.text : text;
+            todo.completed = completed === undefined ? todo.completed : completed;
+            return todo;
+        });
 
-const deleteTodo = (id) =>
-    delay(200).then(() => {
-        let deletedTodo = fakeDatabase.todos.find(t => t.id === id);
-        fakeDatabase.todos = fakeDatabase.todos.filter(t => t.id !== id);
-        return deletedTodo;
-    });
+    const deleteTodo = (id) =>
+        delay(200).then(() => {
+            let deletedTodo = fakeDatabase.todos.find(t => t.id === id);
+            fakeDatabase.todos = fakeDatabase.todos.filter(t => t.id !== id);
+            return deletedTodo;
+        });
 
-export default {
-    fetchTodos,
-    fetchTodo,
-    addTodo,
-    updateTodo,
-    deleteTodo,
-    fetchPlaylists,
-    fetchPlaylistsResolved,
-    fetchEvents,
-    getMySavedTracks,
-    getMyFollowedArtists,
-    completeArtist,
-    getArtistTopTracks,
-    getToken,
-    getTopArtists,
-    fetchStaticUser,
-    setAccessToken
+    export default {
+        fetchTodos,
+        fetchTodo,
+        addTodo,
+        updateTodo,
+        deleteTodo,
+        fetchPlaylists,
+        fetchPlaylistsResolved,
+        fetchEvents,
+        getMySavedTracks,
+        getMyFollowedArtists,
+        completeArtist,
+        getArtistTopTracks,
+        getToken,
+        getTopArtists,
+        fetchStaticUser,
+        getAuth
 
-}
+    }

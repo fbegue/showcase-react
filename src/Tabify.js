@@ -83,6 +83,10 @@ export default function Tabify() {
 	//console.log("$params",params);
 	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
 	console.log("$globalUI",globalUI);
+	//note: to be used as a base for every request
+
+	//todo: put user in
+	let req = {user:null,auth:globalUI};
 
 	function useDidUpdateEffect(fn,inputs) {
 		const didMountRef = useRef(false);
@@ -101,16 +105,17 @@ export default function Tabify() {
 		}, inputs);
 	}
 
-	//todo: make a private github gist about the utility of this - BUT NOT HERE :p
+
 	//prevent useeffect from triggering on first render
 	//essentially adding a dependency of '2nd render = true'
 	//https://stackoverflow.com/questions/53179075/with-useeffect-how-can-i-skip-applying-an-effect-upon-the-initial-render
 	var slow = function(){ setTimeout(e=>{console.log("slow!");fetchTabContent()},2000)}
 	//useDidUpdateEffect(slow,[globalUI])
 
-	//testing:
 	function fetchTabContent(){
 		var userProms = [];
+
+		//testing:
 		userProms.push(alasqlAPI.followedArtists(user))
 		userProms.push(alasqlAPI.getTopArtists(user))
 		Promise.all(userProms)
@@ -129,12 +134,6 @@ export default function Tabify() {
 				console.log(err);
 			})
 
-		// alasqlAPI.getTopArtists(user)
-		// 	.then(r =>{
-		// 		dispatch({type: 'init', payload: r,user:user,context:'artists'});
-		// 	},err =>{
-		// 		console.log(err);
-		// 	})
 
 		alasqlAPI.fetchPlaylistsResolved()
 			.then(r =>{
@@ -162,12 +161,13 @@ export default function Tabify() {
 		// 	})
 	}
 
-	//testing:
+
 	useEffect(() => {
+		//testing: getting auth system in place
 
 		var userProms = [];
-		userProms.push(alasqlAPI.followedArtists(user))
-		userProms.push(alasqlAPI.getTopArtists(user))
+		userProms.push(alasqlAPI.followedArtists(req))
+		  userProms.push(alasqlAPI.getTopArtists(req))
 		Promise.all(userProms)
 			.then(r =>{
 
@@ -184,15 +184,7 @@ export default function Tabify() {
 				console.log(err);
 			})
 
-		// alasqlAPI.getTopArtists(user)
-		// 	.then(r =>{
-		// 		dispatch({type: 'init', payload: r,user:user,context:'artists'});
-		// 	},err =>{
-		// 		console.log(err);
-		// 	})
-
-		//testing:works fine
-		alasqlAPI.fetchPlaylistsResolved()
+		alasqlAPI.fetchPlaylistsResolved(req)
 			.then(r =>{
 				dispatch({type: 'init', payload: r,user:user,context:'playlists'});
 			},err =>{
@@ -209,7 +201,7 @@ export default function Tabify() {
 		// 		console.log(err);
 		// 	})
 
-		//testing:works fine
+		//todo: what does this do again? was this for other users or what?
 		// alasqlAPI.fetchPlaylists()
 		// 	.then(r =>{
 		// 		dispatch({type: 'init', payload: r,user:user,context:'playlists'});
@@ -222,19 +214,19 @@ export default function Tabify() {
 	//-----------------------------
 	let control = Control.useContainer();
 
-	//testing:
+
 	//todo: we're setting deps = metro here so this autoruns
-	// useEffect(() => {
-	// 	console.log("useEffect fetchEvents on control.metro dependency update",control.metro);
-	// 	//todo: put date picker
-	//
-	// 	alasqlAPI.fetchEvents({metro:{id:control.metro}})
-	// 		.then(r =>{
-	// 			dispatch({type: 'init', payload: r,context:'events'});
-	// 		},err =>{
-	// 			console.log(err);
-	// 		})
-	// },[control.metro])
+	useEffect(() => {
+		console.log("useEffect fetchEvents on control.metro dependency update",control.metro);
+		//todo: put date picker
+
+		alasqlAPI.fetchEvents({metro:{id:control.metro}})
+			.then(r =>{
+				dispatch({type: 'init', payload: r,context:'events'});
+			},err =>{
+				console.log(err);
+			})
+	},[control.metro])
 
 	//-----------------------------
 	//sending this along 'seemed' to work but didn't test hard
@@ -423,7 +415,7 @@ export default function Tabify() {
 									},
 
 								]}
-								data={state[user.id + "_artists"]}
+								data={state[user.id + "_artists"].filter(i =>{return i.source === 'saved'})}
 								options={{
 									search: true,
 									filtering: true,

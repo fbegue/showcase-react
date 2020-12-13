@@ -56,7 +56,16 @@ sources_subset.forEach(s =>{
 //-----------------------------------------------------
 
 export const GLOBAL_STATE_VAR = makeVar(initialState);
-export const GLOBAL_UI_VAR = makeVar({access_token:false});
+
+//testing: set on page refresh from localstorage
+const params = JSON.parse(localStorage.getItem('params'));
+console.log("params of pageload",params);
+
+//note: did this export below
+let GLOBAL_UI_VAR;
+params ? GLOBAL_UI_VAR = makeVar({access_token:params.access_token,refresh_token:params.refresh_token,user:params.user}):
+	GLOBAL_UI_VAR = makeVar({access_token:false,refresh_token:false,user:null});
+
 // export const GLOBAL_STATE_VAR = makeVar({node:[{id:1,name:"agg",data:[]}]});
 
 export const config = {};
@@ -134,7 +143,7 @@ asyncCall();
 //   })
 // })
 
-export {apolloClient,localforage};
+export {apolloClient,localforage,GLOBAL_UI_VAR};
 const withApolloProvider = (WrappedComponent) => {
 
 	return (props) => (

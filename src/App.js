@@ -189,42 +189,12 @@ function App(props) {
     //
     // let [loggedIn, setLoggedIn] = useState(!!token);
 
-    //testing: hide in .env
-    //https://stackoverflow.com/questions/49579028/adding-an-env-file-to-react-project
 
-    var REACT_APP_CLIENT_ID="0e7ef13646c9410293a0119e652b35f7"
-    var REACT_APP_AUTHORIZE_URL= "https://accounts.spotify.com/authorize"
-    var REACT_APP_REDIRECT_URL= "http://localhost:3000/redirect"
-
-    let all_scopes = ["playlist-read-private", "playlist-modify-private", "playlist-modify-public", "playlist-read-collaborative", "user-modify-playback-state", "user-read-currently-playing", "user-read-playback-state", "user-top-read", "user-read-recently-played", "app-remote-control", "streaming", "user-read-birthdate", "user-read-email", "user-read-private", "user-follow-read", "user-follow-modify", "user-library-modify", "user-library-read"];
-    let scopes = ["playlist-read-private","user-library-read","user-top-read"];
-    function getScopes(){
-        //https://developer.spotify.com/documentation/general/guides/scopes/
-        return "ugc-image-upload user-read-recently-played user-top-read user-read-playback-position user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative user-follow-modify user-follow-read user-library-modify user-library-read user-read-email user-read-private"
-        //return scopes.join(" ")
-    }
-    const handleLogin = () => {
-        window.location = `${REACT_APP_AUTHORIZE_URL}?client_id=${REACT_APP_CLIENT_ID}&redirect_uri=${REACT_APP_REDIRECT_URL}&response_type=token&show_dialog=true&scope=` + encodeURIComponent(getScopes()) ;
-    };
-
-    const params = JSON.parse(localStorage.getItem('params'));
-
-    //
     const globalUI = useReactiveVar(GLOBAL_UI_VAR);
     console.log("$globalUI-App",globalUI);
     //console.log(globalUI.accessToken.accessToken !== undefined);
     //TODO: STANDARDIZE TOKEN NAMES :p
     //let [auth, setAuth] = useState(false);
-
-    // if(globalUI.access_token.hasOwnProperty('access_token')){
-    //     console.log("setAuth");
-    //     setAuth(true)
-    // }
-    // console.log(globalUI.access_token.hasOwnProperty('access_token'));
-    // function test(){
-    //     return globalUI.access_token.hasOwnProperty('accessToken');
-    // }
-
 
     return (
         <Store>
@@ -259,20 +229,8 @@ function App(props) {
                         />
                     </div>
                     <div style={{width:"50em"}}>
-                        {/*href='http://localhost:3000/login'*/}
-
-                        {!(params && params.access_token) &&
-                        <button onClick={handleLogin}>
-                            Login to spotify
-                        </button>
-                        }
-                        {params && params.access_token &&
-                        <button onClick={handleLogin}>
-                            Logged in {params.access_token}
-                        </button>
-                        }
                         {/*testing:*/}
-                        {params && params.access_token &&
+                        {globalUI.access_token &&
                         <Tabify></Tabify>
                         }
                         {/*{ auth && <Tabify></Tabify>}*/}

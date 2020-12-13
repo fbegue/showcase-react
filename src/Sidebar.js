@@ -28,8 +28,9 @@ import {useDB, useNormalizedApi} from './db'
 //todo:
 import alasqlAPI from "./alasql/index";
 import Store, {Context} from "./alasql/Store";
-import { GLOBAL_STATE_VAR } from './alasql/withApolloProvider';
+import { GLOBAL_STATE_VAR,GLOBAL_UI_VAR} from './alasql/withApolloProvider';
 import {useQuery,useReactiveVar} from "@apollo/react-hooks";
+import Profile from './components/Profile'
 
 import Player,{} from './Player'
 import Map from "./Map";
@@ -359,6 +360,11 @@ function Sidebar(props) {
     )
   }
 
+
+  //profile
+  const globalUI = useReactiveVar(GLOBAL_UI_VAR);
+  //console.log("$globalUI",globalUI);
+
   return (
       <div className={classes.drawer}>
         {/*note: tabs at the top here */}
@@ -380,6 +386,8 @@ function Sidebar(props) {
 
         {/*testing*/}
         {/*<Player  id={control.id} play={control.play}/>*/}
+
+        <Profile user={globalUI.user}/>
         <Divider />
         <div>
           {/*todo: idea is to made node more sophisicated (able to report who gave what)*/}
