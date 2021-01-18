@@ -56,6 +56,7 @@ sources_subset.forEach(s =>{
 //-----------------------------------------------------
 
 export const GLOBAL_STATE_VAR = makeVar(initialState);
+export const NODES_STATE_VAR = makeVar({agg:[],saved:[]});
 
 //testing: set on page refresh from localstorage
 const params = JSON.parse(localStorage.getItem('params'));

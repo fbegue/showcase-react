@@ -3,6 +3,7 @@ var tables = {};
 tables["playlists"] = [];
 tables["artists"] = [];
 tables["events"] = [];
+tables["tracks"] = [];
 // tables["artistSearchSelection"] = [];
 
 
@@ -15,6 +16,7 @@ tables["users"]["dacandyman01"] = {
 	artists: [],
 	//artists from albums
 	albums:  [],
+	tracks:[],
 	node:[]
 }
 

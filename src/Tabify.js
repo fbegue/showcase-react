@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState,useRef} from 'react';
+import React, {useContext, useEffect, useState,useRef,forwardRef } from 'react';
 //todo: this shit is outdated AF but was so simple I couldn't refuse
 //https://github.com/mikechabot/react-tabify#color-theme
 //specifically it uses glamorous which has been ditched for emotion as a theme provider
@@ -10,8 +10,14 @@ import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ClearIcon from '@material-ui/icons/Clear';
+import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
+import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
 import {Context} from "./alasql/Store";
 import alasqlAPI from "./alasql";
+import api from "./api/api.js"
 
 import ChipsArray from "./ChipsArray";
 import Search from './Search'
@@ -23,6 +29,7 @@ import DiscreteSlider from "./Slider";
 import {initUser} from './alasql/Store';
 import { GLOBAL_UI_VAR } from './alasql/withApolloProvider';
 import {useQuery,useReactiveVar} from "@apollo/react-hooks";
+
 
 // const styles = {
 // 	fontFamily: "sans-serif",
@@ -77,6 +84,7 @@ function getChips(genres){
 export default function Tabify() {
 
 	//todo: move this somewhere else higher up
+	//todo: rename this instance to 'global state'
 	const [state, dispatch] = useContext(Context);
 
 	//const params = JSON.parse(localStorage.getItem('params'));
@@ -109,77 +117,29 @@ export default function Tabify() {
 	//prevent useeffect from triggering on first render
 	//essentially adding a dependency of '2nd render = true'
 	//https://stackoverflow.com/questions/53179075/with-useeffect-how-can-i-skip-applying-an-effect-upon-the-initial-render
-	var slow = function(){ setTimeout(e=>{console.log("slow!");fetchTabContent()},2000)}
-	//useDidUpdateEffect(slow,[globalUI])
-
-	function fetchTabContent(){
-		var userProms = [];
-
-		//testing:
-		userProms.push(alasqlAPI.followedArtists(user))
-		userProms.push(alasqlAPI.getTopArtists(user))
-		Promise.all(userProms)
-			.then(r =>{
-
-				//testing: assigning object identity
-				//probably should be happening on the back
-				r[0].forEach(a =>{a.source = 'saved'})
-				r[1].forEach(a =>{a.source = 'top'})
-
-				//terms have terms, so we don't need to delineate there
-				var pay = [];pay = pay.concat(r[0]);pay= pay.concat(r[1])
-				//unwind getTopArtists before initing
-				dispatch({type: 'init', payload:pay,user:user,context:'artists'});
-			},err =>{
-				console.log(err);
-			})
-
-
-		alasqlAPI.fetchPlaylistsResolved()
-			.then(r =>{
-				dispatch({type: 'init', payload: r,user:user,context:'playlists'});
-			},err =>{
-				console.log(err);
-			})
-
-		//note: decided I would do this on demand for clicks around the app
-		//(so currently not in use)
-		//but for events - I would do the lookup on the server ahead of time
-		// alasqlAPI.getArtistTopTracks('2dI9IuajQnLR5dLxHjTTqU')
-		// 	.then(r =>{
-		// 		console.log("$getArtistTopTracks",r);
-		// 	},err =>{
-		// 		console.log(err);
-		// 	})
-
-
-		// alasqlAPI.fetchPlaylists()
-		// 	.then(r =>{
-		// 		dispatch({type: 'init', payload: r,user:user,context:'playlists'});
-		// 	},err =>{
-		// 		console.log(err);
-		// 	})
-	}
+	var slow = function(){ setTimeout(e=>{console.log("do something");},2000)}
 
 
 	useEffect(() => {
-		//testing: getting auth system in place
 
 		var userProms = [];
 		userProms.push(alasqlAPI.followedArtists(req))
-		  userProms.push(alasqlAPI.getTopArtists(req))
+		userProms.push(alasqlAPI.getTopArtists(req))
+		userProms.push(api.getRecentlyPlayedTracks(req))
 		Promise.all(userProms)
 			.then(r =>{
 
-				//testing: assigning object identity
+				//testing:
 				//probably should be happening on the back
 				r[0].forEach(a =>{a.source = 'saved'})
 				r[1].forEach(a =>{a.source = 'top'})
 
-				//terms have terms, so we don't need to delineate there
-				var pay = [];pay = pay.concat(r[0]);pay= pay.concat(r[1])
-				//unwind getTopArtists before initing
+				//all these artist's have 'sources' so they all end up in here together
+				var pay = [];pay = pay.concat(r[0]);pay= pay.concat(r[1]);
+				//pay= pay.concat(r[2]['artists'])
+
 				dispatch({type: 'init', payload:pay,user:user,context:'artists'});
+				dispatch({type: 'init', payload:r[2].tracks,user:user,context:'tracks'});
 			},err =>{
 				console.log(err);
 			})
@@ -214,19 +174,28 @@ export default function Tabify() {
 	//-----------------------------
 	let control = Control.useContainer();
 
+	//testing: beware naming (there's another dispatch around)
+	const [globalState, dispatchGlobal] = useContext(Context);
 
-	//todo: we're setting deps = metro here so this autoruns
+	//anytime metro selection changes, we recalc events based on the state of the new selection
+	//todo: this executes a fetch on every metro selection switch
+	//but in reality we should be caching
+
 	useEffect(() => {
-		console.log("useEffect fetchEvents on control.metro dependency update",control.metro);
-		//todo: put date picker
+		if(globalState.events.length === 0){
+			console.log("ONE TIME EVENT FETCH");
+			alasqlAPI.fetchEvents({metros:control.metro})
+				.then(r =>{
+					dispatch({type: 'update', payload: r,context:'events', control:control});
+				},err =>{
+					console.log(err);
+				})
+		}else{
+			console.log("UPDATING ON METRO SELECT",control.metro);
+			dispatch({type: 'update', payload: [],context:'events', control:control});
+		}
 
-		alasqlAPI.fetchEvents({metro:{id:control.metro}})
-			.then(r =>{
-				dispatch({type: 'init', payload: r,context:'events'});
-			},err =>{
-				console.log(err);
-			})
-	},[control.metro])
+	},[control.metro,control.startDate,control.endDate])
 
 	//-----------------------------
 	//sending this along 'seemed' to work but didn't test hard
@@ -276,15 +245,14 @@ export default function Tabify() {
 		//but can't (easily - maybe could pass the current state value here)
 		//access the current state value
 
-		dispatch({type: 'select', payload:null,user:user,context:'artists'});
+		dispatch({type: 'select', payload:null,user:user,context:'artists',control:control});
 		//dispatch({type: 'select', payload:null,user:user,context:'artists',state:state:globalState});
 	}
 	var handleSelectGuest = function(rows){
-		//confused on how to get selected row? seems like it should be pretty simple?
-		//turns out I'm just accessing the 'checked' rows directly later, so null payload here
+		//here I'm just accessing the 'checked' rows directly later, so null payload here
 		//console.log("selected",rows.length);
 
-		dispatch({type: 'select', payload:null,user:user,context:'artists'});
+		dispatch({type: 'select', payload:null,user:user,context:'artists',control:control});
 
 
 	}
@@ -294,15 +262,19 @@ export default function Tabify() {
 		//seems like it should be pretty simple?
 		//for now just take one - otherwise do a delta? :(
 		console.log("selected",rows.length);
-		dispatch({type: 'select', payload:rows[0],user:user,context:'playlists'});
+		dispatch({type: 'select', payload:rows[0],user:user,context:'playlists',control:control});
 	}
+
+	var handleSelectRecent= function(rows){
+		dispatch({type: 'select', payload:null,user:user,context:'tracks',control:control});
+	}
+
 
 	function getRandomInt(max) {
 		max = 99999999;
 		return Math.floor(Math.random() * Math.floor(max));
 	}
 	var prepPlay = function(playob,mode){
-
 
 
 		var chips = [];
@@ -329,18 +301,19 @@ export default function Tabify() {
 
 				var artists = [];
 				var artistsSorted = [];
+				//console.log("$prepPlay",playob);
 				Object.keys(playob.artistFreq).forEach(k =>{
 					//todo: should be faster lookup on actual db
 					tables["artists"].forEach(a =>{
-						k === a.id ?  artists.push({id:a.id,name:a.name,freq:playob.artistFreq[k]}):{};
+						k === a.id ?  artists.push({id:a.id,name:a.name,freq:playob.artistFreq[k],familyAgg:a.familyAgg}):{};
 					})
 				})
 				artistsSorted = _.sortBy(artists, function (r) {return r.freq}).reverse()
-
+				//debugger;
 				//take top 3
 				//console.log("$artists",artistsSorted);
 				for(var x =0;x < 3 && x < artistsSorted.length  ; x++){
-					chips.push({id:getRandomInt(),name:artistsSorted[x].name})
+					chips.push({id:getRandomInt(),name:artistsSorted[x].name,familyAgg:artistsSorted[x].familyAgg})
 				}
 				break;
 			case'genres':
@@ -381,6 +354,49 @@ export default function Tabify() {
 			})
 	}
 
+	function prepTracks(rowData){
+		//console.log("$prepTracks",rowData);
+		var genres = [];
+		rowData.artists.forEach(a =>{
+			genres = genres.concat(a.genres)
+		});
+		genres = _.uniqBy(genres, function(n) {return n.id;});
+		//return <div></div>
+		return(<ChipsArray chipData={genres}/>)
+	}
+
+	function handlePlay(item) {
+		console.log("$handlePlay",item);
+		control.setId(item.id);
+		control.togglePlay(!control.play);
+	}
+
+	const options = {
+		search: true,
+		filtering: true,
+		selection: true,
+		tableLayout:"fixed",
+		paging:true,
+		pageSize:10,
+		showFirstLastPageButtons:false,
+		pageSizeOptions:[10,20,30],
+	}
+	const icons = { SortArrow: forwardRef((
+			props,
+			ref) => <ArrowDropDownIcon{...props} ref={ref}/>),
+		Search: forwardRef((
+			props,
+			ref) => <div{...props} ref={ref}/>),
+		ResetSearch: forwardRef((
+			props,
+			ref) => <ClearIcon{...props} ref={ref}/>),
+		NextPage: forwardRef((
+			props,
+			ref) => <ArrowForwardIosIcon{...props} ref={ref}/>),
+		PreviousPage: forwardRef((
+			props,
+			ref) => <ArrowBackIosIcon{...props} ref={ref}/>)
+	}
 
 	return(
 		// style={styles}
@@ -390,6 +406,89 @@ export default function Tabify() {
 				{/*<Tab label="Search">*/}
 				{/*	<Search></Search>*/}
 				{/*</Tab>*/}
+				<Tab label="My Profile">
+					<Tabs>
+						<Tab label="Recent Listening">
+							<MaterialTable
+								title=""
+								columns={[
+									{
+										field: 'album.images[0]',
+										title: '',
+										render: rowData => <img src={rowData.album.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
+										filtering:false,
+										width:"5em"
+									},
+									{ title: 'Name', field: 'name', filtering:false,
+										render: rowData =>
+											<div>
+												<span><PlayCircleOutlineIcon
+													fontSize={'small'} onClick={() => handlePlay(rowData)}>
+												</PlayCircleOutlineIcon></span>
+												<span>{rowData.name}</span>
+												<div style={{fontSize:".9em",color:"#a4a4a4"}}>
+													by {rowData.artists.map((item,i) => (
+													<span  key={item.id}>
+													<span>{item.name}</span>
+														{rowData.artists.length - 1 > i && <span>,{'\u00A0'}</span>}
+												</span>
+												))}
+												</div>
+											</div>},
+									{
+										field: 'genres',
+										title: 'genres',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => prepTracks(rowData),
+										filtering:false,
+										width:"20em"
+									},
+
+								]}
+								data={state[user.id + "_tracks"]}
+								options={options}
+								icons={icons}
+								onSelectionChange={(rows) => handleSelectRecent(rows,'recent')}
+							/>
+						</Tab>
+						<Tab label="Your Top Artists">
+							{/*<div>{term.toString()}</div>*/}
+							<DiscreteSlider handleChange={(v) =>{setTerm(v)}}/>
+							<MaterialTable
+								title=""
+								columns={[
+									{
+										field: 'images[0]',
+										title: '',
+										render: rowData => <img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
+										filtering:false,
+										width:"5em"
+									},
+									{ title: 'Name', field: 'name', filtering:false},
+									{
+										field: 'genres',
+										title: 'genres',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => <ChipsArray chipData={rowData.genres}/>,
+										filtering:false,
+										width:"20em"
+									},
+
+								]}
+								data={state[user.id + "_artists"].filter(i =>{return i.term === term})}
+								options={{
+									search: true,
+									filtering: true,
+									selection: true,
+									tableLayout:"fixed"
+								}}
+								onSelectionChange={(rows) => handleSelectSaved(rows,'top')}
+							/>
+
+						</Tab>
+						<Tab label="Subtab 2.3">Tab 2 Content 3</Tab>
+					</Tabs>
+				</Tab>
 				<Tab label="My Library">
 					<Tabs>
 						<Tab label="Saved Artists">
@@ -427,31 +526,48 @@ export default function Tabify() {
 
 						</Tab>
 						<Tab label="Playlists">
+							{/*note: customizing material table
+							- the default search works on text provided by the column's 'field' attribute
+							- thinking 'customFilterAndSearch' can be used to setup searches for custom rendered columns
+							  https://github.com/mbrn/material-table/issues/67
+
+							*/}
 							<MaterialTable
+								icons={icons}
 								title=""
 								columns={[
 									{
-										field: 'images[0]',
+										field: 'name',
 										title: '',
-										render: rowData => <img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
-										filtering:false,
-										width:"5em"
+										render: rowData =>
+											<div>
+												<div>{rowData.name}</div>
+												<img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>
+												<div style={{fontSize:".7em",color:"#a4a4a4"}}>{rowData.owner.display_name}</div>
+											</div>,
+										// sorting:false,
+										width:"10em"
 									},
-									{ title: 'Name', field: 'name', filtering:false},
-									{
-										field: 'families',
-										title: 'families',
-										//ender: rowData => getChips(rowData.genres),
-										render: rowData => prepPlay(rowData,'families'),
-										filtering:false,
-										width:"20em"
-									},
+									//testing: not sure where to put this yet
+									//was thinking maybe under 'Top Genres' could have 'see families' which would expose
+									//how those genres map up into famlilies
+
+									// {
+									// 	field: 'families',
+									// 	title: 'families',
+									// 	//ender: rowData => getChips(rowData.genres),
+									// 	render: rowData => prepPlay(rowData,'families'),
+									// 	filtering:false,
+									// 	width:"20em"
+									// },
 									{
 										field: 'artists',
 										title: 'Top Artists',
-										//ender: rowData => getChips(rowData.genres),
 										render: rowData => prepPlay(rowData,'artists'),
-										filtering:false,
+										// customFilterAndSearch: (value, rowData) => {
+										// 	//todo:
+										// },
+										sorting:false,
 										width:"20em"
 									},
 									{
@@ -459,17 +575,33 @@ export default function Tabify() {
 										title: 'Top Genres',
 										//ender: rowData => getChips(rowData.genres),
 										render: rowData => prepPlay(rowData,'genres'),
-										filtering:false,
-										width:"20em"
+										sorting:false,
+										width:"15em"
 									},
-
+									{
+										field: 'tracks.total',
+										title: 'Length',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData =>
+											<div>
+												{rowData.tracks.total}
+											</div>,
+										sorting:true,
+										customSort: (a, b) => a.tracks.total - b.tracks.total,
+										width:"15em"
+									},
 								]}
 								data={state[user.id + "_playlists"]}
 								options={{
 									search: true,
-									filtering: true,
+									searchFieldStyle:{marginRight:"1em"},
+									sorting: true,
 									selection: true,
-									tableLayout:"fixed"
+									tableLayout:"fixed",
+									paging:true,
+									pageSize:10,
+									showFirstLastPageButtons:false,
+									pageSizeOptions:[10,20,30],
 								}}
 								onSelectionChange={(rows) => handleSelectPlaylist(rows)}
 							/>
@@ -477,47 +609,6 @@ export default function Tabify() {
 
 						</Tab>
 						<Tab label="Subtab 1.3">Tab 1 Content 3</Tab>
-					</Tabs>
-				</Tab>
-				<Tab label="My Profile">
-					<Tabs>
-						<Tab label="Your Top Artists">
-							{/*<div>{term.toString()}</div>*/}
-							<DiscreteSlider handleChange={(v) =>{setTerm(v)}}/>
-							<MaterialTable
-								title=""
-								columns={[
-									{
-										field: 'images[0]',
-										title: '',
-										render: rowData => <img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
-										filtering:false,
-										width:"5em"
-									},
-									{ title: 'Name', field: 'name', filtering:false},
-									{
-										field: 'genres',
-										title: 'genres',
-										//ender: rowData => getChips(rowData.genres),
-										render: rowData => <ChipsArray chipData={rowData.genres}/>,
-										filtering:false,
-										width:"20em"
-									},
-
-								]}
-								data={state[user.id + "_artists"].filter(i =>{return i.term === term})}
-								options={{
-									search: true,
-									filtering: true,
-									selection: true,
-									tableLayout:"fixed"
-								}}
-								onSelectionChange={(rows) => handleSelectSaved(rows,'top')}
-							/>
-
-						</Tab>
-						<Tab label="Subtab 2.2">Tab 2 Content 2</Tab>
-						<Tab label="Subtab 2.3">Tab 2 Content 3</Tab>
 					</Tabs>
 				</Tab>
 				<Tab label="My Friends">

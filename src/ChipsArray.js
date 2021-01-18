@@ -17,6 +17,7 @@ export default function ChipsArray(props) {
 
 	//var classes = {root:"root",chip:"chip"}
 	const classes = useStyles();
+	//console.log("$classes",classes);
 	//---------------------------------------------------------------------
 	//note: this a temporary thing anyways but really belongs in families
 	//it would be there except for the classes bit here
@@ -50,8 +51,12 @@ export default function ChipsArray(props) {
 		return match;
 	}
 
+	//produce a color for the chip:
+	// - the chip is a genre = lookup it's genre name color
+	// - the chip is an artist = look up its familyAgg color
 
 	function getClass(data){
+		//console.log(classes);
 		//console.log(data.name, genreFam_map[data.name]);
 		//if the genre is already mapped, return its family
 		//todo: not sure what decision to make here when they have < 1 family
@@ -59,26 +64,53 @@ export default function ChipsArray(props) {
 		//in this example it might be pertinent to just ignore my outdated listing
 		//if the genre contains a family name, but something to think about in general
 
+
 		var f = (genreFam_map[data.name] ? genreFam_map[data.name][0] : specialLogic[data.name] || null);
-		if(f){
+
+		//added step for artists
+		if(data.familyAgg){
+			//console.log("$familyAgg",data.familyAgg);
+			return classes[data.familyAgg]
+		}
+		else if(f){
 			//if its one that needs normalized, look that up instead
 			return classes[f] || classes[familyNormal[f]]
 		}
 		else if(!(classes[f])){
 			// else if(!(classes[f]) && (getLike(data.name) !== null)){
 			var newFam = getLike(data.name);
-			//console.log("$",newFam);
-			return classes[newFam] || classes[familyNormal[newFam]]
-		}
-		else{
-			//console.log("default");
-			return "default"
+
+			//note: the very last condition here is the catch unknown
+			return classes[newFam] || classes[familyNormal[newFam]] ||  classes["unknown"]
 		}
 	}
+
+	//give the genres from an event's artist that matches an outline
+	//just compared to the familyAgg we passed in to to compare which
+	//was with the artist already
+
+	//todo: does nothing for playlists (need to analyze many familyAggs on many artists)
+	function getVariant(data){
+
+		if(data.family_name && props.familyAgg){
+			if(data.family_name === props.familyAgg){
+				return 'outlined'
+			}
+		}
+		return 'default'
+	}
+
 	//---------------------------------------------------------------------
 
 	const [chipData, setChipData] = React.useState(props.chipData);
-	//console.log("$chipData",props.chipData);
+
+	//note: didn't think this would work in place b/c of state? hmph
+	chipData.sort( (e1,e2) =>{
+		var ret = 0;
+		e2.family_name === props.familyAgg ? ret=1:ret= -1;
+		return ret;
+	})
+
 	//console.log(classes.colorPrimary);
 	//console.log(typeof chipData[0].name);
 
@@ -101,11 +133,13 @@ export default function ChipsArray(props) {
 						label={data.name}
 						className={classes.chip}
 						color="primary"
+						variant={getVariant(data)}
 						classes={{
 							//root: classes.root,
 							//todo: non-genred events catch
-							colorPrimary:data.name?getClass(data):'default'
-
+							// colorPrimary:data.name?getClass(data):'default'
+							colorPrimary:getClass(data),
+							// outlinedPrimary:getClass(data)
 							//note: again really not fucking understanding this lol
 							//colorPrimary:classes.colorPrimary
 							//colorPrimary:getColor()

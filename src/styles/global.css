@@ -1,0 +1,10 @@
+/*depreciated: realized I don't need css variables for this*/
+.fam-pop{
+    background: var(--pop);
+}
+
+.fam-pop-2{
+    filter:brightness(90%);
+    filter:opacity(50%);
+    background: var(--pop);
+}

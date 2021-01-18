@@ -12,6 +12,10 @@ import {Context} from './Store'
 //fix this
 import tables from './tables'
 
+//todo: at some point, I think this file became irrelevant
+//why go thru here and then the API? b/c I thought I would be performing a lot more
+//side effects here and wanted to keep the API code purely about the network business?
+
 const alasqlAPI = {
 
 	fetchPlaylists: async (user) => {

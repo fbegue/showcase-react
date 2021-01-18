@@ -30,6 +30,9 @@ function Map(props) {
 	var toggleMap = {};
 	states['OH'].forEach(s =>{
 		toggleMap[s.id] = 'default'
+		if(props.default.id === s.id){
+			toggleMap[s.id] = 'selected'
+		}
 	})
 
 //{"displayName": "Salt Lake City", "id":13560}
@@ -40,25 +43,11 @@ function Map(props) {
 
 	const setSelect = (e,metro) => {
 		console.log("setSelect",metro);
-		//testing: tried all I could to use these values but react just doesn't work like that
-		//g.selected = "blue"
-		//g.selected = !g.selected;
-		//e.target.classList = (g.selected ? "selected":"unselected");
 
+		color[metro.id] === 'selected' ? setColor({...color,[metro.id]:'default'})
+			:setColor({...color,[metro.id]:'selected'})
 
-		//note: set this up for multi-toggle, but for now clearing all values instead
-		var clone = JSON.parse(JSON.stringify(color))
-		Object.keys(clone).forEach(k =>{
-			clone[k] = 'default'
-		})
-		clone[metro.id] = 'selected';
-		setColor(clone);
-		control.selectMetro(metro.id);
-		//working multi-toggle
-
-		// color[metro.id] === 'selected' ? setColor({...color,[metro.id]:'default'})
-		// 	:setColor({...color,[metro.id]:'selected'})
-
+		control.selectMetro(metro);
 	};
 
 	//from the map
@@ -88,6 +77,7 @@ function Map(props) {
 						 button
 						 key={metro.id}
 						 onClick={(e) => setSelect(e,metro)}>
+
 			{metro.displayName}
 		</ListItem>
 	}
@@ -110,18 +100,13 @@ function Map(props) {
 		},
 	}));
 
-
-	Date.prototype.addDays = function(days) {
-		var date = new Date(this.valueOf());
-		date.setDate(date.getDate() + days);
-		return date;
-	};
-
-	const [selectedDate, setSelectedDate] = React.useState({start:new Date(),end: new Date().addDays(7)});
-
 	const handleDateChange = (date,which) => {
 		//console.log("handleDateChange");
-		setSelectedDate({...date,[which]:date});
+		if(which === 'start'){
+			control.setStartDate(date)
+		}else{
+			control.setEndDate(date)
+		}
 	};
 
 	return (
@@ -150,7 +135,7 @@ function Map(props) {
 					margin="normal"
 					id="date-picker-inline"
 					label="start"
-					value={selectedDate.start}
+					value={control.startDate}
 					onChange={(date) =>{handleDateChange(date,'start')}}
 					KeyboardButtonProps={{
 						'aria-label': 'change date',
@@ -166,7 +151,7 @@ function Map(props) {
 							margin="normal"
 							id="date-picker-inline"
 							label="end"
-							value={selectedDate.end}
+							value={control.endDate}
 							onChange={(date) =>{handleDateChange(date,'end')}}
 							KeyboardButtonProps={{
 								'aria-label': 'change date',

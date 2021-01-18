@@ -14,7 +14,7 @@ import './App.css'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
-
+import logo from './assets/sound_found.png'
 import Store, {Context} from './alasql/Store'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import RedirectPage from './RedirectPage';
@@ -27,6 +27,7 @@ import api from "./api/api";
 //
 import { GLOBAL_UI_VAR } from './alasql/withApolloProvider';
 import {useQuery,useReactiveVar} from "@apollo/react-hooks";
+import Profile from './components/Profile'
 
 import Map from './Map'
 
@@ -65,7 +66,6 @@ import EventsList from './EventsList'
 import alasqlAPI from "./alasql";
 import alasql from "alasql";
 
-//
 import SpotifyWebApi from 'spotify-web-api-js';
 const spotifyApi = new SpotifyWebApi();
 
@@ -116,56 +116,55 @@ const styles = theme => ({
     }
 });
 
-function TestComp(props) {
-    let control = Control.useContainer();
-     //const [state, dispatch] = useContext(Context);
-    useEffect(() => {
-        console.log("componentDidMount");
-
-
-
-
-        //todo: endless loop
-        //confusing b/c I dont' get why this doesn't happen in Tabify then.
-        //like I would get 'you updating the state of a component that relies, so loop'
-        //but I'm missing something here...
-
-        //moving the call outside of store = "invalid attempt to destructure non-iterable instance"
-        //not to sure what that means - when I removed 'store' it was the same error but different place
-        //so maybe something to do with provider lookups?
-
-        //update: now this is going to run one time only at application mount
-        //except we're going to trigger it by setting an initial metro_id value
-        //control.selectMetro(9480)
-
-
-        // alasqlAPI.fetchEvents()
-        //     .then(r =>{
-        //         dispatch({type: 'init', payload: r,context:'events'});
-        //     },err =>{
-        //         console.log(err);
-        //     })
-        return function cleanup() {
-            console.log("componentWillUnmount");
-        };
-    },[]);
-
-    return (
-        <div>
-            <button onClick={() => control.selectMetro(1)}>
-                Click me: {control.metro}
-            </button>
-        </div>
-    )
-}
+// function TestComp(props) {
+//     let control = Control.useContainer();
+//     //const [state, dispatch] = useContext(Context);
+//     useEffect(() => {
+//         console.log("componentDidMount");
+//
+//
+//
+//
+//         //todo: endless loop
+//         //confusing b/c I dont' get why this doesn't happen in Tabify then.
+//         //like I would get 'you updating the state of a component that relies, so loop'
+//         //but I'm missing something here...
+//
+//         //moving the call outside of store = "invalid attempt to destructure non-iterable instance"
+//         //not to sure what that means - when I removed 'store' it was the same error but different place
+//         //so maybe something to do with provider lookups?
+//
+//         //update: now this is going to run one time only at application mount
+//         //except we're going to trigger it by setting an initial metro_id value
+//         //control.selectMetro(9480)
+//
+//
+//         // alasqlAPI.fetchEvents()
+//         //     .then(r =>{
+//         //         dispatch({type: 'init', payload: r,context:'events'});
+//         //     },err =>{
+//         //         console.log(err);
+//         //     })
+//         return function cleanup() {
+//             console.log("componentWillUnmount");
+//         };
+//     },[]);
+//
+//     return (
+//         <div>
+//             <button onClick={() => control.selectMetro(1)}>
+//                 Click me: {control.metro}
+//             </button>
+//         </div>
+//     )
+// }
 
 function App(props) {
 
     const { classes } = props;
     let [filter, setFilter] = useState('active');
     let [selectedTodoId, setSelectedTodoId] = useState();
-
-    //let control = Control.useContainer()
+    let control = Control.useContainer()
 
     //login
 
@@ -192,14 +191,23 @@ function App(props) {
 
     const globalUI = useReactiveVar(GLOBAL_UI_VAR);
     console.log("$globalUI-App",globalUI);
-    //console.log(globalUI.accessToken.accessToken !== undefined);
     //TODO: STANDARDIZE TOKEN NAMES :p
     //let [auth, setAuth] = useState(false);
 
+    const [playerStyle, setStyle] = useState({opacity:.4,flexGrow:2});
+    // var  = {opacity:.4,flexGrow:2}
+
+    useEffect(() => {
+        if(control.play){
+            setStyle({opacity:1,flexGrow:2})
+        }else{
+            setStyle({opacity:.4,flexGrow:2})
+        }
+    }, [control.play]);
+
     return (
         <Store>
-            {/*<div style={{position: "sticky",top: "0", borderBottom: "1px solid black", zIndex: "1"}}>*/}
-            {/*    <Player  id={control.id} play={control.play}/> </div>*/}
+
             {/*<TestComp/>*/}
             <BrowserRouter>
                 <div className="main">
@@ -212,10 +220,16 @@ function App(props) {
                 </div>
             </BrowserRouter>
             <div>
-                {/*<div style={{position: "sticky",top: "0", borderBottom: "1px solid black", zIndex: "1"}}>*/}
-                {/*    <Player  id={control.id} play={control.play}/> </div>*/}
+                <div style={{position: "sticky",top: "0", padding:"1em 1em 0em 1em", borderBottom: "1px solid black", zIndex: "20",display:'flex',background:"#f0f0f0"}}>
+                    <div><img style={{height:"4em"}} src={logo}/> </div>
+                    <div style={{marginRight:"1em"}}><Profile user={globalUI.user}/></div>
 
-                 <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
+                    {globalUI.access_token &&
+                    <div style={playerStyle}>
+                        <Player token={globalUI.access_token} id={control.id} play={control.play}/></div>
+                    }
+                </div>
+                <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
                     <div>
                         {/*won't respond to flex w/out div*/}
                         {/*width comes from 'const drawerWidth' */}

@@ -129,6 +129,24 @@ var getMyFollowedArtists =  function(req){
     })
 }
 
+var getRecentlyPlayedTracks =  function(req){
+    return new Promise(function(done, fail) {
+        fetch('http://localhost:8888/getRecentlyPlayedTracks', {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({auth:req.auth,user:req.user})
+        }).then(res => res.json())
+            .then(function(payload){
+                console.log("retrieved: ",payload);
+                done(payload)
+            })
+    })
+}
+
+
 //static user methods
 
     var fetchStaticUser =  function(req){
@@ -217,6 +235,25 @@ var getMyFollowedArtists =  function(req){
     }
 
 //methods
+
+var createPlaylist =  function(req){
+    return new Promise(function(done, fail) {
+
+        fetch('http://localhost:8888/createPlaylist', {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(req)
+        })
+            .then(res => res.json())
+            .then(function(res){
+                console.log("playlist created",res);
+                done(res)
+            })
+    })
+}
 
     var getAuth =  function(code){
         return new Promise(function(done, fail) {
@@ -362,6 +399,7 @@ var getMyFollowedArtists =  function(req){
         getToken,
         getTopArtists,
         fetchStaticUser,
-        getAuth
-
+        getAuth,
+        createPlaylist,
+        getRecentlyPlayedTracks
     }

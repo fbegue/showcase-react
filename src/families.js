@@ -1,7 +1,12 @@
 import all_genres from "./alasql/all_genres";
 
 let familyColors= {};
-familyColors["pop"] = '#386ffd';
+
+
+// familyColors["pop"] = '#386ffd';
+familyColors["pop"] = 'rgba(56, 111, 253, 1)';
+familyColors["pop2"] = 'rgba(56, 111, 253,.2)';
+
 familyColors["electro house"] = 'rgb(214, 196, 36)';
 familyColors["rock"] = 'orange';
 familyColors["hip hop"] = 'lightblue';
@@ -16,6 +21,8 @@ familyColors["reggae"] = 'tan';
 familyColors["world"] = 'pink';
 familyColors["jazz"] = '#a87373';
 familyColors["classical"] = 'grey';
+// familyColors["unknown"] =  'rgba(0,0,0,.14)';
+familyColors["unknown"] =  '#00000036';
 var families =  ["pop", "electro house", "rock", "hip hop", "r&b", "latin", "folk", "country", "metal", "punk", "blues", "reggae", "world", "jazz", "classical"];
 
 var familyGenre_map = {};
@@ -44,7 +51,7 @@ var familyStyles = {
 		// background: 'black',
 		// borderRadius: "16px",
 		// margin:"2px",
-		color: 'white'
+		backgroundColor:'grey'
 	},
 	hipHop: {
 		backgroundColor: familyColors['hip hop']
@@ -56,7 +63,11 @@ var familyStyles = {
 		backgroundColor: familyColors["r&b"]
 	},
 	pop: {
-		backgroundColor: familyColors['pop']
+		backgroundColor: familyColors['pop'],
+		color:'white'
+	},
+	pop2: {
+		backgroundColor: familyColors['pop2'],
 	},
 	rock: {
 		backgroundColor: familyColors['rock']
@@ -87,6 +98,9 @@ var familyStyles = {
 	},
 	classical: {
 		backgroundColor: familyColors["classical"]
+	},
+	unknown:{
+		backgroundColor: familyColors["unknown"]
 	}
 };
 

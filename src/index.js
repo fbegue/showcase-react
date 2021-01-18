@@ -2,6 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import ReactDOM from "react-dom";
 import { DatabaseProvider } from "./db";
 import App from './App'
+import _ from 'lodash'
 
 import './index.css'
 //
@@ -13,15 +14,30 @@ import alasqlAPI from "./alasql";
 function useControl(initialState = 0) {
     let [id, _setId] = useState(null);
     let [play, _togglePlay] = useState(false);
-    //not sure why the examples have this pattern
-    //seeeems fine just to just export them here?
-    //maybe he was demo'ing side-effects?
-    // let [metro, selectMetro] = useState(null);
-    let [metro, _selectMetro] = useState(9480);
+
+    //testing: just ohio for now
+    var states = {"OH":[
+            {"displayName":"Columbus", "id":9480},
+            {"displayName":"Cleveland", "id":14700},
+            {"displayName":"Cincinnati", "id":22040},
+            // {"displayName":"Dayton", "id":3673},
+            {"displayName":"Toledo", "id":5649}
+        ]};
+
+    let [metro, _selectMetro] = useState([{"displayName":"Columbus", "id":9480}]);
+    Date.prototype.addDays = function(days) {
+        var date = new Date(this.valueOf());
+        date.setDate(date.getDate() + days);
+        return date;
+    };
+    //testing:
+    // let [startDate, setStartDate] = useState(new Date());
+    let [startDate, setStartDate] = useState(new Date('2020-11-29'));
+    let [endDate, setEndDate] = useState(new Date().addDays(30));
 
     let togglePlay = () => _togglePlay(!play)
     let setId = (id) => _setId(id);
-    let selectMetro = (id) => {
+    let selectMetro = (metroSel) => {
         //so this is new territory...
         //init thought was that someone is listening for this value to change and then sends new events req?
         //but is that like reacty? idk. for now just going to rely on the events list updating based on its
@@ -29,30 +45,44 @@ function useControl(initialState = 0) {
 
         //this feels like a slightly different problem - I'm really forcing this 'component' here so I can use hooks,
         //when I really just want to call some javascript.
+        if(_.find(metro, { 'id': metroSel.id })){
+            console.log('remove', metroSel);
+            _selectMetro(metro.filter((e) =>(e.id !==  metroSel.id)));
+        }else{
+            console.log('add',metroSel);
+            _selectMetro([...metro,metroSel]);
+        }
 
-        //maybe I'm confused bc Tabify shouldn't be working? idk something just feels weird
-
-        //see: TestComp in App.js
-        _selectMetro(id);
     }
 
-    return { play,id, togglePlay, setId,metro,selectMetro }
+    return { play,id, togglePlay, setId,metro,selectMetro,startDate,endDate,setStartDate,setEndDate}
 }
 
 let Control  = createContainer(useControl);
+
+function useHighlighter(initialState = 0) {
+    //testing:
+    let [hoverState, setHoverState] = useState([]);
+    return { hoverState,setHoverState }
+}
+let Highlighter  = createContainer(useHighlighter);
+
+
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(
     <DatabaseProvider>
         <Control.Provider>
+            <Highlighter.Provider>
             <App />
+            </Highlighter.Provider>
         </Control.Provider>
     </DatabaseProvider>,
     rootElement
 );
 
 export{
-    Control
+    Control,Highlighter
 }
 
 //=====================================================
