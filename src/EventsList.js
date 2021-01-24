@@ -347,6 +347,21 @@ function EventsList() {
 		});
 	}
 
+	function getCoverage(events){
+		var c_familyAgg = 0,c_genres = 0,c_eventsWithOne = 0;
+		events.forEach(e =>{
+			var ec = 0;
+			e.performance.forEach(p =>{
+				p.artist.familyAgg ? c_familyAgg++ :{};
+				p.artist.familyAgg ? ec++ :{};
+				p.artist.genres.length > 0 ? c_genres++ :{};
+			})
+			ec >0 ? c_eventsWithOne++:{};
+
+		})
+		return <div>agg:{c_familyAgg} genres:{c_genres} eventsWithOne: {c_eventsWithOne} total: {events.length} </div>
+	}
+
 	return (
 		<div style={{display:"flex",flexDirection:"column"}}>
 			{/*<div>*/}
@@ -380,7 +395,7 @@ function EventsList() {
 					{/*	</List>*/}
 					{/*</Collapse>*/}
 					<ListItem button divider onClick={handleClickConfig2}>
-						<ListItemText primary={<div>Events ({globalState.events.length})</div>} />
+						<ListItemText primary={<div>Events ({globalState.events.length}) {getCoverage(globalState.events)}</div>} />
 						{open2 ? <ExpandLess /> : <ExpandMore />}
 					</ListItem>
 					<Collapse in={open2} timeout="auto" unmountOnExit>

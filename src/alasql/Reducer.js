@@ -398,11 +398,20 @@ function getJoin(action){
 			//--------------------------------------------
 			//first do the metro step, then filter out remaining with families
 
+			//events start date is > than control's start, but less than controls end
+			//unless there is no control end, than just check the start (which is auto-set to today's date)
+			function byDate(e){
+				return (new Date(e.start.datetime) >= action.control.startDate) && (action.control.endDate ? (new Date(e.start.datetime) <= action.control.endDate):true)
+			}
 			events = events.filter(e =>cids.indexOf(e.metro_id) !== -1)
-				.filter(e => (new Date(e.start.datetime) >= action.control.startDate) && (new Date(e.start.datetime) <= action.control.endDate) )
-				.sort((e1,e2) =>{return new Date(e1.start.datetime) - new Date(e2.start.datetime) })
+				 .filter(byDate)
+				 .sort((e1,e2) =>{return new Date(e1.start.datetime) - new Date(e2.start.datetime) })
 
-			//todo: this is 'just restore old events' if there's nothing to process here
+			//todo: strange error here when ... my date result returns to little of # of results?
+			//noticed when testin large cleveland pull - if my date range was real small it would start to duplicate event entries?
+			events = _.sortedUniqBy(events,e =>{return e.id})
+
+
 			if(families.length > 0){
 				//for every event, if any of the performances has a familyAgg
 				//that is within our filtered set, keep the event
@@ -417,7 +426,7 @@ function getJoin(action){
 					}
 					return some;
 				})
-			}else{console.log("nothing to filter, resetting events state");}
+			}else{console.log("no families to filter on!");}
 
 			console.log("$$events",jstr(events));
 			return events;

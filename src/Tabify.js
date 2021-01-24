@@ -183,7 +183,7 @@ export default function Tabify() {
 
 	useEffect(() => {
 		if(globalState.events.length === 0){
-			console.log("ONE TIME EVENT FETCH");
+			//console.log("ONE TIME EVENT FETCH");
 			alasqlAPI.fetchEvents({metros:control.metro})
 				.then(r =>{
 					dispatch({type: 'update', payload: r,context:'events', control:control});

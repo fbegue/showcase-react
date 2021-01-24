@@ -30,10 +30,12 @@ function useControl(initialState = 0) {
         date.setDate(date.getDate() + days);
         return date;
     };
-    //testing:
+
     // let [startDate, setStartDate] = useState(new Date());
-    let [startDate, setStartDate] = useState(new Date('2020-11-29'));
-    let [endDate, setEndDate] = useState(new Date().addDays(30));
+    let [startDate, setStartDate] = useState(new Date());
+    //testing:
+    let [endDate, setEndDate] = useState(null);
+    // let [endDate, setEndDate] = useState(new Date().addDays(30));
 
     let togglePlay = () => _togglePlay(!play)
     let setId = (id) => _setId(id);
