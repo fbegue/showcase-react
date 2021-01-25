@@ -244,6 +244,7 @@ function EventsList() {
 	function getFamilyClass(event){
 		//console.log("getFamilyClass",event.performance[0].displayName + " | " +event.performance[0].artist.familyAgg);
 		//debugger;
+
 		//go thru all performances and determine what family to represent it with
 		var eventAgg = [];
 		event.performance.forEach(p =>{
@@ -253,7 +254,8 @@ function EventsList() {
 			}
 		})
 		if(eventAgg[0]){
-			//console.log("chose family:",eventAgg[0]);
+
+			console.log("chose family:",familyClasses[eventAgg[0] + '2']);
 			return familyClasses[eventAgg[0] + '2']
 		}else{
 			//we don't want the non-familied events showing up with the 'grey' from 'unknown' families

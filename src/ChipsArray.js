@@ -139,7 +139,7 @@ export default function ChipsArray(props) {
 							//todo: non-genred events catch
 							// colorPrimary:data.name?getClass(data):'default'
 							colorPrimary:getClass(data),
-							// outlinedPrimary:getClass(data)
+							outlinedPrimary:getClass(data),
 							//note: again really not fucking understanding this lol
 							//colorPrimary:classes.colorPrimary
 							//colorPrimary:getColor()
