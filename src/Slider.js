@@ -14,6 +14,10 @@ function ValueLabelComponent(props) {
 	);
 }
 
+/**
+ * @param props.defaultValue Number [0,1,2]
+ * @param props.handleChange Function Affect outside state
+ * */
 export default function DiscreteSlider(props) {
 	const useStyles = makeStyles((theme) => ({
 		root: {
@@ -53,7 +57,8 @@ export default function DiscreteSlider(props) {
 				Listening History Range
 			</Typography>
 			<Slider
-				defaultValue={1}
+				// defaultValue={1}
+				defaultValue={props.defaultValue}
 				min={0}
 				max={2}
 				marks={marks}

@@ -67,6 +67,7 @@ import alasqlAPI from "./alasql";
 import alasql from "alasql";
 
 import SpotifyWebApi from 'spotify-web-api-js';
+import {makeVar} from "@apollo/client";
 const spotifyApi = new SpotifyWebApi();
 
 
@@ -159,51 +160,125 @@ const styles = theme => ({
 //     )
 // }
 
+class Delayed extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {hidden : true};
+    }
+
+    componentDidMount() {
+        setTimeout(() => {
+            this.setState({hidden: false});
+        }, this.props.waitBeforeShow);
+    }
+
+    render() {
+        return this.state.hidden ? '' : this.props.children;
+    }
+}
+
+Delayed.propTypes = {
+    waitBeforeShow: PropTypes.number.isRequired
+};
+
 function App(props) {
+
+    useEffect(() => {
+        console.log("APP | componentDidMount");
+        // Update the document title using the browser API
+        //testing:
+        // document.title = `You clicked ${count} times`;
+        return function cleanup() {
+            console.log("APP | componentWillUnmount");
+        };
+    });
+
 
     const { classes } = props;
     let [filter, setFilter] = useState('active');
     let [selectedTodoId, setSelectedTodoId] = useState();
     let control = Control.useContainer()
 
-    //login
-
-    // function getHashParams() {
-    //     var hashParams = {};
-    //     var e, r = /([^&;=]+)=?([^&;]*)/g,
-    //         q = window.location.hash.substring(1);
-    //     e = r.exec(q)
-    //     while (e) {
-    //         hashParams[e[1]] = decodeURIComponent(e[2]);
-    //         e = r.exec(q);
-    //     }
-    //     return hashParams;
-    // }
-    //
-    // const params = getHashParams();
-    // const token = params.access_token;
-    // if (token) {
-    //     spotifyApi.setAccessToken(token);
-    // }
-    //
-    // let [loggedIn, setLoggedIn] = useState(!!token);
-
-
     const globalUI = useReactiveVar(GLOBAL_UI_VAR);
-    console.log("$globalUI-App",globalUI);
-    //TODO: STANDARDIZE TOKEN NAMES :p
-    //let [auth, setAuth] = useState(false);
+    console.log("APP | globalUI ",globalUI);
 
-    const [playerStyle, setStyle] = useState({opacity:.4,flexGrow:2});
-    // var  = {opacity:.4,flexGrow:2}
+
 
     useEffect(() => {
-        if(control.play){
-            setStyle({opacity:1,flexGrow:2})
-        }else{
-            setStyle({opacity:.4,flexGrow:2})
-        }
-    }, [control.play]);
+        var newTime = null;
+        const interval = setInterval(() => {
+            //todo: yeaaaaaaahh
+            //so basically: first time interval check = use stored value
+            //as soon as we expire for the first time, we switch to using
+            //the now forever updated newTime
+
+            var diff = 0;
+
+            if(!(newTime)){
+               // console.log('Checking expiryTime...',globalUI.expiryTime);
+                diff = Math.abs(new Date() - new Date(globalUI.expiryTime));
+            }else{
+               // console.log('Checking newTime...',newTime);
+                diff = Math.abs(new Date() - new Date(newTime));
+            }
+
+            //testing: every 20s
+            // var threshold = 3580*1000;
+            //when there is 15s left
+            var threshold = 15*1000;
+            //console.log({diff});
+
+            if(diff < threshold){
+                console.log("token is about to expire. refreshing...");
+                api.refreshAuth(globalUI.refresh_token)
+                    .then(r =>{
+                        //console.log("refreshAuth result",r)
+
+                        //only need to refresh the access_token value
+                        console.log("previous GLOBAL_UI_VAR",globalUI);
+                        const params = JSON.parse(localStorage.getItem('params'));
+                        localStorage.setItem('params', JSON.stringify({access_token:r.access_token,refresh_token:params.refresh_token,user:params.user}));
+                        const expiryTime = new Date(new Date().getTime() + 3600 * 1000);
+                        localStorage.setItem('expiryTime', expiryTime.toISOString());
+
+                        //todo: state set here causes rerender, but this time it will pass w/ new expiryTime
+                        //this seems like a bad pattern - not sure I'm even guarantee'd sync state set here
+                        //in fact as soon as this is set, we trigger rerender (console.log comes after)
+                        GLOBAL_UI_VAR({...globalUI,expiryTime:expiryTime, access_token:r.access_token})
+                        newTime = expiryTime;
+                        console.log("refreshAuth finished");
+                    }).catch(e =>{console.error(e)})
+            }else{
+               // console.log("APP | threshold check passed",diff);
+            }
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // if(diff < threshold){
+    //     console.log("token is about to expire. refreshing...");
+    //     api.refreshAuth(globalUI.refresh_token)
+    //         .then(r =>{
+    //             //console.log("refreshAuth result",r)
+    //
+    //             //only need to refresh the access_token value
+    //             console.log("previous GLOBAL_UI_VAR",globalUI);
+    //             const params = JSON.parse(localStorage.getItem('params'));
+    //             localStorage.setItem('params', JSON.stringify({access_token:r.access_token,refresh_token:params.refresh_token,user:params.user}));
+    //             const expiryTime = new Date(new Date().getTime() + 3600 * 1000);
+    //             localStorage.setItem('expiryTime', expiryTime.toISOString());
+    //
+    //             //todo: state set here causes rerender, but this time it will pass w/ new expiryTime
+    //             //this seems like a bad pattern - not sure I'm even guarantee'd sync state set here
+    //             //in fact as soon as this is set, we trigger rerender (console.log comes after)
+    //             GLOBAL_UI_VAR({...globalUI,expiryTime:expiryTime, access_token:r.access_token})
+    //
+    //             console.log("refreshAuth finished");
+    //         }).catch(e =>{console.error(e)})
+    // }else{
+    //     console.log("APP | threshold check passed");
+    // }
 
     return (
         <Store>
@@ -224,131 +299,46 @@ function App(props) {
                     <div><img style={{height:"4em"}} src={logo}/> </div>
                     <div style={{marginRight:"1em"}}><Profile user={globalUI.user}/></div>
 
-                    {globalUI.access_token &&
-                    <div style={playerStyle}>
-                        <Player token={globalUI.access_token} id={control.id} play={control.play}/></div>
-                    }
+                    {/*todo: broke this player when I set GLOBAL_UI_VAR in refreshAuth*/}
+                    {/*tried to make it wait, but doesn't seem to matter. the tracing says
+                    that this is caused by my GLOBAL_UI_VAR set but I can't make sense of it... */}
+
+                    {/*{globalUI.access_token  &&*/}
+                    {/*<div style={playerStyle}>*/}
+                    {/*    <Player token={globalUI.access_token} id={control.id} play={control.play}/></div>*/}
+                    {/*}*/}
+
+                    {/*todo: forcing delay until I can figure it out*/}
+
+                    <Delayed waitBeforeShow={2000}>
+                        {/*{globalUI.access_token  &&*/}
+                        <div style={control.play ? {opacity:1,flexGrow:2}: {opacity:.4,flexGrow:2}}>
+                            <Player token={globalUI.access_token} id={control.id} play={control.play}/></div>
+                        {/*}*/}
+                    </Delayed>
+
                 </div>
                 <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
                     <div>
                         {/*won't respond to flex w/out div*/}
                         {/*width comes from 'const drawerWidth' */}
-                        <Sidebar
-                            // playlists={playlists}
-                            // fetchTodosRequest={fetchTodosRequest}
-                            filter={filter}
-                            onFilterChange={setFilter}
-                            selectedTodo={selectedTodoId}
-                            onSelectedTodoChange={setSelectedTodoId}
-                        />
+                        {/*<Sidebar*/}
+                        {/*    // playlists={playlists}*/}
+                        {/*    // fetchTodosRequest={fetchTodosRequest}*/}
+                        {/*    filter={filter}*/}
+                        {/*    onFilterChange={setFilter}*/}
+                        {/*    selectedTodo={selectedTodoId}*/}
+                        {/*    onSelectedTodoChange={setSelectedTodoId}*/}
+                        {/*/>*/}
                     </div>
                     <div style={{width:"50em"}}>
                         {/*testing:*/}
                         {globalUI.access_token &&
                         <Tabify></Tabify>
                         }
-                        {/*{ auth && <Tabify></Tabify>}*/}
                     </div>
-                    {/*<span>*/}
-                    {/*    <SimpleTabs></SimpleTabs>*/}
-                    {/*</span>*/}
-
-                    {/*<div>*/}
-                    {/*    <NestedList*/}
-                    {/*        artists={artists}*/}
-                    {/*        genres={genres}*/}
-                    {/*    />*/}
-                    {/*</div>*/}
-
                     <div>
                         <EventsList data={[]} />
-                    </div>
-
-                    {/*todo: list of nested lists?*/}
-                    {/*yeah no this isn't working very well - could be for an easy reason but idk */}
-                    {/*like i can in no way actually click on anything in here*/}
-                    {/*just seems like its not going to be THAT easy :)*/}
-                    {/*google: list of nestedList material ui*/}
-                    {/*https://stackoverflow.com/questions/48607844/multilevel-nested-list-in-material-ui-next*/}
-                    <div>
-                        {/*==============default=============================*/}
-                        {/*<List>*/}
-                        {/*  {events.map((event, index) => (*/}
-                        {/*      <ListItem*/}
-                        {/*          button*/}
-                        {/*          key={event.id}*/}
-                        {/*          onClick={(e) => props.onSelectedTodoChange(event.id)}*/}
-                        {/*      >*/}
-                        {/*        <Typography*/}
-                        {/*            variant="subtitle1"*/}
-                        {/*            color={props.selectedTodo === event.id ? 'secondary' : 'textPrimary'}*/}
-                        {/*        >*/}
-                        {/*          {event.displayName} - <span style={{fontSize:"10px"}}>{event.start.date}</span>*/}
-                        {/*        </Typography>*/}
-                        {/*      </ListItem>*/}
-                        {/*  ))}*/}
-                        {/*</List>*/}
-                        {/*==============default=============================*/}
-
-                    </div>
-
-                    <div className={classes.contentAndToolbar}>
-                        {/*<AppBar position="relative" className={classes.appBar}>*/}
-                        {/*  <Toolbar>*/}
-                        {/*    <Typography variant="h6" color="inherit" noWrap>*/}
-                        {/*      Todo App*/}
-                        {/*    </Typography>*/}
-                        {/*  </Toolbar>*/}
-                        {/*</AppBar>*/}
-                        {/*<div className={classes.content}>*/}
-                        {/*  <div className={classes.todoDetail}>*/}
-                        {/*    <TodoDetail id={selectedTodoId}/>*/}
-                        {/*  </div>*/}
-                        {/*  <div className={classes.storeInspectors}>*/}
-                        {/*    <div className={classes.storeInspector}>*/}
-                        {/*    <ContainerDimensions>*/}
-                        {/*        { ({ height, width }) => (*/}
-                        {/*            <React.Fragment>*/}
-                        {/*              <div className={classes.storeInspectorHeader}>*/}
-                        {/*                Entity Store*/}
-                        {/*              </div>*/}
-                        {/*              <AceEditor*/}
-                        {/*                value={JSON.stringify(db.entities, 2, 2)}*/}
-                        {/*                mode="json"*/}
-                        {/*                theme="monokai"*/}
-                        {/*                width={width}*/}
-                        {/*                height={320}*/}
-                        {/*                readOnly*/}
-                        {/*                name="entities-json"*/}
-                        {/*                editorProps={{$blockScrolling: true}}*/}
-                        {/*              />*/}
-                        {/*            </React.Fragment>*/}
-                        {/*        ) }*/}
-                        {/*    </ContainerDimensions>*/}
-                        {/*    </div>*/}
-                        {/*    <div className={classes.storeInspector}>*/}
-                        {/*      <ContainerDimensions>*/}
-                        {/*          { ({ height, width }) => (*/}
-                        {/*            <React.Fragment>*/}
-                        {/*              <div className={classes.storeInspectorHeader}>*/}
-                        {/*                Query Store*/}
-                        {/*              </div>*/}
-                        {/*              <AceEditor*/}
-                        {/*                value={JSON.stringify(db.storedQueries, 2, 2)}*/}
-                        {/*                mode="json"*/}
-                        {/*                theme="monokai"*/}
-                        {/*                width={width}*/}
-                        {/*                height={320}*/}
-                        {/*                readOnly*/}
-                        {/*                name="stored-queries-json"*/}
-                        {/*                editorProps={{$blockScrolling: true}}*/}
-                        {/*              />*/}
-                        {/*            </React.Fragment>*/}
-                        {/*          ) }*/}
-                        {/*      </ContainerDimensions>*/}
-                        {/*    </div>*/}
-                        {/*  </div>*/}
-                        {/*</div>*/}
                     </div>
                 </div>
             </div>

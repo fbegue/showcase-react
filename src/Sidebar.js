@@ -105,15 +105,15 @@ function Sidebar(props) {
    *
    */
 
-  useEffect(() => {
-    console.log("componentDidMount | Sidebar");
-    // Update the document title using the browser API
-    //testing:
-    // document.title = `You clicked ${count} times`;
-    return function cleanup() {
-      console.log("componentWillUnmount | Sidebar");
-    };
-  });
+  // useEffect(() => {
+  //   console.log("componentDidMount | Sidebar");
+  //   // Update the document title using the browser API
+  //   //testing:
+  //   // document.title = `You clicked ${count} times`;
+  //   return function cleanup() {
+  //     console.log("componentWillUnmount | Sidebar");
+  //   };
+  // });
 
 //todo: not sure how/if this works
   const { classes } = props;
@@ -240,7 +240,7 @@ function Sidebar(props) {
   }
 
   function getNodes(){
-    console.log('Sidebar | getNodes | globalState.node)',globalState.node);
+    //console.log('Sidebar | getNodes | globalState.node)',globalState.node);
     //todo: make sure to guarantee order every time
 
     //console.log("getNodes",globalState.node.filter(n => n.data.length > 0))
@@ -283,23 +283,24 @@ function Sidebar(props) {
   const NodeSingle = React.memo(function NodeSingle(props){
     //todo: I couldn't pass 'key' as a prop here? wtf
 
-    useEffect(() => {
-      console.log("componentDidMount | NodeSingle");
+    // useEffect(() => {
+    //   console.log("componentDidMount | NodeSingle");
+    //
+    //   return function cleanup() {
+    //     console.log("componentWillUnmount | NodeSingle");
+    //   };
+    // });
 
-      return function cleanup() {
-        console.log("componentWillUnmount | NodeSingle");
-      };
-    });
-    console.log("NodeSingle",props);
+   // console.log("NodeSingle",props);
     let highlighter = Highlighter.useContainer()
 
     function getDynamicStyle(item,i){
       //what family does the item belong to? if that family
       //have been hovered over, we'll see it here
       //have negative margins for overlap effect (except every 3)
-      console.log(i);
-      console.log(highlighter.hoverState);
-      console.log(highlighter.hoverState[0] === item.familyAgg);
+      //console.log(i);
+     // console.log(highlighter.hoverState);
+      //console.log(highlighter.hoverState[0] === item.familyAgg);
       var ret = null;
       highlighter.hoverState[0] === item.familyAgg ? ret= {
         marginLeft: i % 3 === 0 ? "0em":"-1em",

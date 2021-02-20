@@ -477,9 +477,9 @@ const Reducer = (state, action) => {
 				//testing: maybe this should just be additive
 				//tables["users"][action.user][action.context] = action.payload;
 				//console.log("$context",tables["users"][action.user][action.context]);
-				console.log("$",tables);
-				console.log("$",action.user.id);
-				console.log("$",tables["users"][action.user.id]);
+				// console.log("$",tables);
+				// console.log("$",action.user.id);
+				// console.log("$",tables["users"][action.user.id]);
 				tables["users"][action.user.id][action.context] = tables["users"][action.user.id][action.context].concat(action.payload)
 
 				var key = action.user.id + '_' + action.context;

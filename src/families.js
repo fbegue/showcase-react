@@ -202,7 +202,7 @@ var familyStyles = {
 };
 
 Object.keys(familyColors).forEach((k,i,arr) =>{
-	console.log(k[k.length-1]);
+	// console.log(k[k.length-1]);
 
 		if(k[k.length-1] === '2'){
 			familyStyles[k] = {
@@ -224,9 +224,9 @@ Object.keys(familyColors).forEach((k,i,arr) =>{
 });
 
 
-console.log("$familyStyles",familyStyles);
-console.log("$familyGenre_map",familyGenre_map);
-console.log("$genreFam_map",genreFam_map);
+// console.log("$familyStyles",familyStyles);
+// console.log("$familyGenre_map",familyGenre_map);
+// console.log("$genreFam_map",genreFam_map);
 //------------------------------------------
 
 export {

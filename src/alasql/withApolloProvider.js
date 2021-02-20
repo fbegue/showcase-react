@@ -1,11 +1,13 @@
 import {ApolloClient, gql, InMemoryCache,createHttpLink, makeVar} from "@apollo/client";
-import {ApolloProvider} from "@apollo/react-hooks";
+import {ApolloProvider, useReactiveVar} from "@apollo/react-hooks";
 import React from "react";
 //import fetch from 'isomorphic-fetch'
 //import { persistCache } from 'apollo-cache-persist';
 import { persistCache } from "apollo3-cache-persist";
 import localforage from 'localforage'
 
+//todo: api is undefined when I use this provider? hmmm...
+//import api from '../api/index'
 
 //todo: to see where I made changes for apollo testin see: //testing: apollo reactive
 //reducer,sidebar,tabify,
@@ -57,15 +59,30 @@ sources_subset.forEach(s =>{
 
 export const GLOBAL_STATE_VAR = makeVar(initialState);
 export const NODES_STATE_VAR = makeVar({agg:[],saved:[]});
+export const GLOBAL_UI_VAR = makeVar({access_token:false,refresh_token:false,expiryTime:null,user:null});
 
 //testing: set on page refresh from localstorage
 const params = JSON.parse(localStorage.getItem('params'));
-console.log("params of pageload",params);
+const expiryTime = localStorage.getItem('expiryTime');
+console.log("PROVIDER | localStorage:",params);
+if(params && expiryTime){
+	console.log("PROVIDER | setting previous localStorage values");
+	GLOBAL_UI_VAR({access_token:params.access_token,refresh_token:params.refresh_token,user:params.user,expiryTime:expiryTime})
+}
 
-//note: did this export below
-let GLOBAL_UI_VAR;
-params ? GLOBAL_UI_VAR = makeVar({access_token:params.access_token,refresh_token:params.refresh_token,user:params.user}):
-	GLOBAL_UI_VAR = makeVar({access_token:false,refresh_token:false,user:null});
+// console.log("getAuth:",r);
+// //testing: just going to double-dose this stuff
+// //would rather not be relying on local storage reads I guess?
+// GLOBAL_UI_VAR({access_token:r.access_token,refresh_token:r.refresh_token,user:r.user})
+// localStorage.setItem('params', JSON.stringify({access_token:r.access_token,refresh_token:r.refresh_token,user:r.user}));
+// //debugger;
+//
+// const expiryTime = new Date(new Date().getTime() + r.expires_in * 1000);
+// localStorage.setItem('expiryTime', expiryTime.toISOString());
+
+
+
+
 
 // export const GLOBAL_STATE_VAR = makeVar({node:[{id:1,name:"agg",data:[]}]});
 
@@ -144,7 +161,7 @@ asyncCall();
 //   })
 // })
 
-export {apolloClient,localforage,GLOBAL_UI_VAR};
+export {apolloClient,localforage};
 const withApolloProvider = (WrappedComponent) => {
 
 	return (props) => (

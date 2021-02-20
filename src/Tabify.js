@@ -24,12 +24,12 @@ import Search from './Search'
 import util from "./util/util";
 import tables from "./alasql/tables";
 import _ from "lodash";
-import {Control} from "./index";
+import {Control, StatControl} from "./index";
 import DiscreteSlider from "./Slider";
 import {initUser} from './alasql/Store';
 import { GLOBAL_UI_VAR } from './alasql/withApolloProvider';
 import {useQuery,useReactiveVar} from "@apollo/react-hooks";
-
+import Home from './components/Home';
 
 // const styles = {
 // 	fontFamily: "sans-serif",
@@ -90,7 +90,7 @@ export default function Tabify() {
 	//const params = JSON.parse(localStorage.getItem('params'));
 	//console.log("$params",params);
 	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
-	console.log("$globalUI",globalUI);
+	//console.log("$globalUI",globalUI);
 	//note: to be used as a base for every request
 
 	//todo: put user in
@@ -371,6 +371,22 @@ export default function Tabify() {
 		control.togglePlay(!control.play);
 	}
 
+	//-----------------------------
+	let statcontrol = StatControl.useContainer();
+
+	//todo: flush out
+	const tabMap = {1:"playlists"}
+	const [tabs, setActiveTab] = useState({library:0});
+
+	function handleTabSelect(section,key){
+		console.log(section);
+		console.log(key);
+		setActiveTab({...tabs,[section]:key})
+		statcontrol.setStats({name:tabMap[key]})
+	}
+
+	//-----------------------------
+
 	const options = {
 		search: true,
 		filtering: true,
@@ -408,6 +424,9 @@ export default function Tabify() {
 				{/*</Tab>*/}
 				<Tab label="My Profile">
 					<Tabs>
+						<Tab label="Home">
+							<Home data={state[user.id + "_artists"].filter(i =>{return i.term})} />
+						</Tab>
 						<Tab label="Recent Listening">
 							<MaterialTable
 								title=""
@@ -453,7 +472,7 @@ export default function Tabify() {
 						</Tab>
 						<Tab label="Your Top Artists">
 							{/*<div>{term.toString()}</div>*/}
-							<DiscreteSlider handleChange={(v) =>{setTerm(v)}}/>
+							<DiscreteSlider defaultValue={1} handleChange={(v) =>{setTerm(v)}}/>
 							<MaterialTable
 								title=""
 								columns={[
@@ -486,11 +505,10 @@ export default function Tabify() {
 							/>
 
 						</Tab>
-						<Tab label="Subtab 2.3">Tab 2 Content 3</Tab>
 					</Tabs>
 				</Tab>
 				<Tab label="My Library">
-					<Tabs>
+					<Tabs activeKey={tabs['library']} onSelect={handleTabSelect.bind(null,'library')}>
 						<Tab label="Saved Artists">
 
 							<MaterialTable
@@ -525,7 +543,7 @@ export default function Tabify() {
 							/>
 
 						</Tab>
-						<Tab label="Playlists">
+						<Tab label="Playlists" >
 							{/*note: customizing material table
 							- the default search works on text provided by the column's 'field' attribute
 							- thinking 'customFilterAndSearch' can be used to setup searches for custom rendered columns

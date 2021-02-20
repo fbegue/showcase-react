@@ -69,6 +69,12 @@ function useHighlighter(initialState = 0) {
 }
 let Highlighter  = createContainer(useHighlighter);
 
+function useStats(initialState = 0) {
+    //testing:
+    let [stats, setStats] = useState({name:"Home"});
+    return { stats,setStats }
+}
+let StatControl  = createContainer(useStats);
 
 
 const rootElement = document.getElementById("root");
@@ -76,7 +82,9 @@ ReactDOM.render(
     <DatabaseProvider>
         <Control.Provider>
             <Highlighter.Provider>
-            <App />
+                <StatControl.Provider>
+                    <App />
+                </StatControl.Provider>
             </Highlighter.Provider>
         </Control.Provider>
     </DatabaseProvider>,
@@ -84,7 +92,7 @@ ReactDOM.render(
 );
 
 export{
-    Control,Highlighter
+    Control,Highlighter,StatControl
 }
 
 //=====================================================

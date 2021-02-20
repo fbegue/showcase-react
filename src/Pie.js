@@ -224,6 +224,8 @@ function Pie(props) {
 				{!(view) &&
 				<VictoryPie
 					data={sorted()}
+					 padAngle={2}
+					innerRadius={80}
 					animate={{
 						duration: 2009, easing: "bounce"
 					}}

@@ -38,14 +38,14 @@ const alasqlAPI = {
 			p.artists = ob.resolved;
 			playlists.push(p);
 		})
-		console.log("fetchPlaylistsResolved", playlists);
+		//console.log("fetchPlaylistsResolved", playlists);
 		return playlists
 	},
 	followedArtists: async (req) => {
 
 		let artists = await api.getMyFollowedArtists(req).catch(e =>console.log(e));
 		//var playlists = {};playlists.items = [{id: 99, text: "playlist99"},{id: 98, text: "playlist98"}]
-		console.log("followedArtists", artists);
+		//console.log("followedArtists", artists);
 
 		artists.forEach(a =>{
 
@@ -65,7 +65,7 @@ const alasqlAPI = {
 	},
 	getTopArtists: async (req) => {
 		let map = await api.getTopArtists(req).catch(e =>console.log(e));
-		console.log("getTopArtists termmap", map);
+		//console.log("getTopArtists termmap", map);
 		return map
 	},
 	fetchStaticUser: async (req) => {

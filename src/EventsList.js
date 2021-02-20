@@ -12,13 +12,13 @@ import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import { DateTime } from "luxon";
-
 import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
 import {Context} from "./alasql/Store";
 import ChipsArray from "./ChipsArray";
 import { makeStyles } from '@material-ui/core/styles';
 import {familyStyles } from './families';
+import spotifyLogo from './assets/spotify_logo_large.png'
 
 
 import Player, {play,player} from './Player'
@@ -31,6 +31,8 @@ import Button from '@material-ui/core/Button';
 import api from "./api/api";
 import {useReactiveVar} from "@apollo/react-hooks";
 import {GLOBAL_UI_VAR} from "./alasql/withApolloProvider";
+import { useTransition, animated, config } from 'react-spring'
+import Stats from './components/Stats'
 
 function ChipsArray_dep(props) {
 	//const classes = useStyles();
@@ -111,6 +113,78 @@ function EventsList() {
 			}
 		}
 		return false;
+	};
+
+	function ArtistImageFader(props){
+
+		// var urls =  [
+		// 	"http://images.sk-static.com/images/media/profile_images/artists/2406548/huge_avatar",
+		// 	"http://images.sk-static.com/images/media/profile_images/artists/85293/huge_avatar",
+		// 	"http://images.sk-static.com/images/media/profile_images/artists/177426/huge_avatar"
+		// ]
+		var urls = [];
+		for(var x = 0; x < props.item.performance.length;x++){
+        var id = props.item.performance[x].artist.artistSongkick_id || props.item.performance[x].artist.id
+			if(id){urls.push("http://images.sk-static.com/images/media/profile_images/artists/" + id  + "/huge_avatar")}
+		}
+
+		//todo: prevent white-only default images from returning
+		//basically need to check if the img returned is all white by inspecting pixel colors :(
+		//https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getImageData
+		//issue now is CORS - could maybe get around this somehow but seems like the source server needs
+		//to allow this, not just me setting headers
+		//https://stackoverflow.com/questions/22097747/how-to-fix-getimagedata-error-the-canvas-has-been-tainted-by-cross-origin-data
+
+		//example white image / valid image
+		//http://images.sk-static.com/images/media/profile_images/artists/9392084/huge_avatar
+		//http://images.sk-static.com/images/media/profile_images/artists/93920/huge_avatar
+
+		//currently this is returning all 0s which I assume is just b/c it couldn't access anything
+
+		// if(props.item.id ===39600437){
+		// 	//console.log("urls",urls);
+		// 	var img = document.createElement('img');img.src = urls[1] + '?' + new Date().getTime();img.id ='9999';
+		// 	//img.setAttribute('crossOrigin', '');
+		// 	img.crossOrigin = "Anonymous";
+		// 	//var img = document.getElementById('9999');
+		// 	var canvas = document.createElement('canvas');
+		// 	canvas.width = img.width;
+		// 	canvas.height = img.height;
+		// 	canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
+		// 	var pixelData = canvas.getContext('2d').getImageData(1, 1, 1, 1).data;
+		// 	console.log("pixelData",pixelData);
+		// }
+
+
+		// canvas.width = img.width;
+		// canvas.height = img.height;
+		// canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
+
+		if(urls.length > 1){
+		const [index, set] = useState(0)
+		const transitions = useTransition(urls[index], item => item, {
+			from: { opacity: 0 },
+			enter: { opacity: 1 },
+			leave: { opacity: 0 },
+			config: config.molasses,
+		})
+		useEffect(() => void setInterval(() => set(state => (state + 1) % urls.length), Math.floor(Math.random() * (5000 -  + 1) + 2000)), [])
+		 // if(props.item.id === 39280906){
+			//console.log("$urls",urls);
+
+			return transitions.map(({ item, props, key }) => (
+				<animated.div
+					key={key}
+					class="bg"
+					style={{ ...props, backgroundImage: `url(${item})`,height:"5em",width:"5em" }}
+				/>
+
+			))
+		}
+		// }
+		 return <div class="bg" style={{ ...props, backgroundImage: `url(${urls[0]})`,height:"5em",width:"5em" }}/>
+
+
 	};
 
 	function showPlay(sub){
@@ -214,15 +288,18 @@ function EventsList() {
 	}
 
 
-	const [open, setOpen] = React.useState(true);
+	const [open, setOpen] = React.useState(false);
 	const [open2, setOpen2] = React.useState(true);
+	const [open3, setOpen3] = React.useState(true);
 	const handleClickConfig = () => {
 		setOpen(!open);
 	};
 	const handleClickConfig2 = () => {
 		setOpen2(!open2);
 	};
-
+	const handleClickConfig3 = () => {
+		setOpen3(!open3);
+	};
 	//-----------------------------------------------------------
 	//events list utilities
 
@@ -242,6 +319,7 @@ function EventsList() {
 
 	//todo: need to test this with more events
 	function getFamilyClass(event){
+		//console.log("$event",event);
 		//console.log("getFamilyClass",event.performance[0].displayName + " | " +event.performance[0].artist.familyAgg);
 		//debugger;
 
@@ -255,7 +333,7 @@ function EventsList() {
 		})
 		if(eventAgg[0]){
 
-			console.log("chose family:",familyClasses[eventAgg[0] + '2']);
+			//console.log("chose family:",familyClasses[eventAgg[0] + '2']);
 			return familyClasses[eventAgg[0] + '2']
 		}else{
 			//we don't want the non-familied events showing up with the 'grey' from 'unknown' families
@@ -300,7 +378,7 @@ function EventsList() {
 									{/*	<div>*/}
 									{/*	</div>*/}
 									{/*	<div>*/}
-
+									<div>{subOption.id}</div>
 									<ChipsArray familyAgg={subOption.artist.familyAgg} chipData={subOption.artist.genres}>
 									</ChipsArray>
 									{/*	</div>*/}
@@ -315,21 +393,20 @@ function EventsList() {
 				);
 			}
 			return (
-				<div key={subOption.name} className={getFamilyClass(subOption)}>
+				<div key={subOption.id} className={getFamilyClass(subOption)}>
 					<ListItem   button onClick={() => handleClick(subOption.id)}>
-						{unHolyDrill(subOption) && <MusicNoteIcon style={{"position":"absolute","left":"49px","top":"10px"}} fontSize={'small'}/>}
+						{unHolyDrill(subOption) && <img src={spotifyLogo} style={{"position":"absolute","left":"52px","top":"2px",zIndex:"100",height:"1em",width:"1em"}} />}
 						<ListItemText
 							inset
 							primary={ subOption.displayName.toString().replace(/at.*/,"")}
 							secondary={
 								<React.Fragment>
+									<ArtistImageFader item={subOption}/>
 									<Typography
 										component={'span'}
 										variant="body2"
 										color="textPrimary"
-
 									>
-
 										{/*https://moment.github.io/luxon/docs/manual/formatting.html*/}
 										{DateTime.fromISO(subOption.start.datetime).toFormat('LLL d')},{'\u00A0'}
 										{DateTime.fromISO(subOption.start.datetime).toFormat('t')}{'\u00A0'}
@@ -377,12 +454,20 @@ function EventsList() {
 			{/*</div>*/}
 
 			<div>
+
 				<List>
-					<ListItem button divider onClick={handleClickConfig}>
+					<ListItem button divider key={'stats'} onClick={handleClickConfig3}>
+						Stats!
+						{open3 ? <ExpandLess /> : <ExpandMore />}
+					</ListItem>
+					<Collapse key={'stats-collapse'}  in={open3} timeout="auto" unmountOnExit>
+						<Stats></Stats>
+					</Collapse>
+					<ListItem button divider key={'locdate'} onClick={handleClickConfig}>
 						<ListItemText primary={<div>Location & Date <div style={{background:'#80808026',display:"inline-block"}}>{getTitle()}</div></div>} />
 						{open ? <ExpandLess /> : <ExpandMore />}
 					</ListItem>
-					<Collapse in={open} timeout="auto" unmountOnExit>
+					<Collapse key={'locdate-collapse'}  in={open} timeout="auto" unmountOnExit>
 						<Map default={{"displayName":"Columbus", "id":9480}}></Map>
 					</Collapse>
 					{/*<ListItem button divider onClick={handleClickConfig}>*/}
@@ -396,11 +481,11 @@ function EventsList() {
 					{/*		</ListItem>*/}
 					{/*	</List>*/}
 					{/*</Collapse>*/}
-					<ListItem button divider onClick={handleClickConfig2}>
+					<ListItem key={'events'} button divider onClick={handleClickConfig2}>
 						<ListItemText primary={<div>Events ({globalState.events.length}) {getCoverage(globalState.events)}</div>} />
 						{open2 ? <ExpandLess /> : <ExpandMore />}
 					</ListItem>
-					<Collapse in={open2} timeout="auto" unmountOnExit>
+					<Collapse  key={'events-collapse'}  in={open2} timeout="auto" unmountOnExit>
 						<div style={{marginTop:"1em",marginBottom:"1em"}} key={'special'}><CreatePlay/></div>
 						{handler(globalState.events)}
 					</Collapse>

@@ -115,7 +115,7 @@ function Map(props) {
 				<div style={{"position":"relative","left":"-10px"}}>
 					<List>
 						{states['OH'].map((metro, index) => (
-							<StyledListItem color={color[metro.id]} metro={metro}></StyledListItem>
+							<StyledListItem key={index} color={color[metro.id]} metro={metro}></StyledListItem>
 						))}
 					</List>
 				</div>
