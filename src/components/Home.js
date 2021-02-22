@@ -191,38 +191,6 @@ function Main(props) {
 						))}
 					</div>
 					<DiscreteSlider defaultValue={2}  handleChange={handleSliderChange}/>
-					<VictoryPie
-						data={pieData}
-						padAngle={2}
-						innerRadius={80}
-						animate={{
-							duration: 2009, easing: "linear"
-						}}
-						style={{
-							data: {fill: (d) => familyColors[d.slice.data.x]}
-						}}
-						events={[{
-							target: "data",
-							eventHandlers: {
-								onClick: () => {
-									return [{
-										mutation: (props) => {
-											console.log("onClick | ",props.datum);
-											var ret = null;
-											if(families.indexOf(props.datum.x) === -1){
-												selectFamilies([...families,props.datum.x])
-												ret= {style: Object.assign({}, props.style, {stroke: "black", strokeWidth: 2})};
-											}else{
-												selectFamilies(families.filter(f =>{return f !== props.datum.x}))
-												ret= {style: Object.assign({}, props.style, {stroke: "none", strokeWidth: 2})};
-											}
-											return ret;
-										}
-									}];
-								},
-							}
-						}]}
-					/>
 				</div>
 				<div>
 					<div  className="list" style={{height: Math.max(...heights)}}>

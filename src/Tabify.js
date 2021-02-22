@@ -85,11 +85,16 @@ export default function Tabify() {
 
 	//todo: move this somewhere else higher up
 	//todo: rename this instance to 'global state'
-	const [state, dispatch] = useContext(Context);
+	const [globalState, globalDispatch] = useContext(Context);
+
+
 
 	//const params = JSON.parse(localStorage.getItem('params'));
 	//console.log("$params",params);
 	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
+
+
+		//{id:'dacandyman01',name:"Franky"};
 	//console.log("$globalUI",globalUI);
 	//note: to be used as a base for every request
 
@@ -138,15 +143,16 @@ export default function Tabify() {
 				var pay = [];pay = pay.concat(r[0]);pay= pay.concat(r[1]);
 				//pay= pay.concat(r[2]['artists'])
 
-				dispatch({type: 'init', payload:pay,user:user,context:'artists'});
-				dispatch({type: 'init', payload:r[2].tracks,user:user,context:'tracks'});
+				globalDispatch({type: 'init', payload:pay,user: globalUI.user,context:'artists'});
+				globalDispatch({type: 'init', payload:r[2].tracks,user: globalUI.user,context:'tracks'});
 			},err =>{
 				console.log(err);
 			})
 
 		alasqlAPI.fetchPlaylistsResolved(req)
 			.then(r =>{
-				dispatch({type: 'init', payload: r,user:user,context:'playlists'});
+				//todo
+				globalDispatch({type: 'init', payload: r,user: globalUI.user,context:'playlists'});
 			},err =>{
 				console.log(err);
 			})
@@ -174,9 +180,6 @@ export default function Tabify() {
 	//-----------------------------
 	let control = Control.useContainer();
 
-	//testing: beware naming (there's another dispatch around)
-	const [globalState, dispatchGlobal] = useContext(Context);
-
 	//anytime metro selection changes, we recalc events based on the state of the new selection
 	//todo: this executes a fetch on every metro selection switch
 	//but in reality we should be caching
@@ -186,13 +189,13 @@ export default function Tabify() {
 			//console.log("ONE TIME EVENT FETCH");
 			alasqlAPI.fetchEvents({metros:control.metro})
 				.then(r =>{
-					dispatch({type: 'update', payload: r,context:'events', control:control});
+					globalDispatch({type: 'update', payload: r,context:'events', control:control});
 				},err =>{
 					console.log(err);
 				})
 		}else{
 			console.log("UPDATING ON METRO SELECT",control.metro);
-			dispatch({type: 'update', payload: [],context:'events', control:control});
+			globalDispatch({type: 'update', payload: [],context:'events', control:control});
 		}
 
 	},[control.metro,control.startDate,control.endDate])
@@ -203,9 +206,7 @@ export default function Tabify() {
 	//const globalState = useReactiveVar(GLOBAL_STATE_VAR);
 	//-----------------------------
 
-	//todo:
-	var playlists = [];
-	var user = {id:'dacandyman01',name:"Franky"};
+
 
 	const CustomSelect = (props) => {
 		const [date, setDate] = useState("");
@@ -245,14 +246,14 @@ export default function Tabify() {
 		//but can't (easily - maybe could pass the current state value here)
 		//access the current state value
 
-		dispatch({type: 'select', payload:null,user:user,context:'artists',control:control});
+		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'artists',control:control});
 		//dispatch({type: 'select', payload:null,user:user,context:'artists',state:state:globalState});
 	}
 	var handleSelectGuest = function(rows){
 		//here I'm just accessing the 'checked' rows directly later, so null payload here
 		//console.log("selected",rows.length);
 
-		dispatch({type: 'select', payload:null,user:user,context:'artists',control:control});
+		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'artists',control:control});
 
 
 	}
@@ -262,11 +263,11 @@ export default function Tabify() {
 		//seems like it should be pretty simple?
 		//for now just take one - otherwise do a delta? :(
 		console.log("selected",rows.length);
-		dispatch({type: 'select', payload:rows[0],user:user,context:'playlists',control:control});
+		globalDispatch({type: 'select', payload:rows[0],user: globalUI.user,context:'playlists',control:control});
 	}
 
 	var handleSelectRecent= function(rows){
-		dispatch({type: 'select', payload:null,user:user,context:'tracks',control:control});
+		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'tracks',control:control});
 	}
 
 
@@ -348,7 +349,7 @@ export default function Tabify() {
 		alasqlAPI.fetchStaticUser()
 			.then(r =>{
 				initUser(guest);
-				dispatch({type: 'init', user:guest,payload:r[0].data,context:'artists'});
+				globalDispatch({type: 'init', user:guest,payload:r[0].data,context:'artists'});
 			},err =>{
 				console.log(err);
 			})
@@ -374,15 +375,28 @@ export default function Tabify() {
 	//-----------------------------
 	let statcontrol = StatControl.useContainer();
 
-	//todo: flush out
-	const tabMap = {1:"playlists"}
-	const [tabs, setActiveTab] = useState({library:0});
-
+	const tabMap = {library:{
+			0:"artists_saved",
+			1:"playlists"
+		},profile:{
+			0:"home",
+			1:"recent",
+		}}
+	const secMap ={0:"profile",1:"library",2:"friends"}
+	const [tabs, setActiveTab] = useState({library:0,profile:0,friends:0});
+	const [section, setActiveSection] = useState(0);
 	function handleTabSelect(section,key){
-		console.log(section);
-		console.log(key);
 		setActiveTab({...tabs,[section]:key})
-		statcontrol.setStats({name:tabMap[key]})
+		statcontrol.setStats({name:tabMap[section][key]})
+	}
+
+	function handleSectionSelect(sectionkey){
+		//if the section changed, also trigger tab set (0 as default)
+		if(sectionkey !== section){
+			setActiveTab({...tabs,[secMap[sectionkey]]:0})
+			statcontrol.setStats({name:tabMap[secMap[sectionkey]][0]})
+		}
+		setActiveSection(sectionkey)
 	}
 
 	//-----------------------------
@@ -417,15 +431,15 @@ export default function Tabify() {
 	return(
 		// style={styles}
 		<div>
-			<Tabs theme={theme} >
+			<Tabs activeKey={section} onSelect={handleSectionSelect} theme={theme} >
 				{/*todo: disabled for now (broke in multiple places)*/}
 				{/*<Tab label="Search">*/}
 				{/*	<Search></Search>*/}
 				{/*</Tab>*/}
 				<Tab label="My Profile">
-					<Tabs>
+					<Tabs activeKey={tabs['profile']} onSelect={handleTabSelect.bind(null,'profile')}>
 						<Tab label="Home">
-							<Home data={state[user.id + "_artists"].filter(i =>{return i.term})} />
+							<Home data={globalState[ globalUI.user.id + "_artists"].filter(i =>{return i.term})} />
 						</Tab>
 						<Tab label="Recent Listening">
 							<MaterialTable
@@ -464,7 +478,7 @@ export default function Tabify() {
 									},
 
 								]}
-								data={state[user.id + "_tracks"]}
+								data={globalState[ globalUI.user.id + "_tracks"]}
 								options={options}
 								icons={icons}
 								onSelectionChange={(rows) => handleSelectRecent(rows,'recent')}
@@ -494,7 +508,7 @@ export default function Tabify() {
 									},
 
 								]}
-								data={state[user.id + "_artists"].filter(i =>{return i.term === term})}
+								data={globalState[ globalUI.user.id + "_artists"].filter(i =>{return i.term === term})}
 								options={{
 									search: true,
 									filtering: true,
@@ -532,7 +546,7 @@ export default function Tabify() {
 									},
 
 								]}
-								data={state[user.id + "_artists"].filter(i =>{return i.source === 'saved'})}
+								data={globalState[ globalUI.user.id + "_artists"].filter(i =>{return i.source === 'saved'})}
 								options={{
 									search: true,
 									filtering: true,
@@ -609,7 +623,7 @@ export default function Tabify() {
 										width:"15em"
 									},
 								]}
-								data={state[user.id + "_playlists"]}
+								data={globalState[ globalUI.user.id + "_playlists"]}
 								options={{
 									search: true,
 									searchFieldStyle:{marginRight:"1em"},
@@ -637,7 +651,7 @@ export default function Tabify() {
 							<DiscreteSlider handleChange={(v) =>{setTerm(v)}}/>
 
 							{/*todo: disable for now until content shown*/}
-							{state[guest.id + "_artists"] && <MaterialTable
+							{globalState[guest.id + "_artists"] && <MaterialTable
 								title=""
 								columns={[
 									{
@@ -658,7 +672,7 @@ export default function Tabify() {
 									},
 
 								]}
-								data={state[guest.id + "_artists"].filter(i =>{return i.term === term})}
+								data={globalState[guest.id + "_artists"].filter(i =>{return i.term === term})}
 								options={{
 									search: true,
 									filtering: true,

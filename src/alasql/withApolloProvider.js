@@ -5,6 +5,7 @@ import React from "react";
 //import { persistCache } from 'apollo-cache-persist';
 import { persistCache } from "apollo3-cache-persist";
 import localforage from 'localforage'
+import {DateTime} from "luxon";
 
 //todo: api is undefined when I use this provider? hmmm...
 //import api from '../api/index'
@@ -65,9 +66,13 @@ export const GLOBAL_UI_VAR = makeVar({access_token:false,refresh_token:false,exp
 const params = JSON.parse(localStorage.getItem('params'));
 const expiryTime = localStorage.getItem('expiryTime');
 console.log("PROVIDER | localStorage:",params);
-if(params && expiryTime){
+console.log("PROVIDER | localStorage:",expiryTime);
+var validAfterNow = DateTime.fromISO(new Date().toISOString()) < DateTime.fromISO(expiryTime)
+if(params && expiryTime && validAfterNow){
 	console.log("PROVIDER | setting previous localStorage values");
 	GLOBAL_UI_VAR({access_token:params.access_token,refresh_token:params.refresh_token,user:params.user,expiryTime:expiryTime})
+}else{
+	console.log("PROVIDER | found stale localStorage values, no setting occurred");
 }
 
 // console.log("getAuth:",r);

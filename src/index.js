@@ -72,7 +72,9 @@ let Highlighter  = createContainer(useHighlighter);
 function useStats(initialState = 0) {
     //testing:
     let [stats, setStats] = useState({name:"Home"});
-    return { stats,setStats }
+    //the default true is context
+    const [mode, setMode] = useState(true);
+    return { stats,setStats,mode,setMode }
 }
 let StatControl  = createContainer(useStats);
 

@@ -19,7 +19,7 @@ import ChipsArray from "./ChipsArray";
 import { makeStyles } from '@material-ui/core/styles';
 import {familyStyles } from './families';
 import spotifyLogo from './assets/spotify_logo_large.png'
-
+import { StatControl} from "./index";
 
 import Player, {play,player} from './Player'
 import {Control} from "./index";
@@ -89,6 +89,7 @@ function EventsList() {
 	const [globalState, dispatch] = useContext(Context);
 	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
 	let control = Control.useContainer()
+	let statcontrol = StatControl.useContainer()
 
 	function handlePlay(item) {
 		console.log("$handlePlay",item);
@@ -441,6 +442,7 @@ function EventsList() {
 		return <div>agg:{c_familyAgg} genres:{c_genres} eventsWithOne: {c_eventsWithOne} total: {events.length} </div>
 	}
 
+
 	return (
 		<div style={{display:"flex",flexDirection:"column"}}>
 			{/*<div>*/}
@@ -456,8 +458,8 @@ function EventsList() {
 			<div>
 
 				<List>
-					<ListItem button divider key={'stats'} onClick={handleClickConfig3}>
-						Stats!
+					<ListItem button divider key={'stats'} style={{zIndex:10}} onClick={handleClickConfig3}>
+						Analysis
 						{open3 ? <ExpandLess /> : <ExpandMore />}
 					</ListItem>
 					<Collapse key={'stats-collapse'}  in={open3} timeout="auto" unmountOnExit>

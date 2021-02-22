@@ -5,7 +5,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Sidebar from './Sidebar';
 import Panels from './Panels'
 import FilterBar from './FilterBar';
 import NestedList from './NestedList';
@@ -311,33 +310,21 @@ function App(props) {
                     {/*todo: forcing delay until I can figure it out*/}
 
                     <Delayed waitBeforeShow={2000}>
-                        {/*{globalUI.access_token  &&*/}
+                        {globalUI.access_token  &&
                         <div style={control.play ? {opacity:1,flexGrow:2}: {opacity:.4,flexGrow:2}}>
                             <Player token={globalUI.access_token} id={control.id} play={control.play}/></div>
-                        {/*}*/}
+                        }
                     </Delayed>
 
                 </div>
                 <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
-                    <div>
-                        {/*won't respond to flex w/out div*/}
-                        {/*width comes from 'const drawerWidth' */}
-                        {/*<Sidebar*/}
-                        {/*    // playlists={playlists}*/}
-                        {/*    // fetchTodosRequest={fetchTodosRequest}*/}
-                        {/*    filter={filter}*/}
-                        {/*    onFilterChange={setFilter}*/}
-                        {/*    selectedTodo={selectedTodoId}*/}
-                        {/*    onSelectedTodoChange={setSelectedTodoId}*/}
-                        {/*/>*/}
-                    </div>
-                    <div style={{width:"50em"}}>
+                    <div style={{width:"60em"}}>
                         {/*testing:*/}
                         {globalUI.access_token &&
                         <Tabify></Tabify>
                         }
                     </div>
-                    <div>
+                    <div style={{width:"30em"}}>
                         <EventsList data={[]} />
                     </div>
                 </div>

@@ -4,12 +4,45 @@ import tables from './tables'
 
 //so we got tables, and we got state, and we got the initial state of nodes
 
+
 let initialState = {
 	posts: [],
 	artists:[],
 	events:[],
 	artistSearchSelection:[],
-	node:[{id:1,name:"agg",data:[]}],
+	// node:[{id:1,name:"agg",data:[]}],
+	node:[
+		{
+			"id": 0,
+			"name": "agg",
+			"label": "Aggregate",
+			"data": []
+		},
+		{
+			"id": 1,
+			"name": "saved",
+			"label": "Saved Artists",
+			"data":[]
+		},
+		{
+			"id": 2,
+			"name": "top",
+			"label": "Top Artists",
+			"data": []
+		},
+		{
+			"id": 4,
+			"name": "playlists",
+			"label": "Playlists",
+			"data": []
+		},
+		{
+			"id": 9999,
+			"name": "recent",
+			"label": "Recently Played",
+			"data": []
+		}
+	],
 	//testing:
 	dacandyman01_artists:[],
 	dacandyman01_playlists:[],
