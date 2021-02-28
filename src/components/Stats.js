@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext, useRef} from 'react';
+import React, {useState, useEffect, useContext, useRef, useMemo} from 'react';
 import {Highlighter, StatControl} from "../index";
 import {familyColors} from "../families";
 import {VictoryPie} from "victory";
@@ -16,6 +16,8 @@ import RedoIcon from "@material-ui/icons/Redo";
 import PieChartIcon from "@material-ui/icons/PieChart";
 import CloudIcon from "@material-ui/icons/Cloud";
 import Typography from "@material-ui/core/Typography";
+import useMedia from "./Masonry/useMedia";
+import {a, useTransition} from "react-spring";
 
 function Stats(props) {
 	let statcontrol = StatControl.useContainer();
@@ -39,19 +41,21 @@ function Stats(props) {
 		console.log("useEffect",statcontrol.stats.name);
 		//console.log("tables",tables);
 
-		//todo: still working out form here
-		//to think about: how much duplication is happening between this and the reducer.
+		//todo: tried to avoid having to do double work here and reducer
+		//but the tab that I'm passing around still needed to be reduced here...
+	    //filter either implements a custom filter based on a key, or it's playlists?
+		var contextFilter = function(key,rec) {
+			var t = false;
 
-	    //filter either implements a custom filter based on a key, or just returns all checked with that filter
-		//basically: context still needs to do custom filters, but custom needs to also check for checked.
-		var contextFilter = function(key,i){
-			if(statcontrol.mode){
-				if(key){
-					return i.source === key
-				}else{return true}
+			if (key === 'top') {
+				t = rec['term'] !== null
+			} else {
+				t = rec['source'] === key
+			}
 
-			}else{
-				return i.tableData && i.tableData.checked && (key ? i.source === key : true)
+			if (statcontrol.mode) {
+				if (key) {return t}
+				else {return true}
 			}
 		}
 
@@ -59,7 +63,14 @@ function Stats(props) {
 		switch(statcontrol.stats.name) {
 			case "artists_saved":
 				//data = globalState[globalUI.user.id + "_artists"].filter(i =>{return i.source === 'saved'})
-				data = tables["users"][globalUI.user.id]["artists"].filter(contextFilter.bind(null,'saved'))
+				//data = tables["users"][globalUI.user.id]["artists"].filter(contextFilter.bind(null,'saved'))
+				data = globalState[globalUI.user.id + "_artists"].filter(contextFilter.bind(null,'saved'))
+				break;
+			case "artists_top":
+				data = globalState[globalUI.user.id + "_artists"].filter(contextFilter.bind(null,'top'))
+				break;
+			case "artists_recent":
+				data = globalState[globalUI.user.id + "_artists"].filter(contextFilter.bind(null,'recent'))
 				break;
 			case "playlists":
 				//todo: may not have been stated yet
@@ -198,30 +209,90 @@ function Stats(props) {
 	}
 
 	function ContextStats(props) {
-		var items = [];
+
+		//todo: thought storing in proper state would smooth transition
+		//I'm not even sure if I get what I'm looking for for free really...
+		var _items = [];
+		//const [items, setItems] = useState([]);
+
 		switch(statcontrol.stats.name) {
 			case 'artists_saved':
-				// code block
+				_items.push({label:"test1",value:null})
+				_items.push({label:"test2",value:null})
+				_items.push({label:"test23",value:null})
 				break;
 			case 'playlists':
-				items.push({label:"Created",value:null})
-				items.push({label:"Followed",value:null})
-				items.push({label:"Recently Modified",value:null})
-				items.push({label:"Most Active",value:null})
-				items.push({label:"Oldest",value:null})
+				_items.push({label:"Created",value:null})
+				_items.push({label:"Followed",value:null})
+				_items.push({label:"Recently Modified",value:null})
+				// items.push({label:"Most Active",value:null})
+				_items.push({label:"Oldest",value:null})
 				break;
 			default:
 			// code block
 		}
+		//_items.length !== 0 && items.length === 0 ? setItems(_items):{};
+		var items = _items;
+
+		//-----------------------------------------------
+		const columns = useMedia(['(min-width: 1500px)', '(min-width: 1000px)', '(min-width: 600px)'], [5, 4, 3], 2)
+
+		// Hook2: Measure the width of the container element
+		//todo: disabled this b/c of 'illegal invocation' when moving off this component
+		//related to bind - possibly b/c I'm destroying the element below that I would be binding to
+		//...and then like it realizes that it's invalid and complains? idk
+		//const [bind, { width }] = useMeasure()
+		//console.log("bind",bind);
+		//console.log("width",width);
+		const width = 480;
+
+		//note: replaced all references to data-height (designed to be unique values 300-500) with uHeight
+		const uHeight = 100;
+
+		const [heights, gridItems] = useMemo(() => {
+			let heights = new Array(columns).fill(0) // Each column gets a height starting with zero
+			let gridItems = items
+				.map((child, i) => {
+					const column = heights.indexOf(Math.min(...heights)) // Basic masonry-grid placing, puts tile into the smallest column using Math.min
+					const xy = [(width / columns) * column, (heights[column] += uHeight / 2) - uHeight / 2] // X = container width / number of columns * column index, Y = it's just the height of the current column
+					return { ...child, xy, width: width / columns, height: uHeight / 2 }
+				})
+			return [heights, gridItems]
+		}, [columns, items])
+
+		// Hook6: Turn the static grid values into animated transitions, any addition, removal or change will be animated
+		const transitions = useTransition(
+			gridItems,
+			(item) => item.label, {
+				from: ({ xy, width, height }) => ({ xy, width, height, opacity: 0 }),
+				enter: ({ xy, width, height }) => ({ xy, width, height, opacity: 1 }),
+				update: ({ xy, width, height }) => ({ xy, width, height }),
+				leave: { height: 0, opacity: 0 },
+				config: { mass: 5, tension: 500, friction: 100 },
+				trail: 25
+			})
+		//-----------------------------------------------
+
 		return(<div>
-			<div style={{display:"flex"}}>
-				{items.map((item,i) => (
-					<div style={{display:"flex"}}>
-						<Typography variant="subtitle1" component={'div'} gutterBottom>{item.label}</Typography>
-						<Typography variant="body1" component={'div'} gutterBottom>{item.value}</Typography>
-					</div>
+			<div  className="list" style={{height: Math.max(...heights)}}>
+				{transitions.map(({item, props: {xy, ...rest}, key}) => (
+					<a.div key={key}
+						   style={{transform: xy.interpolate((x, y) => `translate3d(${x}px,${y}px,0)`), ...rest}}>
+						<div style={{display:"flex"}}>
+							<Typography variant="subtitle1" component={'div'} gutterBottom>{item.label}</Typography>
+							<Typography variant="body1" component={'div'} gutterBottom>{item.value}</Typography>
+						</div>
+					</a.div>
 				))}
 			</div>
+			{/*<div style={{display:"flex"}}>*/}
+			{/*	{items.map((item,i) => (*/}
+			{/*		<div style={{display:"flex"}}>*/}
+			{/*			<Typography variant="subtitle1" component={'div'} gutterBottom>{item.label}</Typography>*/}
+			{/*			<Typography variant="body1" component={'div'} gutterBottom>{item.value}</Typography>*/}
+			{/*		</div>*/}
+			{/*	))}*/}
+			{/*</div>*/}
 		</div>)
 	}
 	return(

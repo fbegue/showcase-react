@@ -197,13 +197,13 @@ function NodeDisplay(props) {
     // console.log("NodeBasic",props);
     // console.log(nodes);
 
-    useEffect(() => {
-      console.log("componentDidMount | NodeBasic");
-
-      return function cleanup() {
-        console.log("componentWillUnmount | NodeBasic");
-      };
-    });
+       // useEffect(() => {
+    //   console.log("componentDidMount | NodeBasic");
+    //
+    //   return function cleanup() {
+    //     console.log("componentWillUnmount | NodeBasic");
+    //   };
+    // });
 
 
     //todo: not super confident about this - how does it help?
@@ -232,7 +232,7 @@ function NodeDisplay(props) {
 
     var data = props.item.data;
     if(props.item.data.length > 5){
-      console.log("true");
+      //console.log("true");
       data = props.item.data.slice(0,5);
 
       data.push({id:"more",familyAgg:null,more:
@@ -257,7 +257,7 @@ function NodeDisplay(props) {
 
               {/*testing:*/}
               {data.map((item,i) => (
-                  <NodeSingle useKey={`el-${item.id}`} it={i} item={item}></NodeSingle>
+                  <NodeSingle key={`node-${item.id}`} useKey={`el-${item.id}`} it={i} item={item}></NodeSingle>
               ))}
 
               {/*{props.item.data.map((item,i) => (*/}
@@ -295,7 +295,7 @@ function NodeDisplay(props) {
                 >
                   {/*<Node item={item}/>*/}
                   {/*<NodeTransGroup item={item}/>*/}
-                  <NodeBasic item={item}/>
+                  <NodeBasic key={item.id} item={item}/>
                 </animated.div>
             ))}
           </List>

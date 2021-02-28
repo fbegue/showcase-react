@@ -34,6 +34,11 @@ import {GLOBAL_UI_VAR} from "./alasql/withApolloProvider";
 import { useTransition, animated, config } from 'react-spring'
 import Stats from './components/Stats'
 
+import SliderEvents from './components/Sliders/Slider-Events'
+import SliderEvents2 from './components/Sliders/Slider-Events2'
+import DiscreteSlider from "./Slider";
+import alasqlAPI from "./alasql";
+
 function ChipsArray_dep(props) {
 	//const classes = useStyles();
 	//todo: implement useStyles
@@ -86,7 +91,7 @@ function EventsList() {
 	// it is in expanded or collapsed or a collapsed state
 
 	const [state, setState] = useState({});
-	const [globalState, dispatch] = useContext(Context);
+	const [globalState, globalDispatch] = useContext(Context);
 	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
 	let control = Control.useContainer()
 	let statcontrol = StatControl.useContainer()
@@ -218,6 +223,11 @@ function EventsList() {
 		setName(makeName())
 	}, [control.metro,control.startDate,control.endDate]);
 
+	useEffect(() => {
+			console.log("UPDATING ON SENS SELECT",{control});
+			globalDispatch({type: 'update_events', payload: [],context:'events', control:control,stats:statcontrol});
+	},[control.genreSens,control.artistSens])
+
 
 	function playlistFromEvents(){
 		var songs = [];
@@ -283,6 +293,10 @@ function EventsList() {
 						{/*<TextField value={name} onChange={(e) =>{setName(e.target.value)}} id="standard-basic" label="" />*/}
 						<TextField value={name} onChange={handleSetName} id="standard-basic" label="" />
 					</form>
+				</div>
+				<div>
+					<SliderEvents defaultValue={0} handleChange={(v) =>{control.setArtistSens(v)}}/>
+					<SliderEvents2 defaultValue={1} handleChange={(v) =>{control.setGenreSens(v)}}/>
 				</div>
 			</div>
 		)

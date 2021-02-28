@@ -25,21 +25,21 @@ const alasqlAPI = {
 		return playlists
 	},
 	fetchPlaylistsResolved: async (req) => {
-		let playlistObs = await api.fetchPlaylistsResolved(req).catch(e =>console.log(e));
+		let playlistOb = await api.fetchPlaylistsResolved(req).catch(e =>console.log(e));
 		//testing: managing this stuff could be complicated
 		//not sure exactly where artistFreq goes but it seems so small that I can just keep it as sidekick I think - right?
 		//point of at least keeping artistFreq seperate is that these artists should be pulled from a local db of some kind
 		//NOT passed around on the playlist object itself
 
 		var playlists = [];
-		playlistObs.forEach(ob =>{
+		playlistOb.playlists.forEach(ob =>{
 			var p = Object.assign({},ob.playlist)
 			p.artistFreq = ob.artistFreq;
 			p.artists = ob.resolved;
 			playlists.push(p);
 		})
 		//console.log("fetchPlaylistsResolved", playlists);
-		return playlists
+		return {playlists:playlists,stats:playlistOb.stats}
 	},
 	followedArtists: async (req) => {
 

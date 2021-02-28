@@ -11,6 +11,8 @@ import {Context} from "./alasql/Store";
 import alasqlAPI from "./alasql";
 
 
+//todo: should probably break out play control here...
+
 function useControl(initialState = 0) {
     let [id, _setId] = useState(null);
     let [play, _togglePlay] = useState(false);
@@ -57,7 +59,10 @@ function useControl(initialState = 0) {
 
     }
 
-    return { play,id, togglePlay, setId,metro,selectMetro,startDate,endDate,setStartDate,setEndDate}
+    let [genreSens, setGenreSens] = useState('families');
+    let [artistSens, setArtistSens] = useState('artists');
+
+    return { play,id, togglePlay, setId,metro,selectMetro,startDate,endDate,setStartDate,setEndDate,genreSens, setGenreSens,artistSens, setArtistSens}
 }
 
 let Control  = createContainer(useControl);
@@ -70,7 +75,7 @@ function useHighlighter(initialState = 0) {
 let Highlighter  = createContainer(useHighlighter);
 
 function useStats(initialState = 0) {
-    //testing:
+    //note: stats is really tracking active tab...
     let [stats, setStats] = useState({name:"Home"});
     //the default true is context
     const [mode, setMode] = useState(true);

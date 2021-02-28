@@ -151,29 +151,12 @@ export default function Tabify() {
 
 		alasqlAPI.fetchPlaylistsResolved(req)
 			.then(r =>{
-				//todo
-				globalDispatch({type: 'init', payload: r,user: globalUI.user,context:'playlists'});
+				console.log("r.stats",r.stats);
+				globalDispatch({type: 'init', payload: r.playlists,user: globalUI.user,context:'playlists'});
 			},err =>{
 				console.log(err);
 			})
 
-		//note: decided I would do this on demand for clicks around the app
-		//(so currently not in use)
-		//but for events - I would do the lookup on the server ahead of time
-		// alasqlAPI.getArtistTopTracks('2dI9IuajQnLR5dLxHjTTqU')
-		// 	.then(r =>{
-		// 		console.log("$getArtistTopTracks",r);
-		// 	},err =>{
-		// 		console.log(err);
-		// 	})
-
-		//todo: what does this do again? was this for other users or what?
-		// alasqlAPI.fetchPlaylists()
-		// 	.then(r =>{
-		// 		dispatch({type: 'init', payload: r,user:user,context:'playlists'});
-		// 	},err =>{
-		// 		console.log(err);
-		// 	})
 	},[]);
 
 
@@ -189,13 +172,13 @@ export default function Tabify() {
 			//console.log("ONE TIME EVENT FETCH");
 			alasqlAPI.fetchEvents({metros:control.metro})
 				.then(r =>{
-					globalDispatch({type: 'update', payload: r,context:'events', control:control});
+					globalDispatch({type: 'update_events', payload: r,context:'events', control:control});
 				},err =>{
 					console.log(err);
 				})
 		}else{
 			console.log("UPDATING ON METRO SELECT",control.metro);
-			globalDispatch({type: 'update', payload: [],context:'events', control:control});
+			globalDispatch({type: 'update_events', payload: [],context:'events', control:control});
 		}
 
 	},[control.metro,control.startDate,control.endDate])
@@ -246,14 +229,14 @@ export default function Tabify() {
 		//but can't (easily - maybe could pass the current state value here)
 		//access the current state value
 
-		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'artists',control:control});
+		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'artists',control:control,stats:statcontrol});
 		//dispatch({type: 'select', payload:null,user:user,context:'artists',state:state:globalState});
 	}
 	var handleSelectGuest = function(rows){
 		//here I'm just accessing the 'checked' rows directly later, so null payload here
 		//console.log("selected",rows.length);
 
-		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'artists',control:control});
+		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'artists',control:control,stats:statcontrol});
 
 
 	}
@@ -263,11 +246,11 @@ export default function Tabify() {
 		//seems like it should be pretty simple?
 		//for now just take one - otherwise do a delta? :(
 		console.log("selected",rows.length);
-		globalDispatch({type: 'select', payload:rows[0],user: globalUI.user,context:'playlists',control:control});
+		globalDispatch({type: 'select', payload:rows[0],user: globalUI.user,context:'playlists',control:control,stats:statcontrol});
 	}
 
 	var handleSelectRecent= function(rows){
-		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'tracks',control:control});
+		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'tracks',control:control,stats:statcontrol});
 	}
 
 
@@ -381,20 +364,29 @@ export default function Tabify() {
 		},profile:{
 			0:"home",
 			1:"recent",
+			2:"artists_top"
 		}}
+	const tabContextMap = {artists_saved:"artists",artists_top:"artists",playlists:"playlists",home:"home",recent:"recent"}	;
 	const secMap ={0:"profile",1:"library",2:"friends"}
 	const [tabs, setActiveTab] = useState({library:0,profile:0,friends:0});
 	const [section, setActiveSection] = useState(0);
 	function handleTabSelect(section,key){
+		// console.log("handleTabSelect",section);
+		// console.log(key);
 		setActiveTab({...tabs,[section]:key})
 		statcontrol.setStats({name:tabMap[section][key]})
+
+		//testing: can't use statcontrol.stats value immediately
+		//so I recreate the stats object I'd want to send...yeaaaaaah
+
+		globalDispatch({type: 'update', payload: null,user: globalUI.user,context:tabContextMap[tabMap[section][key]],
+			stats:{stats: {name:tabMap[section][key]},mode:statcontrol.mode},control:control});
 	}
 
 	function handleSectionSelect(sectionkey){
 		//if the section changed, also trigger tab set (0 as default)
 		if(sectionkey !== section){
-			setActiveTab({...tabs,[secMap[sectionkey]]:0})
-			statcontrol.setStats({name:tabMap[secMap[sectionkey]][0]})
+			 handleTabSelect(secMap[sectionkey],0)
 		}
 		setActiveSection(sectionkey)
 	}
@@ -403,11 +395,13 @@ export default function Tabify() {
 
 	const options = {
 		search: true,
-		filtering: true,
-		selection: true,
+		// filtering: true,
+		sorting: true,
+		// selection: false,
 		tableLayout:"fixed",
 		paging:true,
 		pageSize:10,
+		searchFieldStyle:{marginRight:"1em"},
 		showFirstLastPageButtons:false,
 		pageSizeOptions:[10,20,30],
 	}
@@ -479,7 +473,7 @@ export default function Tabify() {
 
 								]}
 								data={globalState[ globalUI.user.id + "_tracks"]}
-								options={options}
+								options={{...options,selection:!(statcontrol.mode)}}
 								icons={icons}
 								onSelectionChange={(rows) => handleSelectRecent(rows,'recent')}
 							/>
@@ -509,12 +503,7 @@ export default function Tabify() {
 
 								]}
 								data={globalState[ globalUI.user.id + "_artists"].filter(i =>{return i.term === term})}
-								options={{
-									search: true,
-									filtering: true,
-									selection: true,
-									tableLayout:"fixed"
-								}}
+								options={{...options,selection:!(statcontrol.mode)}}
 								onSelectionChange={(rows) => handleSelectSaved(rows,'top')}
 							/>
 
@@ -547,12 +536,7 @@ export default function Tabify() {
 
 								]}
 								data={globalState[ globalUI.user.id + "_artists"].filter(i =>{return i.source === 'saved'})}
-								options={{
-									search: true,
-									filtering: true,
-									selection: true,
-									tableLayout:"fixed"
-								}}
+								options={{...options,selection:!(statcontrol.mode)}}
 								onSelectionChange={(rows) => handleSelectSaved(rows,'saved')}
 							/>
 
@@ -624,17 +608,7 @@ export default function Tabify() {
 									},
 								]}
 								data={globalState[ globalUI.user.id + "_playlists"]}
-								options={{
-									search: true,
-									searchFieldStyle:{marginRight:"1em"},
-									sorting: true,
-									selection: true,
-									tableLayout:"fixed",
-									paging:true,
-									pageSize:10,
-									showFirstLastPageButtons:false,
-									pageSizeOptions:[10,20,30],
-								}}
+								options={{...options,selection:!(statcontrol.mode)}}
 								onSelectionChange={(rows) => handleSelectPlaylist(rows)}
 							/>
 

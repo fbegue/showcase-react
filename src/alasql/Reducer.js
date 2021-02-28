@@ -58,10 +58,10 @@ var idmap = {
 let nodes = [];
 var sources = ['top','saved','agg','playlists','recent']
 var sourceLabel = {'top':"Top Artists",
-		'saved':"Saved Artists",
+	'saved':"Saved Artists",
 	'agg':"Aggregate",
 	'playlists': "Playlists",
-'recent':"Recently Played"}
+	'recent':"Recently Played"}
 
 //subset of sources that a guest can have
 var sources_subset = ['top','saved','playlists','recent']
@@ -82,9 +82,15 @@ sources_subset.forEach(s =>{
 
 //-----------------------------------------------------
 
-
+/** @func noder
+ *  Recalculate node values in globalState.node based on the action that is taking place
+ *  and the current state of statcontrol - context ignores all 'selected' values and custom = opposite
+ *  Then always recalc agg node
+ *
+ * */
 function noder(action){
-	//console.log("noder started",action);
+
+	console.log("noder started",action);
 	//console.log("current nodes",jstr(nodes.length));
 	//console.log("current tables",jstr(tables));
 	//set tableContext based on action.context
@@ -123,16 +129,63 @@ function noder(action){
 	//every one of these node updates has to go over multiple users
 	//except selection based ones
 
+	//filter either implements a custom filter based on a key, or just returns all checked with that filter
+	//basically: context still needs to do custom filters, but custom needs to also check for checked.
+
+	var contextFilter = function(key,rec){
+		// console.log("contextFilter",key);
+		// console.log("mode",action.stats.mode);
+		// console.log("tab",action.stats.stats.name);
+		//set a flag that, for each type of node, filters the correct artists back
+		var t = false;
+		//todo: (1) don't have source on top stuff yet
+		//should just be teeing off that here completely
+
+		//if key === top, the artist is valid if it has ANY 'term' value
+		//otherwise artist is only valid if it has a source = input key (saved,recent)
+		if(key === 'top'){t = rec['term'] !== null}
+		else{t = rec['source'] === key}
+		// console.log("t",t);
+		// console.log("r",rec['source']);
+		//testing: playlists
+		if(key === null){t = true;}
+
+		var tabMap = {
+			saved:"artists_saved",
+			top:"artists_top",
+			recent:"artists_recent"
+		}
+
+		if(action.stats.mode){
+			//in context mode, we need to know which tab, but ignore checked status
+			if(key === 'saved' || key === 'recent'){
+				return t && tabMap[key] === action.stats.stats.name
+			}else if(key === 'top'){
+				return t && tabMap[key] === action.stats.stats.name}
+			//playlists
+			else if(key === null){
+				return true
+			}
+			return false;
+
+		}else{
+			return rec.tableData && rec.tableData.checked && t
+		}
+	}
 
 	if(action.context === 'artistSearch'){
 		//todo: put this on hold for now (broken everywhere else)
 		console.warn("skipped artistSearch");
 		//tableContext = tables["users"][action.user.id][action.context];
 	}
+	else if(action.context === 'home' || action.context === 'recent'){
+		console.warn("skipped tab node recalc",action.context);
+	}
 	else{
 		Object.keys(tables["users"]).forEach(uid =>{
 			//see: tables for ideas
-			if(uid === 'selection'){//handled elsewhere?
+			if(uid === 'selection'){
+				//handled elsewhere?
 				//we get away with not taking care of this here b/c we take care of it above, right?
 				// not conflating the point of it...
 
@@ -157,9 +210,7 @@ function noder(action){
 					//console.log(uid);
 					//console.log(action.context);
 					//console.log(tables["users"][uid][action.context]);
-					n.data = tables["users"][uid][action.context].filter(r => {
-						return r.tableData && r.tableData.checked;
-					})
+					n.data = tables["users"][uid][action.context].filter(contextFilter.bind(null,null))
 				}else if(action.context === 'tracks') {
 
 					//testing: tracks as a context means I need to do something special
@@ -179,6 +230,9 @@ function noder(action){
 					//console.log(tables["users"][uid][action.context]);
 					n.data = as
 				}else{
+					//note: artists are interesting b/c when I update the node
+					//here I'm necessarily going to filter OUT stuff that doesn't belong
+
 					//set data for each node
 					// var sources = ['top','saved','agg','playlists','guest']
 					var special = ['top','saved','recent']
@@ -187,7 +241,9 @@ function noder(action){
 						var n = _.find(nodes, {name: nodeName[s]});
 						//console.log("current node value",jstr(n.data));
 
-						//testing:
+						//testing: was trying to filter in place to avoid destroying references
+						//but don't think I ever got this to solve my issue
+
 						//look at the current data
 						//figure out what the new data looks like
 						//make the arrays equal by adding or removing elements
@@ -207,21 +263,16 @@ function noder(action){
 							}
 						}
 
-						var update = tables["users"][uid][action.context].filter(r => {
-							var t = false;
-							//set a flag that, for each type of node, filters the correct artists back
-							//todo: (1) don't have source on top stuff yet
-							//should just be teeing off that here completely
-							if(s === 'top'){t = r['term']}
-							else{t = r['source'] === s}
-							return r.tableData && r.tableData.checked && t
-						})
+						// var update = tables["users"][uid][action.context].filter(contextFilter.bind(null,s))
+						// console.log("update",s);
+						// console.log(update);
+						n.data = tables["users"][uid][action.context].filter(contextFilter.bind(null,s))
 
+						//testing: think I stopped destroying refs, but no luck solving transitions issue :(
+						//also, after implementing CONTEXT mode, this filterinPlace won't filter OUT correctly?
 
-
-						//testing: think I stopped destroying refs, but no luck :(
 						//console.log("$update",jstr(update));
-						filterInPlace(n.data,update)
+						//filterInPlace(n.data,update)
 						//console.log("next node value",jstr(n.data));
 
 						//testing: apollo reactive
@@ -236,14 +287,14 @@ function noder(action){
 						// GLOBAL_STATE_VAR({...action.state,node:copy})
 
 
-						n.data = tables["users"][uid][action.context].filter(r => {
-							var t = false;
-							//todo: (1) don't have source on top stuff yet
-							//should just be teeing off that here completely
-							if(s === 'top'){t = r['term']}
-							else{t = r['source'] === s}
-							return r.tableData && r.tableData.checked && t
-						})
+						// n.data = tables["users"][uid][action.context].filter(r => {
+						// 	var t = false;
+						// 	//todo: (1) don't have source on top stuff yet
+						// 	//should just be teeing off that here completely
+						// 	if(s === 'top'){t = r['term']}
+						// 	else{t = r['source'] === s}
+						// 	return r.tableData && r.tableData.checked && t
+						// })
 					})
 				}
 			}//todo: selection
@@ -251,12 +302,35 @@ function noder(action){
 	}//todo: selection
 
 
-//------------------------------------------------------------------
-//calculate agg based on available nodes
+	//------------------------------------------------------------------
+	//calculate agg based on available nodes
 
-//just union all the nodes' data right?
-//this works for artists but not playlists
-//setup agg nodes right here
+	//just union all the nodes' data right?
+	//this works for artists but not playlists
+	//setup agg nodes right here
+
+	//testing: in all cases except artist-related to artist-related tabs,
+	//I need to kill all other nodes if in context mode
+
+	var tabMapReverse = {
+		artists_saved:"saved",
+		artists_top:"top",
+		artists_recent:"recent"
+	}
+
+	if(action.stats.mode){
+		if(action.context === 'artists'){
+			//clear everything except the one that was just activated
+			var keepKey = tabMapReverse[action.stats.stats.name]
+			nodes.forEach(n =>{
+				n.name !== keepKey  ? n.data = []:{};
+			})
+		}else{
+			nodes.forEach(n =>{
+				n.name !== action.context  ? n.data = []:{};
+			})
+		}
+	}
 
 	var u = [];
 //&& n.name !== 'playlists'
@@ -333,14 +407,15 @@ function getJoin(action){
 			//produce a new state for events by filtering thru
 			//- included via families from aggregate node's current data
 			//- included via date and metro selection
+			//- included based on sens filters
 
 			//----------------------------------------------
 			//update events w/ new payload on init
-
+			//todo: this doesn't belong here
+			//just need to leave all payloads except events ones alone
 
 			console.log("$update events (getjoin)",action);
 			//debugger
-			//todo: yeah just need to leave all payloads except events ones alone
 
 			if(action.payload && action.payload[0] && action.payload[0].performance){
 				console.log("new events payload",action.payload);
@@ -354,6 +429,7 @@ function getJoin(action){
 				//what size do I need to be concerned about - or do I just pull it all all the time?
 				tables['events'] = tables['events'].concat(action.payload);
 			}
+			//----------------------------------------------
 
 			//filter on this later
 			var cids = action.control.metro.map( i => i.id);
@@ -392,7 +468,7 @@ function getJoin(action){
 			//testing: familyAgg = null seems like a fine value, right?
 			//I think this is a feature, not a bug
 
-		    families = families.filter(e => e !== null)
+			families = families.filter(e => e !== null)
 			//console.log("$families",families);
 
 			//--------------------------------------------
@@ -400,12 +476,12 @@ function getJoin(action){
 
 			//events start date is > than control's start, but less than controls end
 			//unless there is no control end, than just check the start (which is auto-set to today's date)
-			function byDate(e){
-				return (new Date(e.start.datetime) >= action.control.startDate) && (action.control.endDate ? (new Date(e.start.datetime) <= action.control.endDate):true)
-			}
+		function byDate(e){
+			return (new Date(e.start.datetime) >= action.control.startDate) && (action.control.endDate ? (new Date(e.start.datetime) <= action.control.endDate):true)
+		}
 			events = events.filter(e =>cids.indexOf(e.metro_id) !== -1)
-				 .filter(byDate)
-				 .sort((e1,e2) =>{return new Date(e1.start.datetime) - new Date(e2.start.datetime) })
+				.filter(byDate)
+				.sort((e1,e2) =>{return new Date(e1.start.datetime) - new Date(e2.start.datetime) })
 
 			//todo: strange error here when ... my date result returns to little of # of results?
 			//noticed when testin large cleveland pull - if my date range was real small it would start to duplicate event entries?
@@ -446,23 +522,31 @@ var stateOb = {
 }
 
 //note: reducer rewrite
-//starting to feel like we just place all kinds of artists into USER_artists and just run filters
-//in order to produce certain states which are looking at pieces of it
+
 //todo: change name from init (obviously)
 
 const Reducer = (state, action) => {
 	console.log("Reducer",action);
 	switch (action.type) {
-		case 'update':
+		//refilter events based on some filter change (on events itself only)
+		//- changing selected metro
+		//-
+		case 'update_events':
 			return {
 				...state,
 				events: getJoin(Object.assign({},action,{type:"events"})),
 			}
+		//normally node recalcs are triggered by a selection, but in context mode the tab is the selection
+		//action has access to the tab select
+		case 'update':
+			return {
+				...state,
+				node:  getJoin(Object.assign({},action,{type:"node"})),
+				events:  getJoin(Object.assign({},action,{type:"events"})),
+			}
+		//todo: why is it that I'm not recalcing node on these inits?
 		case 'init':
 			console.log('action', action);
-
-			//refactored above
-			// if(action.context === 'events')
 
 			if(action.context === 'artists'){
 
@@ -512,7 +596,7 @@ const Reducer = (state, action) => {
 					});
 
 				})
-				console.log("$check",tables["artists"]);
+
 
 				//register for user
 				//todo: set up id only relations for user
