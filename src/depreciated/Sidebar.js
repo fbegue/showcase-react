@@ -21,7 +21,7 @@ import Button from '@material-ui/core/Button';
 import ChipsArray from './ChipsArray'
 import Pie from './Pie'
 import {familyColors} from './families'
-import {NODES_STATE_VAR} from './alasql/withApolloProvider'
+//import {NODES_STATE_VAR} from './alasql/withApolloProvider'
 
 
 import {useDB, useNormalizedApi} from './db'

@@ -4,6 +4,7 @@ tables["playlists"] = [];
 tables["artists"] = [];
 tables["events"] = [];
 tables["tracks"] = [];
+tables["spotifyusers"] = [];
 // tables["artistSearchSelection"] = [];
 
 

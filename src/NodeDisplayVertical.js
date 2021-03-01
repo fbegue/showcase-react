@@ -13,18 +13,18 @@ import { useTransition, animated } from "react-spring";
 import _ from "lodash";
 
 import {familyColors} from './families'
-import {NODES_STATE_VAR} from './alasql/withApolloProvider'
+//import {NODES_STATE_VAR} from './alasql/withApolloProvider'
 
 
-import {useDB, useNormalizedApi} from './db'
+//import {useDB, useNormalizedApi} from './db'
 //import useAsync from "./useAsync";
 
 //todo:
-import alasqlAPI from "./alasql/index";
-import Store, {Context} from "./alasql/Store";
-import { GLOBAL_STATE_VAR,GLOBAL_UI_VAR} from './alasql/withApolloProvider';
-import {useQuery,useReactiveVar} from "@apollo/react-hooks";
-import Profile from './components/Profile'
+// import alasqlAPI from "./alasql/index";
+ import {Context} from "./storage/Store";
+// import { GLOBAL_STATE_VAR,GLOBAL_UI_VAR} from './alasql/withApolloProvider';
+// import {useQuery,useReactiveVar} from "@apollo/react-hooks";
+// import Profile from './components/Profile'
 
 import Player,{} from './Player'
 import Map from "./Map";

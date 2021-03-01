@@ -2,7 +2,7 @@
 import React from "react";
 import { VictoryChart,VictoryPie } from 'victory';
 import _ from "lodash";
-import all_genres from "./alasql/all_genres";
+//import all_genres from "./alasql/all_genres";
 import {familyColors,familyGenre_map,genreFam_map} from "./families";
 import util from './util/util'
 import {Control,Highlighter} from './index'

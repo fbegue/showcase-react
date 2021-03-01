@@ -1,7 +1,7 @@
 import React, {useEffect, useContext} from 'react';
 
 // import axios from "../../api/axios";
-import {Context} from './alasql/Store'
+import {Context} from './storage/Store'
 
 const Events = () => {
 	const [state, dispatch] = useContext(Context);

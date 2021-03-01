@@ -1,15 +1,13 @@
 import React, {useContext, useEffect, useState} from "react";
 import ReactDOM from "react-dom";
-import { DatabaseProvider } from "./db";
 import App from './App'
 import _ from 'lodash'
 
 import './index.css'
 //
 import { createContainer } from "unstated-next"
-import {Context} from "./alasql/Store";
-import alasqlAPI from "./alasql";
-
+//import {Context} from "./alasql/Store";
+//import alasqlAPI from "./alasql";
 
 //todo: should probably break out play control here...
 
@@ -65,6 +63,7 @@ function useControl(initialState = 0) {
     return { play,id, togglePlay, setId,metro,selectMetro,startDate,endDate,setStartDate,setEndDate,genreSens, setGenreSens,artistSens, setArtistSens}
 }
 
+
 let Control  = createContainer(useControl);
 
 function useHighlighter(initialState = 0) {
@@ -86,15 +85,13 @@ let StatControl  = createContainer(useStats);
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(
-    <DatabaseProvider>
         <Control.Provider>
             <Highlighter.Provider>
                 <StatControl.Provider>
                     <App />
                 </StatControl.Provider>
             </Highlighter.Provider>
-        </Control.Provider>
-    </DatabaseProvider>,
+        </Control.Provider>,
     rootElement
 );
 

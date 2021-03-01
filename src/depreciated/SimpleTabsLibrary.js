@@ -16,9 +16,9 @@ import MaterialTable from "material-table";
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import alasql from "alasql";
-import alasqlAPI from "./alasql/index";
-import {Context} from './alasql/Store'
+//import alasql from "alasql";
+//import alasqlAPI from "./alasql/index";
+import {Context} from './storage/Store'
 
 
 function TabPanel(props) {
@@ -73,7 +73,7 @@ export default function SimpleTabsLibrary() {
 	var user = 'dacandyman01';
 	useEffect(() => {
 		//testing:
-		alasqlAPI.followedArtists(user)
+		api.followedArtists(user)
 			.then(r =>{
 				dispatch({type: 'init', payload: r,user:user,context:'artists'});
 			},err =>{

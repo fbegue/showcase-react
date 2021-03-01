@@ -1,4 +1,4 @@
-import all_genres from "./alasql/all_genres";
+import all_genres from "./storage/all_genres";
 
 let familyColors= {};
 

@@ -14,7 +14,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { DateTime } from "luxon";
 import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
-import {Context} from "./alasql/Store";
+import {Context} from "./storage/Store";
 import ChipsArray from "./ChipsArray";
 import { makeStyles } from '@material-ui/core/styles';
 import {familyStyles } from './families';
@@ -30,14 +30,14 @@ import PlaylistAddIcon from "@material-ui/icons/PlaylistAdd";
 import Button from '@material-ui/core/Button';
 import api from "./api/api";
 import {useReactiveVar} from "@apollo/react-hooks";
-import {GLOBAL_UI_VAR} from "./alasql/withApolloProvider";
+import {GLOBAL_UI_VAR} from "./storage/withApolloProvider";
 import { useTransition, animated, config } from 'react-spring'
 import Stats from './components/Stats'
 
 import SliderEvents from './components/Sliders/Slider-Events'
 import SliderEvents2 from './components/Sliders/Slider-Events2'
 import DiscreteSlider from "./Slider";
-import alasqlAPI from "./alasql";
+//import alasqlAPI from "./alasql";
 
 function ChipsArray_dep(props) {
 	//const classes = useStyles();

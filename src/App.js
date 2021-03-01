@@ -5,26 +5,24 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Panels from './Panels'
-import FilterBar from './FilterBar';
-import NestedList from './NestedList';
-import MapArea from './MapArea';
+// import Panels from './Panels'
+// import MapArea from './MapArea';
 import './App.css'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import logo from './assets/sound_found.png'
-import Store, {Context} from './alasql/Store'
+import Store, {Context} from './storage/Store'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import RedirectPage from './RedirectPage';
 //
 import Player,{} from './Player'
 import {Control} from './index'
-import withApolloProvider from './alasql/withApolloProvider';
+import withApolloProvider from './storage/withApolloProvider';
 import api from "./api/api";
 
 //
-import { GLOBAL_UI_VAR } from './alasql/withApolloProvider';
+import { GLOBAL_UI_VAR } from './storage/withApolloProvider';
 import {useQuery,useReactiveVar} from "@apollo/react-hooks";
 import Profile from './components/Profile'
 
@@ -37,12 +35,11 @@ import Map from './Map'
 
 import { Helmet } from "react-helmet";
 
-import TodoDetail from './TodoDetail';
 import brace from 'brace';
 import AceEditor from 'react-ace';
 import ContainerDimensions from 'react-container-dimensions';
 //import useAsync from './useAsync';
-import { useDB, useNormalizedApi } from './db'
+//import { useDB, useNormalizedApi } from './db'
 
 import {getUserPlaylists } from './testdata/getUserPlaylists.js'
 
@@ -62,8 +59,8 @@ import ListItemText from "@material-ui/core/ListItemText";
 
 //import TreeView  from "./NestedList3"
 import EventsList from './EventsList'
-import alasqlAPI from "./alasql";
-import alasql from "alasql";
+//import alasqlAPI from "./alasql";
+//import alasql from "alasql";
 
 import SpotifyWebApi from 'spotify-web-api-js';
 import {makeVar} from "@apollo/client";

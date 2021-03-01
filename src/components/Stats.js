@@ -2,10 +2,10 @@ import React, {useState, useEffect, useContext, useRef, useMemo} from 'react';
 import {Highlighter, StatControl} from "../index";
 import {familyColors} from "../families";
 import {VictoryPie} from "victory";
-import {Context} from "../alasql/Store";
+import {Context} from "../storage/Store";
 import {useReactiveVar} from "@apollo/react-hooks";
-import { GLOBAL_UI_VAR } from '../alasql/withApolloProvider';
-import tables from "../alasql/tables";
+import { GLOBAL_UI_VAR } from '../storage/withApolloProvider';
+import tables from "../storage/tables";
 import _ from "lodash";
 //testing:
 // import NodeDisplay from "../NodeDisplay";
@@ -18,6 +18,7 @@ import CloudIcon from "@material-ui/icons/Cloud";
 import Typography from "@material-ui/core/Typography";
 import useMedia from "./Masonry/useMedia";
 import {a, useTransition} from "react-spring";
+import {Tab} from "react-tabify";
 
 function Stats(props) {
 	let statcontrol = StatControl.useContainer();
@@ -224,6 +225,7 @@ function Stats(props) {
 			case 'playlists':
 				_items.push({label:"Created",value:null})
 				_items.push({label:"Followed",value:null})
+				_items.push({label:"Collaborative",value:null})
 				_items.push({label:"Recently Modified",value:null})
 				// items.push({label:"Most Active",value:null})
 				_items.push({label:"Oldest",value:null})
@@ -295,6 +297,11 @@ function Stats(props) {
 			{/*</div>*/}
 		</div>)
 	}
+
+
+	function checkState(){
+		console.log("$globalstate",globalState);
+	}
 	return(
 		<div>
 			<div>
@@ -303,8 +310,11 @@ function Stats(props) {
 
 			<div style={{display:"flex"}}>
 				<div style={{flexGrow:"1"}}></div>
-				<button onClick={() =>{statcontrol.setMode(!statcontrol.mode)}}>{statcontrol.mode ===  true? 'Context':'Custom'}
-				</button>
+				<div style={{zIndex:2}}>
+					<button  onClick={() =>{statcontrol.setMode(!statcontrol.mode)}}>{statcontrol.mode ===  true? 'Context':'Custom'}
+					</button>
+					<button onClick={checkState}>checkState</button>
+				</div>
 				<RedoIcon fontSize={'small'}/>
 				<button onClick={() =>{setView(!view)}}>
 					{view ? <PieChartIcon fontSize={'small'}/>:<CloudIcon fontSize={'small'}/>}
@@ -312,7 +322,9 @@ function Stats(props) {
 			</div>
 			<div style={{display:"flex"}}>
 				<div>
-					<div style={{top: "-5em",right:"2em",position: "relative",height: "21em"}}>
+					{/*todo: need to make container smaller, not do relative pos
+					 style={{top: "-5em",right:"2em",position: "relative",height: "21em"}}*/}
+					<div  style={{top: "-4em",position: "relative",height: "21em",zIndex:1}}>
 						{view && <div>{showCloud(dataset)}</div>}
 						{!(view) &&
 						//	todo: no idea how this width/height bit works

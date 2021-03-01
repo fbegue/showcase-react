@@ -6,12 +6,11 @@ import {getArtistGenres} from "../testdata/getArtistGenres";
 import {getMetroEvents} from "../testdata/getMetroEvents";
 import $ from 'jquery';
 import {useReactiveVar} from "@apollo/react-hooks";
-import {GLOBAL_UI_VAR} from "../alasql/withApolloProvider";
+import {GLOBAL_UI_VAR} from "../storage/withApolloProvider";
 
 const host = "http://localhost:8888";
 
 let counter = 0
-
 const fakeDatabase = {
     todos: [
         {
@@ -104,9 +103,17 @@ var fetchPlaylistsResolved =  function(req){
             // body: JSON.stringify({auth:req.auth,user:req.user})
             body: JSON.stringify({auth:req.auth,user:req.user,madeForYou:true})
         }).then(res => res.json())
-            .then(function(res){
-                //console.log("retrieved: ",res);
-                done(res)
+            .then(function(playlistOb){
+                var playlists = [];
+                playlistOb.playlists.forEach(ob =>{
+                    var p = Object.assign({},ob.playlist)
+                    p.artistFreq = ob.artistFreq;
+                    p.artists = ob.resolved;
+                    playlists.push(p);
+                })
+                //console.log("fetchPlaylistsResolved", playlists);
+                done({playlists:playlists,stats:playlistOb.stats})
+               // done(res)
             })
 
         // fakeFetch2()
@@ -217,6 +224,23 @@ var fetchStaticUser =  function(req){
     })
 }
 
+var getUserPlaylistFriends =  function(req){
+    return new Promise(function(done, fail) {
+
+        fetch('http://localhost:8888/getUserPlaylistFriends', {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(req)
+        }).then(res => res.json())
+            .then(function(res){
+                //console.log("retrieved: ",res);
+                done(res)
+            })
+    })
+}
 //event methods
 
 var fetchEvents =  function(req){
@@ -439,6 +463,7 @@ export default {
     getToken,
     getTopArtists,
     fetchStaticUser,
+    getUserPlaylistFriends,
     getAuth,
     refreshAuth,
     createPlaylist,

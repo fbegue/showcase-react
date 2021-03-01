@@ -7,7 +7,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 import api from "./api/api";
-import {Context} from "./alasql/Store";
+import {Context} from "./storage/Store";
 import ChipsArray from "./ChipsArray";
 
 //source demo

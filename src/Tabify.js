@@ -15,21 +15,22 @@ import ClearIcon from '@material-ui/icons/Clear';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
-import {Context} from "./alasql/Store";
-import alasqlAPI from "./alasql";
+import {Context} from "./storage/Store";
+//import alasqlAPI from "./alasql";
 import api from "./api/api.js"
 
 import ChipsArray from "./ChipsArray";
 import Search from './Search'
 import util from "./util/util";
-import tables from "./alasql/tables";
+import tables from "./storage/tables";
 import _ from "lodash";
 import {Control, StatControl} from "./index";
 import DiscreteSlider from "./Slider";
-import {initUser} from './alasql/Store';
-import { GLOBAL_UI_VAR } from './alasql/withApolloProvider';
+import {initUser} from './storage/Store';
+import { GLOBAL_UI_VAR } from './storage/withApolloProvider';
 import {useQuery,useReactiveVar} from "@apollo/react-hooks";
 import Home from './components/Home';
+import Social from "./components/Social";
 
 // const styles = {
 // 	fontFamily: "sans-serif",
@@ -128,9 +129,10 @@ export default function Tabify() {
 	useEffect(() => {
 
 		var userProms = [];
-		userProms.push(alasqlAPI.followedArtists(req))
-		userProms.push(alasqlAPI.getTopArtists(req))
+		userProms.push(api.getMyFollowedArtists(req))
+		userProms.push(api.getTopArtists(req))
 		userProms.push(api.getRecentlyPlayedTracks(req))
+		userProms.push(api.getUserPlaylistFriends(req))
 		Promise.all(userProms)
 			.then(r =>{
 
@@ -145,14 +147,16 @@ export default function Tabify() {
 
 				globalDispatch({type: 'init', payload:pay,user: globalUI.user,context:'artists'});
 				globalDispatch({type: 'init', payload:r[2].tracks,user: globalUI.user,context:'tracks'});
+				globalDispatch({type: 'init', payload:r[3],user: globalUI.user,context:'spotifyusers'});
 			},err =>{
 				console.log(err);
 			})
 
-		alasqlAPI.fetchPlaylistsResolved(req)
+		api.fetchPlaylistsResolved(req)
 			.then(r =>{
 				console.log("r.stats",r.stats);
 				globalDispatch({type: 'init', payload: r.playlists,user: globalUI.user,context:'playlists'});
+
 			},err =>{
 				console.log(err);
 			})
@@ -160,7 +164,7 @@ export default function Tabify() {
 	},[]);
 
 
-	//-----------------------------
+	//-------------------------------------------------------------------------------------
 	let control = Control.useContainer();
 
 	//anytime metro selection changes, we recalc events based on the state of the new selection
@@ -170,7 +174,7 @@ export default function Tabify() {
 	useEffect(() => {
 		if(globalState.events.length === 0){
 			//console.log("ONE TIME EVENT FETCH");
-			alasqlAPI.fetchEvents({metros:control.metro})
+			api.fetchEvents({metros:control.metro})
 				.then(r =>{
 					globalDispatch({type: 'update_events', payload: r,context:'events', control:control});
 				},err =>{
@@ -232,14 +236,7 @@ export default function Tabify() {
 		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'artists',control:control,stats:statcontrol});
 		//dispatch({type: 'select', payload:null,user:user,context:'artists',state:state:globalState});
 	}
-	var handleSelectGuest = function(rows){
-		//here I'm just accessing the 'checked' rows directly later, so null payload here
-		//console.log("selected",rows.length);
 
-		globalDispatch({type: 'select', payload:null,user: globalUI.user,context:'artists',control:control,stats:statcontrol});
-
-
-	}
 
 	var handleSelectPlaylist= function(rows){
 		//todo: confused on how to get selected row?
@@ -326,17 +323,7 @@ export default function Tabify() {
 		setTerm(newValue);
 	}
 
-	//testing: not being sent yet
-	var guest = {id:123028477,name:"Dan"};
-	function setStatic(){
-		alasqlAPI.fetchStaticUser()
-			.then(r =>{
-				initUser(guest);
-				globalDispatch({type: 'init', user:guest,payload:r[0].data,context:'artists'});
-			},err =>{
-				console.log(err);
-			})
-	}
+
 
 	function prepTracks(rowData){
 		//console.log("$prepTracks",rowData);
@@ -355,7 +342,7 @@ export default function Tabify() {
 		control.togglePlay(!control.play);
 	}
 
-	//-----------------------------
+	//----------------------------------------------------------------------------
 	let statcontrol = StatControl.useContainer();
 
 	const tabMap = {library:{
@@ -365,8 +352,8 @@ export default function Tabify() {
 			0:"home",
 			1:"recent",
 			2:"artists_top"
-		}}
-	const tabContextMap = {artists_saved:"artists",artists_top:"artists",playlists:"playlists",home:"home",recent:"recent"}	;
+		},friends:{0:"friends"}}
+	const tabContextMap = {artists_saved:"artists",artists_top:"artists",playlists:"playlists",home:"home",recent:"recent",friends:"friends"}	;
 	const secMap ={0:"profile",1:"library",2:"friends"}
 	const [tabs, setActiveTab] = useState({library:0,profile:0,friends:0});
 	const [section, setActiveSection] = useState(0);
@@ -422,6 +409,7 @@ export default function Tabify() {
 			ref) => <ArrowBackIosIcon{...props} ref={ref}/>)
 	}
 
+
 	return(
 		// style={styles}
 		<div>
@@ -433,6 +421,7 @@ export default function Tabify() {
 				<Tab label="My Profile">
 					<Tabs activeKey={tabs['profile']} onSelect={handleTabSelect.bind(null,'profile')}>
 						<Tab label="Home">
+
 							<Home data={globalState[ globalUI.user.id + "_artists"].filter(i =>{return i.term})} />
 						</Tab>
 						<Tab label="Recent Listening">
@@ -620,43 +609,7 @@ export default function Tabify() {
 				<Tab label="My Friends">
 					<Tabs>
 						<Tab label="Look Dan your very own tab">
-
-							<button onClick={setStatic}>getstuff</button>
-							<DiscreteSlider handleChange={(v) =>{setTerm(v)}}/>
-
-							{/*todo: disable for now until content shown*/}
-							{globalState[guest.id + "_artists"] && <MaterialTable
-								title=""
-								columns={[
-									{
-										field: 'images[0]',
-										title: '',
-										render: rowData => <img src={rowData.images[0].url} style={{width: 50, borderRadius: '50%'}}/>,
-										filtering:false,
-										width:"5em"
-									},
-									{ title: 'Name', field: 'name', filtering:false},
-									{
-										field: 'genres',
-										title: 'genres',
-										//ender: rowData => getChips(rowData.genres),
-										render: rowData => <ChipsArray chipData={rowData.genres}/>,
-										filtering:false,
-										width:"20em"
-									},
-
-								]}
-								data={globalState[guest.id + "_artists"].filter(i =>{return i.term === term})}
-								options={{
-									search: true,
-									filtering: true,
-									selection: true,
-									tableLayout:"fixed"
-								}}
-								onSelectionChange={(rows) => handleSelectGuest(rows,'top')}
-							/>
-							}
-
+							<Social/>
 						</Tab>
 						<Tab label="Subtab 3.2">Tab 3 Content 2</Tab>
 						<Tab label="Subtab 3.3">Tab 3 Content 3</Tab>

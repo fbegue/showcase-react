@@ -1,10 +1,10 @@
-import * as alasql from 'alasql';
+//import * as alasql from 'alasql';
 import _ from "lodash";
 //import { DateTime } from "luxon";
 import tables from './tables'
-import alasqlAPI from "./index";
-import { GLOBAL_STATE_VAR } from './withApolloProvider';
-import {ex,ex2} from '../testdata/artists'
+// import alasqlAPI from "./index";
+// import { GLOBAL_STATE_VAR } from './withApolloProvider';
+// import {ex,ex2} from '../testdata/artists'
 
 //------------------------------------------------------
 //utilities
@@ -178,7 +178,7 @@ function noder(action){
 		console.warn("skipped artistSearch");
 		//tableContext = tables["users"][action.user.id][action.context];
 	}
-	else if(action.context === 'home' || action.context === 'recent'){
+	else if(action.context === 'home' || action.context === 'recent' ||  action.context === 'friends'){
 		console.warn("skipped tab node recalc",action.context);
 	}
 	else{
@@ -393,12 +393,12 @@ function getJoin(action){
 		//seems like I'm doing this work in "select"?
 		case 'artists':
 			console.log([tables[action.user.id][action.type]]);
-			r = alasql('SELECT * from ? t join ? art_gen on art_gen.id = t.id', [tables[action.user.id][action.type], art_gen]);
-			console.log(action.type,r);
+			//r = alasql('SELECT * from ? t join ? art_gen on art_gen.id = t.id', [tables[action.user.id][action.type], art_gen]);
+			//console.log(action.type,r);
 			return r;
 		case 'albums':
-			r = alasql('SELECT * from ? t join ? art_gen on art_gen.id = t.id', [tables[action.user.id][action.type], art_gen]);
-			console.log(action.type,r);
+			//r = alasql('SELECT * from ? t join ? art_gen on art_gen.id = t.id', [tables[action.user.id][action.type], art_gen]);
+			//console.log(action.type,r);
 			return r;
 		case 'node':
 			return noder(action)
@@ -636,6 +636,19 @@ const Reducer = (state, action) => {
 				return {
 					...state,
 					[key]: tables["users"][action.user.id][action.context]
+					//node:  getJoin({type:"node"}),
+				};
+			}
+			else if(action.context === 'spotifyusers'){
+
+				//todo: keeping this as a tuple for now
+				//tables[action.context] = tables[action.context].concat(action.payload);
+				tables[action.context] = action.payload;
+
+				console.log("stated",action.context);
+				return {
+					...state,
+					[action.context]: tables[action.context]
 					//node:  getJoin({type:"node"}),
 				};
 			}

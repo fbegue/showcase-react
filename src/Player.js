@@ -1,9 +1,9 @@
 import React, {useEffect,useState} from 'react';
 import api from "./api/api";
 import SpotifyPlayer from 'react-spotify-web-playback';
-import Store from "./alasql/Store";
+//import Store from "./alasql/Store";
 //import './styles_player'
-import { GLOBAL_UI_VAR } from './alasql/withApolloProvider';
+//mport { GLOBAL_UI_VAR } from './alasql/withApolloProvider';
 
 //play is a promise function which de-refs the input object and
 

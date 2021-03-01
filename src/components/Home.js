@@ -147,6 +147,9 @@ function Main(props) {
 		control.setId(item.id);
 		control.togglePlay(!control.play);
 	}
+
+
+
 	return(
 		<div>
 			<div style={{display:"flex"}}>
