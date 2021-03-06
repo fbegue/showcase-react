@@ -13,7 +13,7 @@
     "@material-ui/lab": "latest",
     "@material-ui/pickers": "^3.2.10",
     "@material-ui/styles": "latest",
-    "alasql": "^0.6.3",
+    "alasql": "^0.7.0",
     "apollo3-cache-persist": "^0.9.1",
     "autoprefixer": "7.1.6",
     "axios": "^0.21.0",
