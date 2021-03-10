@@ -60,7 +60,7 @@
     "react": "16.8.0",
     "react-ace": "^6.4.0",
     "react-container-dimensions": "^1.4.1",
-    "react-dev-utils": "^5.0.2",
+    "react-dev-utils": "^11.0.4",
     "react-dom": "16.8.0",
     "react-helmet": "^6.0.0",
     "react-load-script": "0.0.6",
