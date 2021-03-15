@@ -1,4 +1,4 @@
-import React, {useState,useEffect,useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useContext} from 'react';
 import {familyColors,familyGenre_map,genreFam_map} from "../families";
 import DiscreteSlider from "../Slider";
 import useMedia from './Masonry/useMedia'
@@ -19,6 +19,9 @@ import api from "../api/api";
 import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
 import {Control} from "../index";
 import Typography from "@material-ui/core/Typography";
+import {useReactiveVar} from "@apollo/react-hooks";
+import {GLOBAL_UI_VAR} from "../storage/withApolloProvider";
+import {Context} from "../storage/Store";
 
 
 function Main(props) {
@@ -27,6 +30,7 @@ function Main(props) {
 	const [families, selectFamilies] = useState([]);
 	const [savedLast, setSavedLast] = useState([]);
 	const [hoverStyle, setHoverStyle] = useState(null);
+	const [globalState, globalDispatch] = useContext(Context);
 
 	let control = Control.useContainer();
 
@@ -48,16 +52,18 @@ function Main(props) {
 	},[term]);
 
 
+	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
+	let req = {user:null,auth:globalUI};
+
 	useEffect(() => {
-		api.getMySavedTracksLast()
+		var proms = [];
+		proms.push(api.getMySavedTracksLast({auth:globalUI}))
+			Promise.all(proms)
 			.then(r =>{
-				console.log("getMySavedTracksLast",r);
 				var prep = {}
-				r.forEach(tob =>{
-					prep[tob.track.id] = null
-				})
-				setHoverStyle(prep)
-				setSavedLast(r);
+				r[0].forEach(tob =>{prep[tob.id] = null})
+				setHoverStyle(prep);
+				setSavedLast(r[0]);
 			})
 		return function cleanup() {
 			console.log("componentWillUnmount");
@@ -165,26 +171,26 @@ function Main(props) {
 							Recently Saved Songs
 						</Typography>
 						 {savedLast.length !== 0 && savedLast.map((item,i) => (
-							<div key={item.track.id} style={{display:"flex"}}>
-								<div style={hoverStyle[item.track.id] === null ?  {paddingRight:"1em"}: hoverStyle[item.track.id]}
-									 onMouseEnter={() => handleHover(item.track.id)}
+							<div key={item.id} style={{display:"flex"}}>
+								<div style={hoverStyle[item.id] === null ?  {paddingRight:"1em"}: hoverStyle[item.id]}
+									 onMouseEnter={() => handleHover(item.id)}
 									 onMouseLeave={() => handleHover('cancel')}
 								>
-									{ hoverStyle[item.track.id] !== null &&
+									{ hoverStyle[item.id] !== null &&
 										  <div style={{position:"absolute"}}>
-											<div style={{margin:"50%"}}><PlayCircleOutlineIcon  fontSize={'large'} onClick={() =>handlePlay(item.track)}> </PlayCircleOutlineIcon> </div>
+											<div style={{margin:"50%"}}><PlayCircleOutlineIcon  fontSize={'large'} onClick={() =>handlePlay(item)}> </PlayCircleOutlineIcon> </div>
 										</div>
 									}
-									<img height={70} src={item.track.album.images[0].url}
+									<img height={70} src={item.album.images[0].url}
 									/>
 								</div>
 								<div>
-									<div>{item.track.name}</div>
+									<div>{item.name}</div>
 									<div style={{fontSize:".9em",color:"#a4a4a4"}}>
-										by {item.track.artists.map((artist,i) => (
+										by {item.artists.map((artist,i) => (
 										<span  key={artist.id}>
 													<span>{artist.name}</span>
-											{item.track.artists.length - 1 > i && <span>,{'\u00A0'}</span>}
+											{item.artists.length - 1 > i && <span>,{'\u00A0'}</span>}
 												</span>
 									))}
 									</div>

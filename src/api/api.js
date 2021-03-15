@@ -155,7 +155,7 @@ var getRecentlyPlayedTracks =  function(req){
     })
 }
 
-var getSavedTracks =  function(){
+var getSavedTracks =  function(req){
     return new Promise(function(done, fail) {
 
         fetch('http://localhost:8888/getMySavedTracks', {
@@ -171,7 +171,8 @@ var getSavedTracks =  function(){
     })
 }
 
-var getMySavedTracksLast =  function(){
+
+var getMySavedTracksLast =  function(req){
     return new Promise(function(done, fail) {
 
         fetch('http://localhost:8888/getMySavedTracksLast', {

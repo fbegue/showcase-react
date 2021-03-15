@@ -16,6 +16,8 @@ import RedoIcon from "@material-ui/icons/Redo";
 import PieChartIcon from "@material-ui/icons/PieChart";
 import CloudIcon from "@material-ui/icons/Cloud";
 import Typography from "@material-ui/core/Typography";
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
 import useMedia from "./Masonry/useMedia";
 import {a, useTransition} from "react-spring";
 import {Tab} from "react-tabify";
@@ -28,6 +30,16 @@ function Stats(props) {
 	const [dataset, setDataset] = useState([]);
 	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
 	let highlighter = Highlighter.useContainer();
+
+	// useEffect(() => {
+	// 	console.log("componentDidMount | stats");
+	// 	// Update the document title using the browser API
+	// 	//testing:
+	// 	// document.title = `You clicked ${count} times`;
+	// 	return function cleanup() {
+	// 		console.log("componentWillUnmount| stats");
+	// 	};
+	// });
 
 	//const initialRender = useRef(true);
 	useEffect(() => {
@@ -79,9 +91,19 @@ function Stats(props) {
 					data = tables["users"][globalUI.user.id]["playlists"].filter(contextFilter.bind(null,null))
 				}
 				break;
+			case "tracks_recent":
+				data = globalState[globalUI.user.id + "_tracks"].filter(contextFilter.bind(null,'recent'))
+				break;
+			case "tracks_saved":
+				data = globalState[globalUI.user.id + "_tracks"].filter(contextFilter.bind(null,'saved'))
+				break;
 			default:
-			// code block
+				console.warn("skipped stat re-render for: " + statcontrol.stats.name)
+				break;
 		}
+
+		console.log("new data",data);
+
 
 		//a result of the fact that the incoming data is no longer a prop, I need to expose current dataset for showCloud
 		setDataset(data);
@@ -90,32 +112,40 @@ function Stats(props) {
 		var map = {}
 		data.forEach(d =>{
 
-			//artists,...
-			//todo: doesn't quite make sense ...
-			// think this was a notee to myself that I was getting some nulls that shouldn't be there?
-			if(d.familyAgg && d.familyAgg !== null){
-				if(!map[d.familyAgg]){map[d.familyAgg] = 1}
-				else{map[d.familyAgg]++}
+			//todo: this is many artists from many tracks
+			//the abstraction is always going to not-perfectly represent the tracks themselves
+			if(d.type === 'track'){
+				d.artists.forEach(a =>{
+					if(!map[a.familyAgg]){map[a.familyAgg] = 1}
+					else{map[a.familyAgg]++}
+				});
 
+			}else if(d.artists) {
 				//playlists
-			}else if(d.artists){
-
 				//todo: hard part is representing a playlist proportionately next to "another node type object"
 				//todo: and, proportionately within itself
 
 				//I have the familyAgg for each artist - so just make a ranking of these then?
 				//take top 5
-				var rank = util.makeRank(d.artists,d.artistFreq,"familyAgg");
+				var rank = util.makeRank(d.artists, d.artistFreq, "familyAgg");
 				//testing: non-proportionate ranks
-				for(var x =0;x < rank.length && x < 3 ; x++){
+				for (var x = 0; x < rank.length && x < 3; x++) {
 					var fam = Object.keys(rank[x])[0];
-					!(map[fam]) ? map[fam] = 1:map[fam]++
+					!(map[fam]) ? map[fam] = 1 : map[fam]++
 				}
-
+			}
+			//todo: artists? familyAgg is good enough signifier here?
+			//todo: null thing doesn't quite make sense ...
+			// think this was a notee to myself that I was getting some nulls that shouldn't be there?
+			else if(d.familyAgg && d.familyAgg !== null){
+				if(!map[d.familyAgg]){map[d.familyAgg] = 1}
+				else{map[d.familyAgg]++}
 			}else{
 				console.error("malformed data passed to pie");
 			}
 		})
+
+		console.log("new map",map);
 		Object.keys(map).forEach(fam =>{tempPieData.push({x:fam,y:map[fam]})})
 		setPieData(tempPieData);
 
@@ -209,12 +239,61 @@ function Stats(props) {
 		)
 	}
 
+	//todo: trying to figure out memo'ing for contextstats
+	//but shit doesn't work - not sure what the difference here is
+	//https://kyleshevlin.com/using-react-memo-to-avoid-unnecessary-rerenders
+
+	// function Profile({ name, location }) {
+	// 	const [color, setColor] = useState('blue');
+	//
+	// 	setTimeout(e =>{setColor('pink')},2000)
+	// 	useEffect(() => {
+	// 		console.log("componentDidMount | profile");
+	// 		// Update the document title using the browser API
+	// 		//testing:
+	// 		// document.title = `You clicked ${count} times`;
+	// 		return function cleanup() {
+	// 			console.log("componentWillUnmount| profile");
+	// 		};
+	// 	});
+	//
+	// 	return (
+	// 		<div style={{ backgroundColor: color }}>
+	// 			<div>name</div>
+	// 			<div>location</div>
+	// 		</div>
+	// 	)
+	// }
+	//
+	// const personsAreEqual = (prevProps, nextProps) => {return true}
+	// const MemoizedProfile = React.memo(Profile,personsAreEqual)
+
 	function ContextStats(props) {
 
 		//todo: thought storing in proper state would smooth transition
 		//I'm not even sure if I get what I'm looking for for free really...
 		var _items = [];
 		//const [items, setItems] = useState([]);
+
+		function ListArtists(props){
+			return (
+				<div>
+					{props.artists.map((item,i) => (
+						<div>{item.artist.name}</div>
+					))}
+				</div>
+			)
+		}
+
+		function ListTracks(props){
+			return (
+				<div>
+					{props.tracks.map((item,i) => (
+						<div>{item.name}</div>
+					))}
+				</div>
+			)
+		}
 
 		switch(statcontrol.stats.name) {
 			case 'artists_saved':
@@ -223,12 +302,18 @@ function Stats(props) {
 				_items.push({label:"test23",value:null})
 				break;
 			case 'playlists':
-				_items.push({label:"Created",value:null})
-				_items.push({label:"Followed",value:null})
-				_items.push({label:"Collaborative",value:null})
-				_items.push({label:"Recently Modified",value:null})
+				var source = globalState[globalUI.user.id + "_playlists_stats"];
+				_items.push({label:"Created",value:source.created,width:"120px"})
+				_items.push({label:"Followed",value:source.followed,width:"120px"})
+				_items.push({label:"Collaborating",value:source.collaborative,width:"120px"})
+				_items.push({label:"Recently Modified",value:source.recent.playlist_name,width:"240px"})
 				// items.push({label:"Most Active",value:null})
-				_items.push({label:"Oldest",value:null})
+				_items.push({label:"Oldest",value:source.oldest.playlist_name,width:"240px"})
+				break;
+			case 'tracks_saved':
+				var source = globalState[globalUI.user.id + "_tracks_stats"];
+				_items.push({label:"Favorite Artists",value:<ListArtists artists={source.artists_top}/>,width:"240px"})
+				_items.push({label:"Recently Saved",value:<ListTracks tracks={source.recent}/>,width:"240px"})
 				break;
 			default:
 			// code block
@@ -237,7 +322,9 @@ function Stats(props) {
 		var items = _items;
 
 		//-----------------------------------------------
-		const columns = useMedia(['(min-width: 1500px)', '(min-width: 1000px)', '(min-width: 600px)'], [5, 4, 3], 2)
+		//todo: this is cool, but not sure what it means for me in this context
+		//const columns = useMedia(['(min-width: 1500px)', '(min-width: 1000px)', '(min-width: 600px)'], [5, 4, 3], 2)
+		const columns = 3;
 
 		// Hook2: Measure the width of the container element
 		//todo: disabled this b/c of 'illegal invocation' when moving off this component
@@ -250,6 +337,9 @@ function Stats(props) {
 
 		//note: replaced all references to data-height (designed to be unique values 300-500) with uHeight
 		const uHeight = 100;
+
+		//note: attempted to make this into a variable width depending on the data element, but that doesn't make sense
+		//without a serious rework, there will never be a variable # of COLUMNS
 
 		const [heights, gridItems] = useMemo(() => {
 			let heights = new Array(columns).fill(0) // Each column gets a height starting with zero
@@ -275,32 +365,41 @@ function Stats(props) {
 			})
 		//-----------------------------------------------
 
-		return(<div>
-			<div  className="list" style={{height: Math.max(...heights)}}>
-				{transitions.map(({item, props: {xy, ...rest}, key}) => (
-					<a.div key={key}
-						   style={{transform: xy.interpolate((x, y) => `translate3d(${x}px,${y}px,0)`), ...rest}}>
-						<div style={{display:"flex"}}>
-							<Typography variant="subtitle1" component={'div'} gutterBottom>{item.label}</Typography>
-							<Typography variant="body1" component={'div'} gutterBottom>{item.value}</Typography>
-						</div>
-					</a.div>
-				))}
-			</div>
-			{/*<div style={{display:"flex"}}>*/}
-			{/*	{items.map((item,i) => (*/}
-			{/*		<div style={{display:"flex"}}>*/}
-			{/*			<Typography variant="subtitle1" component={'div'} gutterBottom>{item.label}</Typography>*/}
-			{/*			<Typography variant="body1" component={'div'} gutterBottom>{item.value}</Typography>*/}
-			{/*		</div>*/}
+		return(
+			<div>
+			{/*	note: attempt at transitions*/}
+			{/*<div  className="list" style={{height: Math.max(...heights)}}>*/}
+			{/*	{transitions.map(({item, props: {xy, ...rest}, key}) => (*/}
+			{/*		<a.div key={key}*/}
+			{/*			   style={{transform: xy.interpolate((x, y) => `translate3d(${x}px,${y}px,0)`), ...rest}}>*/}
+			{/*			<div style={{display:"flex"}}>*/}
+			{/*				<Typography variant="subtitle1" component={'div'} >{item.label}</Typography>*/}
+			{/*				<Typography variant="subtitle1" component={'div'} ><span style={{color:'#3f51b5'}}>{item.value}</span></Typography>*/}
+			{/*			</div>*/}
+			{/*		</a.div>*/}
 			{/*	))}*/}
 			{/*</div>*/}
+			<div style={{display:"flex", flexWrap:"wrap",width:"480px"}}>
+				{items.map((item,i) => (
+					<div style={{width:item.width, padding:"5px"}}>
+						<Card>
+							<CardContent>
+								<Typography variant="subtitle1" component={'span'} >{item.label}:{'\u00A0'}</Typography>
+								{/*todo: color should be typo color prop set in MUI theme*/}
+								<Typography variant="subtitle1" component={'span'} ><span style={{color:'#3f51b5'}}>{item.value}</span></Typography>
+							</CardContent>
+						</Card>
+
+					</div>
+				))}
+			</div>
 		</div>)
 	}
 
 
 	function checkState(){
 		console.log("$globalstate",globalState);
+		console.log("$globalUI",globalUI);
 	}
 	return(
 		<div>
@@ -405,7 +504,8 @@ function Stats(props) {
 
 						</div>}
 					</div>
-					<div><ContextStats></ContextStats></div>
+					{/*<div><ContextStats></ContextStats></div>*/}
+					<div><ContextStats/></div>
 				</div>
 				<div style={{right:"5em",position: "relative"}}><NodeDisplay/> </div>
 			</div>

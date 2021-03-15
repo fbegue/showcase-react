@@ -178,7 +178,7 @@ function noder(action){
 		console.warn("skipped artistSearch");
 		//tableContext = tables["users"][action.user.id][action.context];
 	}
-	else if(action.context === 'home' || action.context === 'recent' ||  action.context === 'friends'){
+	else if(action.context === 'home' ||  action.context === 'friends'){
 		console.warn("skipped tab node recalc",action.context);
 	}
 	else{
@@ -230,8 +230,7 @@ function noder(action){
 					//console.log(tables["users"][uid][action.context]);
 					n.data = as
 				}else{
-					//note: artists are interesting b/c when I update the node
-					//here I'm necessarily going to filter OUT stuff that doesn't belong
+					//note: any artist related node recalc means I recalc all of them
 
 					//set data for each node
 					// var sources = ['top','saved','agg','playlists','guest']
@@ -577,7 +576,7 @@ const Reducer = (state, action) => {
 			else if(action.context === 'playlists'){
 
 				//register with global playlists
-				tables[action.context] = tables[action.context].concat(action.payload);
+				tables[action.context] = tables[action.context].concat(action.payload.playlists);
 
 				//todo: register with global artists
 				//starting to get a little weird here...should we really be parsing thru each playlist here?
@@ -586,7 +585,7 @@ const Reducer = (state, action) => {
 				// if(typeof tables["artists"] !== 'array'){
 				// 	console.log("retype");tables["artists"] = [];}
 
-				action.payload.forEach(p =>{
+				action.payload.playlists.forEach(p =>{
 					//don't add repeats
 					p.artists.forEach(a =>{
 						if (!(tables["artists"].some(e => e.id === a.id))) {
@@ -602,40 +601,34 @@ const Reducer = (state, action) => {
 				//todo: set up id only relations for user
 				//just the whole thing for now
 				//var ids = _.map(artists, function(a){return a.id;});
-				tables["users"][action.user.id][action.context] = action.payload;
+				tables["users"][action.user.id][action.context] = action.payload.playlists;
 
 
 				var key = action.user.id + '_' + action.context;
 				console.log("stated",key);
 				return {
 					...state,
-					[key]: tables["users"][action.user.id][action.context]
+					[key]: tables["users"][action.user.id][action.context],
+					[key + "_stats"]:action.payload.stats
 					//node:  getJoin({type:"node"}),
 				};
 			}
 			else if(action.context === 'tracks'){
 
-				//register with global artists
-				tables[action.context] = tables[action.context].concat(action.payload);
+				//register with global tracks
+				tables[action.context] = tables[action.context].concat(action.payload.tracks);
 
-				//register for user
-				//todo: set up id only relations for user
-				//just the whole thing for now
-				//var ids = _.map(artists, function(a){return a.id;});
-
-				//testing: maybe this should just be additive
-				//tables["users"][action.user][action.context] = action.payload;
-				//console.log("$context",tables["users"][action.user][action.context]);
 				console.log("$",tables);
 				console.log("$",action.user.id);
 				console.log("$",tables["users"][action.user.id]);
-				tables["users"][action.user.id][action.context] = tables["users"][action.user.id][action.context].concat(action.payload)
+				tables["users"][action.user.id][action.context] = tables["users"][action.user.id][action.context].concat(action.payload.tracks)
 
 				var key = action.user.id + '_' + action.context;
 				console.log("stated",key);
 				return {
 					...state,
-					[key]: tables["users"][action.user.id][action.context]
+					[key]: tables["users"][action.user.id][action.context],
+						[key + "_stats"]:action.payload.stats
 					//node:  getJoin({type:"node"}),
 				};
 			}

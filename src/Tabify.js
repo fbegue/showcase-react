@@ -20,6 +20,7 @@ import {Context} from "./storage/Store";
 import api from "./api/api.js"
 
 import ChipsArray from "./ChipsArray";
+
 import Search from './Search'
 import util from "./util/util";
 import tables from "./storage/tables";
@@ -131,31 +132,29 @@ export default function Tabify() {
 		var userProms = [];
 		userProms.push(api.getMyFollowedArtists(req))
 		userProms.push(api.getTopArtists(req))
-		userProms.push(api.getRecentlyPlayedTracks(req))
-		userProms.push(api.getUserPlaylistFriends(req))
+		 userProms.push(api.getRecentlyPlayedTracks(req))
+		 userProms.push(api.getUserPlaylistFriends(req))
+		 userProms.push(api.getSavedTracks({auth:globalUI}))
 		Promise.all(userProms)
 			.then(r =>{
-
-				//testing:
-				//probably should be happening on the back
-				r[0].forEach(a =>{a.source = 'saved'})
-				r[1].forEach(a =>{a.source = 'top'})
 
 				//all these artist's have 'sources' so they all end up in here together
 				var pay = [];pay = pay.concat(r[0]);pay= pay.concat(r[1]);
 				//pay= pay.concat(r[2]['artists'])
 
 				globalDispatch({type: 'init', payload:pay,user: globalUI.user,context:'artists'});
-				globalDispatch({type: 'init', payload:r[2].tracks,user: globalUI.user,context:'tracks'});
-				globalDispatch({type: 'init', payload:r[3],user: globalUI.user,context:'spotifyusers'});
+				 globalDispatch({type: 'init', payload:r[2],user: globalUI.user,context:'tracks'});
+				 globalDispatch({type: 'init', payload:r[3],user: globalUI.user,context:'spotifyusers'});
+				globalDispatch({type: 'init', payload:r[4],user: globalUI.user,context:'tracks'});
 			},err =>{
 				console.log(err);
 			})
 
+		//testing:
 		api.fetchPlaylistsResolved(req)
 			.then(r =>{
 				console.log("r.stats",r.stats);
-				globalDispatch({type: 'init', payload: r.playlists,user: globalUI.user,context:'playlists'});
+				globalDispatch({type: 'init', payload: r,user: globalUI.user,context:'playlists'});
 
 			},err =>{
 				console.log(err);
@@ -325,16 +324,7 @@ export default function Tabify() {
 
 
 
-	function prepTracks(rowData){
-		//console.log("$prepTracks",rowData);
-		var genres = [];
-		rowData.artists.forEach(a =>{
-			genres = genres.concat(a.genres)
-		});
-		genres = _.uniqBy(genres, function(n) {return n.id;});
-		//return <div></div>
-		return(<ChipsArray chipData={genres}/>)
-	}
+
 
 	function handlePlay(item) {
 		console.log("$handlePlay",item);
@@ -347,13 +337,14 @@ export default function Tabify() {
 
 	const tabMap = {library:{
 			0:"artists_saved",
-			1:"playlists"
+			1:"playlists",
+			2:"tracks_saved"
 		},profile:{
 			0:"home",
-			1:"recent",
+			1:"tracks_recent",
 			2:"artists_top"
 		},friends:{0:"friends"}}
-	const tabContextMap = {artists_saved:"artists",artists_top:"artists",playlists:"playlists",home:"home",recent:"recent",friends:"friends"}	;
+	const tabContextMap = {artists_saved:"artists",artists_top:"artists",playlists:"playlists",home:"home",tracks_recent:"tracks",friends:"friends",tracks_saved:"tracks"}	;
 	const secMap ={0:"profile",1:"library",2:"friends"}
 	const [tabs, setActiveTab] = useState({library:0,profile:0,friends:0});
 	const [section, setActiveSection] = useState(0);
@@ -455,7 +446,7 @@ export default function Tabify() {
 										field: 'genres',
 										title: 'genres',
 										//ender: rowData => getChips(rowData.genres),
-										render: rowData => prepTracks(rowData),
+										render: rowData => util.prepTracks(rowData),
 										filtering:false,
 										width:"20em"
 									},
@@ -603,7 +594,50 @@ export default function Tabify() {
 
 
 						</Tab>
-						<Tab label="Subtab 1.3">Tab 1 Content 3</Tab>
+						<Tab label="Saved Tracks">
+							<MaterialTable
+								title=""
+								columns={[
+									{
+										field: 'name',
+										title: 'Name',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => <div key={rowData.id} style={{display:"flex"}}>
+											<div>
+												<img height={70} src={rowData.album.images[0].url} />
+											</div>
+											<div>
+												<div>{rowData.name}</div>
+												<div style={{fontSize:".9em",color:"#a4a4a4"}}>
+													by {rowData.artists.map((artist,i) => (
+													<span  key={artist.id}>
+													<span>{artist.name}</span>
+														{rowData.artists.length - 1 > i && <span>,{'\u00A0'}</span>}
+												</span>
+												))}
+												</div>
+												{/*<div>{styleAddedAt(rowData.added_at)}</div>*/}
+											</div>
+										</div>,
+										filtering:false,
+										width:"20em"
+									},
+									{
+										field: 'genres',
+										title: 'genres',
+										//ender: rowData => getChips(rowData.genres),
+										render: rowData => util.prepTracks(rowData),
+										filtering:false,
+										width:"20em"
+									},
+
+								]}
+								data={globalState[ globalUI.user.id + "_tracks"].filter(i =>{return i.source === 'saved'})}
+								options={{...options,selection:!(statcontrol.mode)}}
+								onSelectionChange={(rows) => handleSelectSaved(rows,'saved')}
+							/>
+
+						</Tab>
 					</Tabs>
 				</Tab>
 				<Tab label="My Friends">

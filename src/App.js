@@ -1,6 +1,10 @@
 import React, {useState, useEffect, useContext} from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+
+import 'fontsource-roboto';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -276,7 +280,49 @@ function App(props) {
     //     console.log("APP | threshold check passed");
     // }
 
+    //todo: no idea why every variant is getting uppercased
+    //https://stackoverflow.com/questions/25158435/paper-button-always-as-upper-case
+    //https://material-ui.com/components/typography/
+    //configing theme
+    //https://material-ui.com/customization/typography/
+
+
+    const muiTheme = createMuiTheme({
+        typography: {
+            fontFamily: [
+                // '-apple-system',
+                // 'BlinkMacSystemFont',
+                // '"Segoe UI"',
+                'Roboto',
+                '"Helvetica Neue"',
+                'Arial',
+                'sans-serif',
+                // '"Apple Color Emoji"',
+                // '"Segoe UI Emoji"',
+                // '"Segoe UI Symbol"',
+            ].join(','),
+            subtitle2:{  textTransform: 'none',},
+            body1:{  textTransform: 'none'},
+            subtitle1:{  textTransform: 'none'}
+        },
+        overrides: {
+            MuiPaper: {
+                root: {
+                    textTransform:'none'
+                }
+            },
+            MuiCardContent:{
+                root: {
+                   padding:"6px",
+                    //not sure how to go about overriding a last-child condition
+                    paddingBottom:"0px !important"
+                }
+            },
+        }
+    });
+
     return (
+        <MuiThemeProvider theme={muiTheme}>
         <Store>
 
             {/*<TestComp/>*/}
@@ -327,7 +373,7 @@ function App(props) {
                 </div>
             </div>
         </Store>
-
+        </MuiThemeProvider>
     );
 }
 

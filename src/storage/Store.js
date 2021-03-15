@@ -46,6 +46,8 @@ let initialState = {
 	//testing:
 	dacandyman01_artists:[],
 	dacandyman01_playlists:[],
+	dacandyman01_tracks:[],
+	dacandyman01_playlists_stats:null,
 	users:[],
 	error: null
 };

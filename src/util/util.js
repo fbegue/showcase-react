@@ -1,4 +1,6 @@
 import _ from "lodash";
+import ChipsArray from "../ChipsArray";
+import React from "react";
 
 
 //this is going to be harder b/c we already setup familyAgg ...somewhere? whereTF did I set that up
@@ -160,6 +162,17 @@ function familyFreq(a){
 	return ret;
 }
 
+function prepTracks(rowData){
+	//console.log("$prepTracks",rowData);
+	var genres = [];
+	rowData.artists.forEach(a =>{
+		genres = genres.concat(a.genres)
+	});
+	genres = _.uniqBy(genres, function(n) {return n.id;});
+	//return <div></div>
+	return(<ChipsArray chipData={genres}/>)
+}
+
 export default {
-	familyFreq,makeRank,makeRank2
+	familyFreq,makeRank,makeRank2,prepTracks
 }
