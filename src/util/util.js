@@ -1,7 +1,13 @@
 import _ from "lodash";
 import ChipsArray from "../ChipsArray";
-import React from "react";
-
+import React, {useContext,useState,useEffect} from "react";
+import tables from "../storage/tables";
+import {families as systemFamilies, familyColors} from "../families";
+import {Highlighter, StatControl,FriendsControl} from "../index";
+import {Context} from "../storage/Store";
+import {useReactiveVar} from "@apollo/react-hooks";
+import {GLOBAL_UI_VAR} from "../storage/withApolloProvider";
+const uuid = require('react-uuid')
 
 //this is going to be harder b/c we already setup familyAgg ...somewhere? whereTF did I set that up
 //anyways now that I'm on my 3rd 'get some data' about these playlists I'm wondering if I should
@@ -114,6 +120,354 @@ function makeRank(array,artistFreq){
 	return null;
 }
 
+function useCustomHook(){
+
+	//const initialRender = useRef(true);
+
+	const [isOnline, setIsOnline] = useState(null);
+	return 'custom'
+}
+function useProduceData(){
+	//so basically:
+	// when you're only selecting data from one tab or switching between tabs, we only look at one node's data at a time
+	// when you start combining tabs, the logic switches to accommodate many different item types
+
+	let statcontrol = StatControl.useContainer();
+	const [globalState, globalDispatch] = useContext(Context);
+	let highlighter = Highlighter.useContainer();
+	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
+	let friendscontrol = FriendsControl.useContainer()
+
+	const [pieData, setPieData] = useState([]);
+	const [genres, setGenres] = useState([]);
+	const [bubbleData, setBubbleData] = useState([]);
+
+	useEffect(() => {
+		var data = [];
+		var data_guest = [];
+
+		var tempPieData = [];
+		console.log("useEffect",statcontrol.stats.name);
+		console.log("guest:",friendscontrol.guest.id);
+		//console.log("tables",tables);
+
+		//todo: duplicate code in reducer
+		var contextFilter = function(key,rec) {
+			var t = false;
+
+			if (key === 'top') {
+				t = rec['term'] !== null
+			} else {
+				t = rec['source'] === key
+			}
+
+			if (statcontrol.mode) {
+				if (key) {return t}
+				else {return true}
+			}
+		}
+
+		//set data pointer based on current tab
+		switch(statcontrol.stats.name) {
+			case "artists_saved":
+				//data = globalState[globalUI.user.id + "_artists"].filter(i =>{return i.source === 'saved'})
+				//data = tables["users"][globalUI.user.id]["artists"].filter(contextFilter.bind(null,'saved'))
+				data = globalState[globalUI.user.id + "_artists"].filter(contextFilter.bind(null,'saved'))
+				break;
+			case "artists_top":
+				data = globalState[globalUI.user.id + "_artists"].filter(contextFilter.bind(null,'top'))
+				break;
+			case "artists_recent":
+				data = globalState[globalUI.user.id + "_artists"].filter(contextFilter.bind(null,'recent'))
+				break;
+			case "playlists":
+				//todo: may not have been stated yet
+				if (tables["users"][globalUI.user.id]["playlists"]) {
+					data = tables["users"][globalUI.user.id]["playlists"].filter(contextFilter.bind(null,null))
+				}
+				break;
+			case "tracks_recent":
+				data = globalState[globalUI.user.id + "_tracks"].filter(contextFilter.bind(null,'recent'))
+				break;
+			case "tracks_saved":
+				data = globalState[globalUI.user.id + "_tracks"].filter(contextFilter.bind(null,'saved'))
+				break;
+			case "friends":
+				data = globalState[globalUI.user.id + "_artists"].filter(contextFilter.bind(null,'saved'))
+				data_guest = globalState[friendscontrol.guest.id + "_artists"].filter(contextFilter.bind(null,'saved'))
+				break;
+			default:
+				console.warn("skipped stat re-render for: " + statcontrol.stats.name)
+				break;
+		}
+
+		console.log("data source switched",data);
+		console.log("data source switched",data_guest);
+		//based on the type of data coming in,
+		//create a map for pie and bubblechart to unwrap later
+
+		var map = {}
+		var _genres =[];
+
+		//todo: in every case, null familyAgg doesn't quite make sense?
+		// think this was a notee to myself that I was getting some nulls that shouldn't be there?
+
+		//todo: can decide to (initally) hide certain series w/ series property: visible
+		//by default, toggleable by clicking on legend item
+
+		data.forEach(d =>{
+
+			//todo: this is many artists from many tracks
+			//the abstraction is always going to not-perfectly represent the tracks themselves
+			if(d.type === 'track'){
+				d.artists.forEach(a =>{
+					if(a.familyAgg && a.familyAgg !== null){
+						if (!map[a.familyAgg]) {
+							map[a.familyAgg] = {artists:{}}
+						} else {
+							//map[a.familyAgg].artists.push(a)
+							if(map[a.familyAgg].artists[a.name]){map[a.familyAgg].artists[a.name]++}
+							else{map[a.familyAgg].artists[a.name] = 1 }
+						}
+					}
+					//testing: only genres from highlighted family
+					if(highlighter.hoverState[0] === a.familyAgg){
+						_genres = _genres.concat(a.genres)
+					}
+
+				});
+
+			}else if(d.artists) {
+				//playlists
+				//todo: hard part is representing a playlist proportionately within itself
+				//I have the familyAgg for each artist - so just make a ranking of these then using the artistFreq
+				var rank = makeRank(d.artists, d.artistFreq, "familyAgg");
+				//console.log("rank",rank);
+
+				//testing: non-proportionate ranks
+				//with bubble data, the playlist needs to be contained within a single family bubble
+				//b/c otherwise it will be represented in more than a single node. with playlist ranking,
+				//this means that I have to choose whatever fam represents the genre the most.
+				//the values will all be equal for the node sizes b/c nothing else makes sense
+				//(I can't really talk about the family content of a playlist I've already decided would be described by it's top rank)
+
+				for (var x = 0; x < rank.length && x < 3; x++) {
+					var fam = Object.keys(rank[x])[0];
+					//!(map[fam]) ? map[fam] = 1 : map[fam]++
+					if (!map[fam]) {
+						map[fam] = {playlists:[d.name]}
+					} else {
+						map[fam].playlists.push(d.name)
+						// if(map[fam].playlists[d.name]){map[fam].playlists[d.name]++}
+						// else{map[fam].playlists[d.name] = 1 }
+					}
+				}
+			}
+			//todo: artists: familyAgg is good enough signifier here?
+			else if(d.familyAgg && d.familyAgg !== null){
+
+				//testing:
+				//compare maps of each person for each family
+				//compare the total # of artists for each family for each user:
+				//- if both USER and GUEST have a decent number, that's an interesting genre for them to talk about
+				//- if neither do - it's not
+				//- and then something something math
+
+
+				if (!map[d.familyAgg]) {
+					map[d.familyAgg] = {artists:{}}
+				} else {
+					//map[d.familyAgg].artists.push(a)
+					if(map[d.familyAgg].artists[d.name]){map[d.familyAgg].artists[d.name]++}
+					else{map[d.familyAgg].artists[d.name] = 1 }
+				}
+			}else{
+				console.error("malformed data passed to pie");
+			}
+		})
+
+		//todo: duplicate (above)
+		var map_guest =  {};
+		data_guest.forEach(d =>{
+
+
+			//todo: this is many artists from many tracks
+			//the abstraction is always going to not-perfectly represent the tracks themselves
+			if(d.type === 'track'){
+				d.artists.forEach(a =>{
+					if(a.familyAgg && a.familyAgg !== null){
+						if (!map_guest[a.familyAgg]) {
+							map_guest[a.familyAgg] = {artists:{}}
+						} else {
+							//map_guest[a.familyAgg].artists.push(a)
+							if(map_guest[a.familyAgg].artists[a.name]){map_guest[a.familyAgg].artists[a.name]++}
+							else{map_guest[a.familyAgg].artists[a.name] = 1 }
+						}
+					}
+					//testing: only genres from highlighted family
+					if(highlighter.hoverState[0] === a.familyAgg){
+						_genres = _genres.concat(a.genres)
+					}
+
+				});
+
+			}else if(d.artists) {
+				//playlists
+				//todo: hard part is representing a playlist proportionately within itself
+				//I have the familyAgg for each artist - so just make a ranking of these then using the artistFreq
+				var rank = makeRank(d.artists, d.artistFreq, "familyAgg");
+				//console.log("rank",rank);
+
+				//testing: non-proportionate ranks
+				//with bubble data, the playlist needs to be contained within a single family bubble
+				//b/c otherwise it will be represented in more than a single node. with playlist ranking,
+				//this means that I have to choose whatever fam represents the genre the most.
+				//the values will all be equal for the node sizes b/c nothing else makes sense
+				//(I can't really talk about the family content of a playlist I've already decided would be described by it's top rank)
+
+				for (var x = 0; x < rank.length && x < 3; x++) {
+					var fam = Object.keys(rank[x])[0];
+					//!(map_guest[fam]) ? map_guest[fam] = 1 : map_guest[fam]++
+					if (!map_guest[fam]) {
+						map_guest[fam] = {playlists:[d.name]}
+					} else {
+						map_guest[fam].playlists.push(d.name)
+						// if(map_guest[fam].playlists[d.name]){map_guest[fam].playlists[d.name]++}
+						// else{map_guest[fam].playlists[d.name] = 1 }
+					}
+				}
+			}
+			//todo: artists: familyAgg is good enough signifier here?
+			else if(d.familyAgg && d.familyAgg !== null){
+			debugger;
+				//testing:
+				//compare map_guests of each person for each family
+				//compare the total # of artists for each family for each user:
+				//- if both USER and GUEST have a decent number, that's an interesting genre for them to talk about
+				//- if neither do - it's not
+				//- and then something something math
+
+
+				if (!map_guest[d.familyAgg]) {
+					map_guest[d.familyAgg] = {artists:{}}
+				} else {
+					//map_guest[d.familyAgg].artists.push(a)
+					if(map_guest[d.familyAgg].artists[d.name]){map_guest[d.familyAgg].artists[d.name]++}
+					else{map_guest[d.familyAgg].artists[d.name] = 1 }
+				}
+			}else{
+				console.error("malformed data passed to pie");
+			}
+		})
+
+		console.log("new map",map);
+		console.log("new guest map",map_guest);
+
+		//setup base values for bubblechart
+		var d = [];
+		systemFamilies.forEach(f =>{
+			d.push({id:uuid(),name:f,color:familyColors[f + "2"],	type: "packedbubble",data:[]})
+		})
+		var bubbleData = JSON.parse(JSON.stringify(d));
+		var relativeScale = 100;
+		var scale = [50,200,350,500]
+
+		switch(statcontrol.stats.name) {
+			case "artists_top":
+			case "artists_recent":
+			case "artists_saved":
+			case "tracks_recent":
+			case "tracks_saved":
+
+				//set pie data: here you can see the pie chart ignoring the actual occurence value of the artists,
+				//and is instead just proportioning slices based on # of artists in the family
+				Object.keys(map).forEach(fam =>{tempPieData.push({x:fam,y:Object.keys(map[fam].artists).length})});
+
+
+				//set bubble data: on the other hand, we need the occurrence values in order to size the inner bubbles
+				Object.keys(map).forEach(fam =>{
+					var series = _.find(bubbleData, function(o) { return o.name === fam });
+					series.data = []
+					Object.keys(map[fam].artists).forEach(aname =>{
+						series.data.push({name:aname,
+							value:scale[map[fam].artists[aname] -1 ],
+							color:familyColors[fam]
+						})
+					})
+				});
+				break;
+			case "playlists":
+				//for pie, we can describe a playlist using more than 1 slice
+				Object.keys(map).forEach(fam =>{tempPieData.push({x:fam,y:Object.keys(map[fam].playlists).length})});
+
+
+				Object.keys(map).forEach(fam =>{
+					var series = _.find(bubbleData, function(o) { return o.name === fam });
+					series.data = []
+					map[fam].playlists.forEach(aname =>{
+						series.data.push({name:aname,
+							//'value of playlist' doens't make sense here
+							// value:map[fam].playlists.length * relativeScale,
+							value:1 * relativeScale,
+							color:familyColors[fam]
+						})
+					})
+				});
+				break;
+			default:
+				console.warn("skipped stat re-render for: " + statcontrol.stats.name)
+				break;
+		}
+
+		_genres = _.uniqBy(_genres,e =>{return e.id})
+
+		bubbleData = bubbleData.filter(r =>{return !(r.data.length === 0)})
+
+
+
+		setPieData(tempPieData);
+		setGenres(_genres)
+		setBubbleData(bubbleData);
+		//return {bubble:bubbleData,pie:tempPieData,genres:_genres}
+
+	},[statcontrol.stats.name,statcontrol.mode,highlighter.hoverState, JSON.stringify(globalState.node)]);
+
+
+	var sample = [{
+		type: 'venn',
+		name:'Pop',
+		data: [{
+			sets: ['Franky'],
+			value: 2
+		}, {
+			sets: ['Dan'],
+			value: 2
+		},{
+			sets: ['Franky', 'Dan'],
+			value: 1.5,
+			name: 'Shared'
+		}]
+	},
+		{
+			type: 'venn',
+			name:'Rock',
+			data: [{
+				sets: ['Franky'],
+				value: 2
+			}, {
+				sets: ['Dan'],
+				value: 2
+			},{
+				sets: ['Franky', 'Dan'],
+				value: 1.5,
+				name: 'Shared'
+			}]
+		}
+	]
+	//console.log("returns",{bubble:bubbleData,pie:pieData,genres:genres});
+	return {bubbleData:bubbleData,pieData:pieData,genres:genres,vennData:sample}
+}
+
 function familyFreq(a){
 
 	var ret = null;
@@ -174,5 +528,5 @@ function prepTracks(rowData){
 }
 
 export default {
-	familyFreq,makeRank,makeRank2,prepTracks
+	familyFreq,makeRank,makeRank2,prepTracks,useProduceData,useCustomHook
 }

@@ -83,12 +83,23 @@ function useStats(initialState = 0) {
 let StatControl  = createContainer(useStats);
 
 
+function useFriends(initialState = 0) {
+    //note: stats is really tracking active tab...
+    let [guest, setGuest] = useState({id:123028477,name:"Dan"});
+    return { guest,setGuest}
+}
+
+let FriendsControl  = createContainer(useFriends);
+
+
 const rootElement = document.getElementById("root");
 ReactDOM.render(
         <Control.Provider>
             <Highlighter.Provider>
                 <StatControl.Provider>
-                    <App />
+                    <FriendsControl.Provider>
+                        <App />
+                    </FriendsControl.Provider>
                 </StatControl.Provider>
             </Highlighter.Provider>
         </Control.Provider>,
@@ -96,7 +107,7 @@ ReactDOM.render(
 );
 
 export{
-    Control,Highlighter,StatControl
+    Control,Highlighter,StatControl,FriendsControl
 }
 
 //=====================================================

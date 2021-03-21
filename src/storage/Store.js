@@ -54,7 +54,7 @@ let initialState = {
 
 var types = ["artists","playlists"]
 export function initUser(user){
-	tables['users'][user.id] = {artists:[],playlists:[] };
+	tables['users'][user.id] = {artists:[],playlists:[],tracks:[]};
 	types.forEach(t =>{
 		initialState[user.id + "_" + t] = []
 	})

@@ -213,6 +213,7 @@ function noder(action){
 					n.data = tables["users"][uid][action.context].filter(contextFilter.bind(null,null))
 				}else if(action.context === 'tracks') {
 
+
 					//testing: tracks as a context means I need to do something special
 					//I need to access the tracks table to find selected items, and those
 					//artists are then added to the node's data... I guess
@@ -251,7 +252,7 @@ function noder(action){
 						//if update < current, we subtracted
 
 						function filterInPlace(array,update) {
-							//debugger;
+
 							//difference by means subtract, not just...whatever I'm looking for
 							//having trouble remembering array ops this morning
 							//var dif = [];
@@ -414,7 +415,6 @@ function getJoin(action){
 			//just need to leave all payloads except events ones alone
 
 			console.log("$update events (getjoin)",action);
-			//debugger
 
 			if(action.payload && action.payload[0] && action.payload[0].performance){
 				console.log("new events payload",action.payload);
@@ -526,6 +526,7 @@ var stateOb = {
 
 const Reducer = (state, action) => {
 	console.log("Reducer",action);
+	console.log("tables",tables);
 	switch (action.type) {
 		//refilter events based on some filter change (on events itself only)
 		//- changing selected metro

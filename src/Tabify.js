@@ -347,7 +347,7 @@ export default function Tabify() {
 	const tabContextMap = {artists_saved:"artists",artists_top:"artists",playlists:"playlists",home:"home",tracks_recent:"tracks",friends:"friends",tracks_saved:"tracks"}	;
 	const secMap ={0:"profile",1:"library",2:"friends"}
 	const [tabs, setActiveTab] = useState({library:0,profile:0,friends:0});
-	const [section, setActiveSection] = useState(0);
+	const [section, setActiveSection] = useState(2);
 	function handleTabSelect(section,key){
 		// console.log("handleTabSelect",section);
 		// console.log(key);
@@ -641,8 +641,8 @@ export default function Tabify() {
 					</Tabs>
 				</Tab>
 				<Tab label="My Friends">
-					<Tabs>
-						<Tab label="Look Dan your very own tab">
+					<Tabs activeKey={tabs['friends']} onSelect={handleTabSelect.bind(null,'friends')}>
+						<Tab label="Friends">
 							<Social/>
 						</Tab>
 						<Tab label="Subtab 3.2">Tab 3 Content 2</Tab>
