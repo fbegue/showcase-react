@@ -60,6 +60,7 @@ function useControl(initialState = 0) {
     let [genreSens, setGenreSens] = useState('families');
     let [artistSens, setArtistSens] = useState('artists');
 
+
     return { play,id, togglePlay, setId,metro,selectMetro,startDate,endDate,setStartDate,setEndDate,genreSens, setGenreSens,artistSens, setArtistSens}
 }
 
@@ -69,9 +70,16 @@ let Control  = createContainer(useControl);
 function useHighlighter(initialState = 0) {
     //testing:
     let [hoverState, setHoverState] = useState([]);
-    return { hoverState,setHoverState }
+    return { hoverState,setHoverState}
 }
 let Highlighter  = createContainer(useHighlighter);
+
+function usePane(initialState = 0) {
+    let [pane, setPane] = useState(null);
+    return { pane,setPane}
+}
+let PaneControl  = createContainer(usePane);
+
 
 function useStats(initialState = 0) {
     //note: stats is really tracking active tab...
@@ -86,7 +94,11 @@ let StatControl  = createContainer(useStats);
 function useFriends(initialState = 0) {
     //note: stats is really tracking active tab...
     let [guest, setGuest] = useState({id:123028477,name:"Dan"});
-    return { guest,setGuest}
+    //user,guest,shared,all
+    let [compare, setCompare] = useState('all');
+    let [families, setFamilies] = useState([]);
+
+    return { guest,setGuest,compare,setCompare,families, setFamilies}
 }
 
 let FriendsControl  = createContainer(useFriends);
@@ -98,7 +110,9 @@ ReactDOM.render(
             <Highlighter.Provider>
                 <StatControl.Provider>
                     <FriendsControl.Provider>
+                        <PaneControl.Provider>
                         <App />
+                        </PaneControl.Provider>
                     </FriendsControl.Provider>
                 </StatControl.Provider>
             </Highlighter.Provider>
@@ -107,7 +121,7 @@ ReactDOM.render(
 );
 
 export{
-    Control,Highlighter,StatControl,FriendsControl
+    Control,Highlighter,StatControl,FriendsControl,PaneControl
 }
 
 //=====================================================

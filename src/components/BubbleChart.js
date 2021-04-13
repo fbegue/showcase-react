@@ -11,9 +11,8 @@ HC_more(Highcharts)
 
 function BubbleChart(props) {
 
-	console.log("BubbleChart",props);
-	const [legend, setLegend] = useState(false);
-
+	//console.log("BubbleChart",props);
+	//const [legend, setLegend] = useState(false);
 
 	//todo:is there a need for legend at all?
 	///if you have genres appearing, you just put the family on top
@@ -22,69 +21,11 @@ function BubbleChart(props) {
 	//For modifying the chart at runtime: See the class reference.
 	//https://api.highcharts.com/class-reference/classes.list
 
-	const options = {
-		tooltip: {
-			useHTML: true,
-			pointFormat: '<b>{point.name}:</b> {point.value}'
-		},
-		legend:{
-			//layout (horizonal, vert, proximate)
-			//itemHoverStyle
-			//symbols
-			//use HTML
-			floating:true,
-			enabled:legend
-		},
-		plotOptions: {
-			packedbubble: {
-				minSize: "20%",
-				maxSize: "100%",
-				zMin: 0,
-				zMax: 100,
-				layoutAlgorithm: {
-					gravitationalConstant: 0.05,
-					splitSeries: true,
-					seriesInteraction: false,
-					dragBetweenSeries: true,
-					parentNodeLimit: true
-				},
-				dataLabels: {
-					enabled: true,
-					format: "{point.name}",
-					filter: {
-						property: "y",
-						operator: ">",
-						value: 250
-					},
-					style: {
-						color: "black",
-						textOutline: "none",
-						fontWeight: "normal"
-					}
-				}
-			}
-		},
-		series:props.data,
-		credits: {
-			enabled: false
-		},
-		// series: [
-		// 	{
-		// 		type: "packedbubble",
-		// 		data: [{name:"1",value:1},{name:"2",value:2}]
-		// 	},
-		// 	{
-		// 		type: "packedbubble",
-		// 		color:"blue",
-		// 		data: [{name:"1",value:1,color:"lightblue"},{name:"2",value:2}]
-		// 	}
-		// ]
-	};
 
 	return(<div>
 		<div>
 			{/*<button onClick={() =>{setLegend(!legend)}}>legend</button>*/}
-			<HighchartsReact highcharts={Highcharts} options={options} />
+			<HighchartsReact highcharts={Highcharts} options={props.options} />
 		</div>
 	</div>)
 }

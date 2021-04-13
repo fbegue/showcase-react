@@ -33,6 +33,7 @@ import {useQuery,useReactiveVar} from "@apollo/react-hooks";
 import Home from './components/Home';
 import Social from "./components/Social";
 
+
 // const styles = {
 // 	fontFamily: "sans-serif",
 // 	textAlign: "center"
@@ -96,7 +97,7 @@ export default function Tabify() {
 	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
 
 
-		//{id:'dacandyman01',name:"Franky"};
+	//{id:'dacandyman01',name:"Franky"};
 	//console.log("$globalUI",globalUI);
 	//note: to be used as a base for every request
 
@@ -132,9 +133,9 @@ export default function Tabify() {
 		var userProms = [];
 		userProms.push(api.getMyFollowedArtists(req))
 		userProms.push(api.getTopArtists(req))
-		 userProms.push(api.getRecentlyPlayedTracks(req))
-		 userProms.push(api.getUserPlaylistFriends(req))
-		 userProms.push(api.getSavedTracks({auth:globalUI}))
+		userProms.push(api.getRecentlyPlayedTracks(req))
+		userProms.push(api.getUserPlaylistFriends(req))
+		userProms.push(api.getSavedTracks({auth:globalUI}))
 		Promise.all(userProms)
 			.then(r =>{
 
@@ -143,8 +144,8 @@ export default function Tabify() {
 				//pay= pay.concat(r[2]['artists'])
 
 				globalDispatch({type: 'init', payload:pay,user: globalUI.user,context:'artists'});
-				 globalDispatch({type: 'init', payload:r[2],user: globalUI.user,context:'tracks'});
-				 globalDispatch({type: 'init', payload:r[3],user: globalUI.user,context:'spotifyusers'});
+				globalDispatch({type: 'init', payload:r[2],user: globalUI.user,context:'tracks'});
+				globalDispatch({type: 'init', payload:r[3],user: globalUI.user,context:'spotifyusers'});
 				globalDispatch({type: 'init', payload:r[4],user: globalUI.user,context:'tracks'});
 			},err =>{
 				console.log(err);
@@ -343,28 +344,39 @@ export default function Tabify() {
 			0:"home",
 			1:"tracks_recent",
 			2:"artists_top"
-		},friends:{0:"friends"}}
-	const tabContextMap = {artists_saved:"artists",artists_top:"artists",playlists:"playlists",home:"home",tracks_recent:"tracks",friends:"friends",tracks_saved:"tracks"}	;
+		},friends:{0:"friends",1:"user1"}}
+		//todo: mapped user1 to home for now
+	const tabContextMap = {artists_saved:"artists",artists_top:"artists",playlists:"playlists",home:"home",tracks_recent:"tracks",friends:"friends",user1:"user1",tracks_saved:"tracks"};
 	const secMap ={0:"profile",1:"library",2:"friends"}
 	const [tabs, setActiveTab] = useState({library:0,profile:0,friends:0});
 	const [section, setActiveSection] = useState(2);
 	function handleTabSelect(section,key){
-		// console.log("handleTabSelect",section);
-		// console.log(key);
+		console.log("handleTabSelect",section);
+		console.log(key);
 		setActiveTab({...tabs,[section]:key})
 		statcontrol.setStats({name:tabMap[section][key]})
 
 		//testing: can't use statcontrol.stats value immediately
 		//so I recreate the stats object I'd want to send...yeaaaaaah
 
-		globalDispatch({type: 'update', payload: null,user: globalUI.user,context:tabContextMap[tabMap[section][key]],
-			stats:{stats: {name:tabMap[section][key]},mode:statcontrol.mode},control:control});
+
+		//context: use the section index key and section to produce a tabContextMap key
+		//plug into tabContextMap to determine what context to send thru based on that selection
+		var context = tabContextMap[tabMap[section][key]];
+		console.log("context",context);
+
+		//todo: wtf am I doing this for every single tab select?
+		var skip = ['user1','friends']
+		if(skip.indexOf(context) === -1){
+			globalDispatch({type: 'update', payload: null,user: globalUI.user,context:context,
+				stats:{stats: {name:tabMap[section][key]},mode:statcontrol.mode},control:control});
+		}
 	}
 
 	function handleSectionSelect(sectionkey){
 		//if the section changed, also trigger tab set (0 as default)
 		if(sectionkey !== section){
-			 handleTabSelect(secMap[sectionkey],0)
+			handleTabSelect(secMap[sectionkey],0)
 		}
 		setActiveSection(sectionkey)
 	}
@@ -400,6 +412,10 @@ export default function Tabify() {
 			ref) => <ArrowBackIosIcon{...props} ref={ref}/>)
 	}
 
+
+
+	const [dynamic_tabs, setDynamic_tabs] = useState([{name:"default"}]);
+	const [userTab, setUserTab] = useState({name:"select a user!"});
 
 	return(
 		// style={styles}
@@ -643,10 +659,15 @@ export default function Tabify() {
 				<Tab label="My Friends">
 					<Tabs activeKey={tabs['friends']} onSelect={handleTabSelect.bind(null,'friends')}>
 						<Tab label="Friends">
+							{/*<button onClick={() =>{setDynamic_tabs({name:"Dan"})}}>click</button>*/}
+							<button onClick={() =>{setUserTab({name:"Dan"})}}>click</button>
 							<Social/>
 						</Tab>
-						<Tab label="Subtab 3.2">Tab 3 Content 2</Tab>
-						<Tab label="Subtab 3.3">Tab 3 Content 3</Tab>
+						<Tab label={userTab.name}>{userTab.name} content!</Tab>
+						{/*/!*testing: Cannot read property 'hide' of undefined*!/*/}
+						{/*{dynamic_tabs.map((tab) =>*/}
+						{/*	<Tab label={tab.name}>{tab.name} content!</Tab>*/}
+						{/*)}*/}
 					</Tabs>
 				</Tab>
 				<Tab label="Billboards">

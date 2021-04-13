@@ -7,6 +7,7 @@ import {Highlighter, StatControl,FriendsControl} from "../index";
 import {Context} from "../storage/Store";
 import {useReactiveVar} from "@apollo/react-hooks";
 import {GLOBAL_UI_VAR} from "../storage/withApolloProvider";
+
 const uuid = require('react-uuid')
 
 //this is going to be harder b/c we already setup familyAgg ...somewhere? whereTF did I set that up
@@ -127,6 +128,7 @@ function useCustomHook(){
 	const [isOnline, setIsOnline] = useState(null);
 	return 'custom'
 }
+
 function useProduceData(){
 	//so basically:
 	// when you're only selecting data from one tab or switching between tabs, we only look at one node's data at a time
@@ -141,6 +143,7 @@ function useProduceData(){
 	const [pieData, setPieData] = useState([]);
 	const [genres, setGenres] = useState([]);
 	const [bubbleData, setBubbleData] = useState([]);
+	const [vennData, setVennData] = useState([]);
 
 	useEffect(() => {
 		var data = [];
@@ -192,6 +195,8 @@ function useProduceData(){
 			case "tracks_saved":
 				data = globalState[globalUI.user.id + "_tracks"].filter(contextFilter.bind(null,'saved'))
 				break;
+			//	testing:
+			case "123028477":
 			case "friends":
 				data = globalState[globalUI.user.id + "_artists"].filter(contextFilter.bind(null,'saved'))
 				data_guest = globalState[friendscontrol.guest.id + "_artists"].filter(contextFilter.bind(null,'saved'))
@@ -339,7 +344,7 @@ function useProduceData(){
 			}
 			//todo: artists: familyAgg is good enough signifier here?
 			else if(d.familyAgg && d.familyAgg !== null){
-			debugger;
+
 				//testing:
 				//compare map_guests of each person for each family
 				//compare the total # of artists for each family for each user:
@@ -414,6 +419,84 @@ function useProduceData(){
 					})
 				});
 				break;
+			case "123028477":
+			case "friends":
+
+				//create arrays for each map
+
+				var artists_user = [];
+				var artists_guest = [];
+				Object.keys(map).forEach(fam =>{
+					//for each artist key on a fam
+					Object.keys(map[fam].artists).forEach(aname =>{
+						artists_user.push({name:aname,familyAgg:fam})
+					})
+				});
+				Object.keys(map_guest).forEach(fam =>{
+					Object.keys(map_guest[fam].artists).forEach(aname =>{
+						artists_guest.push({name:aname,familyAgg:fam})
+					})
+				});
+
+				var shared = _.intersectionBy(artists_user,artists_guest,'name');
+				var dif_user = _.differenceBy(artists_user,shared,'name');
+				var dif_guest = _.differenceBy(artists_guest,shared,'name');
+
+				//todo: attempted to demo shared v user/guest w/ value, but I don't fucking understand how this scale works lol
+				//todo: create alternate colors for each?
+				//todo: if we're going to be able to switch - probably should mark the data w/ it's owner
+				//and then the control could then filter in/out on those?
+
+				//todo: anyway to do the custom group highlighting we get for free w/ series?
+
+				//testing: complete wipe = lose cool animation?
+				//or is there none anyways
+				bubbleData.forEach(series =>{series.data = []})
+
+			function getShared(){
+				shared.forEach(tuple =>{
+					//find series for tuple
+					var series = _.find(bubbleData, function(o) { return o.name === tuple.familyAgg });
+					//only during this shared iteration, we'll wipe out old data
+					series.data = []
+					series.data.push({name:tuple.name, value:scale[0],
+						color:familyColors[tuple.familyAgg],owner:"shared",className:"shared"
+					})
+				});
+			}
+			function getDifUser(){
+				dif_user.forEach(tuple =>{
+					//find series for tuple
+					var series = _.find(bubbleData, function(o) { return o.name === tuple.familyAgg });
+					series.data.push({name:tuple.name, value:scale[0],
+						color:familyColors[tuple.familyAgg],owner:"user",className:"difUser"
+					})
+				});
+			}
+			function getDifGuest(){
+				dif_guest.forEach(tuple =>{
+					//find series for tuple
+					var series = _.find(bubbleData, function(o) { return o.name === tuple.familyAgg });
+					series.data.push({name:tuple.name, value:scale[2],
+						color:familyColors[tuple.familyAgg],owner:"guest",className:"difGuest"
+					})
+				});
+			}
+
+				console.log("friendscontrol.compare",friendscontrol.compare);
+				switch (friendscontrol.compare) {
+					case 'all':
+						getShared();getDifUser();getDifGuest();break;
+					case 'diff':
+						getDifUser();getDifGuest();break;
+					case 'shared':
+						getShared();break;
+					case 'user':
+						break;
+					case 'guest':
+						break;
+				}
+				break;
 			default:
 				console.warn("skipped stat re-render for: " + statcontrol.stats.name)
 				break;
@@ -422,50 +505,52 @@ function useProduceData(){
 		_genres = _.uniqBy(_genres,e =>{return e.id})
 
 		bubbleData = bubbleData.filter(r =>{return !(r.data.length === 0)})
+		console.log("f",friendscontrol.families);
+		bubbleData = bubbleData.filter(r =>{
+			if(friendscontrol.families.length !== 0){
+				console.log("r",r.name);
+				return friendscontrol.families.indexOf(r.name) !== -1
+			}
+			return true;
+		})
+
+		//venn
+		var series_sample = [
+			{
+				type: 'venn',
+				name:'Pop',
+				data: [{
+					sets: ['User'],
+					value: 2,
+
+				}, {
+					sets: ['Guest'],
+					value: 2
+				},{
+					sets: ['User', 'Guest'],
+					value: 1.5,
+					name: 'Shared',
+					// events: {click: function () {
+					// 		console.log("click shared");
+					// 		friendscontrol.setCompare('shared')}},
+				}]
+			}
+		]
 
 
 
 		setPieData(tempPieData);
 		setGenres(_genres)
 		setBubbleData(bubbleData);
+		setVennData(series_sample);
 		//return {bubble:bubbleData,pie:tempPieData,genres:_genres}
 
-	},[statcontrol.stats.name,statcontrol.mode,highlighter.hoverState, JSON.stringify(globalState.node)]);
+	},[statcontrol.stats.name,statcontrol.mode,highlighter.hoverState,friendscontrol.compare,friendscontrol.families, JSON.stringify(globalState.node)]);
 
 
-	var sample = [{
-		type: 'venn',
-		name:'Pop',
-		data: [{
-			sets: ['Franky'],
-			value: 2
-		}, {
-			sets: ['Dan'],
-			value: 2
-		},{
-			sets: ['Franky', 'Dan'],
-			value: 1.5,
-			name: 'Shared'
-		}]
-	},
-		{
-			type: 'venn',
-			name:'Rock',
-			data: [{
-				sets: ['Franky'],
-				value: 2
-			}, {
-				sets: ['Dan'],
-				value: 2
-			},{
-				sets: ['Franky', 'Dan'],
-				value: 1.5,
-				name: 'Shared'
-			}]
-		}
-	]
+
 	//console.log("returns",{bubble:bubbleData,pie:pieData,genres:genres});
-	return {bubbleData:bubbleData,pieData:pieData,genres:genres,vennData:sample}
+	return {bubbleData:bubbleData,pieData:pieData,genres:genres,vennData:vennData}
 }
 
 function familyFreq(a){

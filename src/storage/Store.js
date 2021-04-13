@@ -49,6 +49,7 @@ let initialState = {
 	dacandyman01_tracks:[],
 	dacandyman01_playlists_stats:null,
 	users:[],
+	spotifyusers:[],
 	error: null
 };
 

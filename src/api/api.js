@@ -210,13 +210,15 @@ var getTopArtists =  function(req){
 var fetchStaticUser =  function(req){
     return new Promise(function(done, fail) {
 
+        console.log("$user",req);
         fetch('http://localhost:8888/fetchStaticUser', {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             mode: 'cors', // no-cors, *cors, same-origin
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({user:"Dan"})
+            body: JSON.stringify(req)
+
         }).then(res => res.json())
             .then(function(res){
                 //console.log("retrieved: ",res);

@@ -637,7 +637,7 @@ const Reducer = (state, action) => {
 
 				//todo: keeping this as a tuple for now
 				//tables[action.context] = tables[action.context].concat(action.payload);
-				tables[action.context] = action.payload;
+				tables[action.context] = action.payload.all_users;
 
 				console.log("stated",action.context);
 				return {

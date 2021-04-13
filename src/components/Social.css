@@ -1,0 +1,18 @@
+.MuiSelect-select[multiple]{
+    height:19em !important
+}
+
+/*todo: not seeing application of this*/
+.user-selected{
+    border:5px solid grey;
+    transition: border .25s;
+}
+
+.user-unselected{
+    border: 5px solid transparent;
+    transition: border .25s;
+}
+
+.user-unselected:hover{
+    border: 5px solid lightgray;
+}

@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useContext, useRef, useMemo} from 'react';
-import {Highlighter, StatControl} from "../index";
+import {FriendsControl, Highlighter, StatControl} from "../index";
 import {families, familyColors} from "../families";
 import {VictoryPie} from "victory";
 import {Context} from "../storage/Store";
@@ -7,6 +7,8 @@ import {useReactiveVar} from "@apollo/react-hooks";
 import { GLOBAL_UI_VAR } from '../storage/withApolloProvider';
 import tables from "../storage/tables";
 import _ from "lodash";
+import ContextStats from './ContextStats'
+
 //testing:
 // import NodeDisplay from "../NodeDisplay";
 import NodeDisplay from "../NodeDisplayVertical";
@@ -24,157 +26,12 @@ import {Tab} from "react-tabify";
 import GenresDisplayVertical from "./GenresDisplayVertical";
 import BubbleChart from "./BubbleChart";
 import {families as systemFamilies} from '../families'
+import './Stats.css'
+import {FormControl, FormControlLabel, Radio, RadioGroup, Select} from "@material-ui/core";
 const uuid = require('react-uuid')
 
 
-function ContextStats(props) {
 
-	let statcontrol = StatControl.useContainer();
-	const [globalState, globalDispatch] = useContext(Context);
-	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
-
-	//todo: thought storing in proper state would smooth transition
-	//I'm not even sure if I get what I'm looking for for free really...
-	var _items = [];
-	//const [items, setItems] = useState([]);
-
-	function ListArtists(props){
-		return (
-			<div>
-				{props.artists.map((item,i) => (
-					<div>{item.artist.name}</div>
-				))}
-			</div>
-		)
-	}
-
-	function ListTracks(props){
-		return (
-			<div>
-				{props.tracks.map((item,i) => (
-					<div>{item.name}</div>
-				))}
-			</div>
-		)
-	}
-
-	function ListGenres(props){
-		return (
-			<div>
-				{props.genres.map((item,i) => (
-					<div>{item.name}</div>
-				))}
-			</div>
-		)
-	}
-
-
-	switch(statcontrol.stats.name) {
-		case 'artists_saved':
-			_items.push({label:"test1",value:null})
-			_items.push({label:"test2",value:null})
-			_items.push({label:"test23",value:null})
-			break;
-		case 'playlists':
-			var source = globalState[globalUI.user.id + "_playlists_stats"];
-			_items.push({label:"Created",value:source.created,width:"120px"})
-			_items.push({label:"Followed",value:source.followed,width:"120px"})
-			_items.push({label:"Collaborating",value:source.collaborative,width:"120px"})
-			_items.push({label:"Recently Modified",value:source.recent.playlist_name,width:"240px"})
-			// items.push({label:"Most Active",value:null})
-			_items.push({label:"Oldest",value:source.oldest.playlist_name,width:"240px"})
-			break;
-		case 'tracks_saved':
-			var source = globalState[globalUI.user.id + "_tracks_stats"];
-			_items.push({label:"Favorite Artists",value:<ListArtists artists={source.artists_top}/>,width:"240px"})
-			_items.push({label:"Recently Saved",value:<ListTracks tracks={source.recent}/>,width:"240px"})
-			break;
-		default:
-		// code block
-	}
-	//_items.length !== 0 && items.length === 0 ? setItems(_items):{};
-	var items = _items;
-
-	//-----------------------------------------------
-	//todo: this is cool, but not sure what it means for me in this context
-	//const columns = useMedia(['(min-width: 1500px)', '(min-width: 1000px)', '(min-width: 600px)'], [5, 4, 3], 2)
-	const columns = 3;
-
-	// Hook2: Measure the width of the container element
-	//todo: disabled this b/c of 'illegal invocation' when moving off this component
-	//related to bind - possibly b/c I'm destroying the element below that I would be binding to
-	//...and then like it realizes that it's invalid and complains? idk
-	//const [bind, { width }] = useMeasure()
-	//console.log("bind",bind);
-	//console.log("width",width);
-	const width = 480;
-
-	//note: replaced all references to data-height (designed to be unique values 300-500) with uHeight
-	const uHeight = 100;
-
-	//note: attempted to make this into a variable width depending on the data element, but that doesn't make sense
-	//without a serious rework, there will never be a variable # of COLUMNS
-
-	const [heights, gridItems] = useMemo(() => {
-		let heights = new Array(columns).fill(0) // Each column gets a height starting with zero
-		let gridItems = items
-			.map((child, i) => {
-				const column = heights.indexOf(Math.min(...heights)) // Basic masonry-grid placing, puts tile into the smallest column using Math.min
-				const xy = [(width / columns) * column, (heights[column] += uHeight / 2) - uHeight / 2] // X = container width / number of columns * column index, Y = it's just the height of the current column
-				return { ...child, xy, width: width / columns, height: uHeight / 2 }
-			})
-		return [heights, gridItems]
-	}, [columns, items])
-
-	// Hook6: Turn the static grid values into animated transitions, any addition, removal or change will be animated
-	const transitions = useTransition(
-		gridItems,
-		(item) => item.label, {
-			from: ({ xy, width, height }) => ({ xy, width, height, opacity: 0 }),
-			enter: ({ xy, width, height }) => ({ xy, width, height, opacity: 1 }),
-			update: ({ xy, width, height }) => ({ xy, width, height }),
-			leave: { height: 0, opacity: 0 },
-			config: { mass: 5, tension: 500, friction: 100 },
-			trail: 25
-		})
-	//-----------------------------------------------
-
-	return(
-		<div>
-			{/*	note: attempt at transitions*/}
-			{/*<div  className="list" style={{height: Math.max(...heights)}}>*/}
-			{/*	{transitions.map(({item, props: {xy, ...rest}, key}) => (*/}
-			{/*		<a.div key={key}*/}
-			{/*			   style={{transform: xy.interpolate((x, y) => `translate3d(${x}px,${y}px,0)`), ...rest}}>*/}
-			{/*			<div style={{display:"flex"}}>*/}
-			{/*				<Typography variant="subtitle1" component={'div'} >{item.label}</Typography>*/}
-			{/*				<Typography variant="subtitle1" component={'div'} ><span style={{color:'#3f51b5'}}>{item.value}</span></Typography>*/}
-			{/*			</div>*/}
-			{/*		</a.div>*/}
-			{/*	))}*/}
-			{/*</div>*/}
-			{items.length > 0 &&
-			<div style={{display:"flex", flexWrap:"wrap",width:"480px"}}>
-				{items.map((item,i) => (
-					<div style={{width:item.width, padding:"5px"}}>
-						<Card>
-							<CardContent>
-								<Typography variant="subtitle1" component={'span'} >{item.label}:{'\u00A0'}</Typography>
-								{/*todo: color should be typo color prop set in MUI theme*/}
-								<Typography variant="subtitle1" component={'span'} ><span style={{color:'#3f51b5'}}>{item.value}</span></Typography>
-							</CardContent>
-						</Card>
-
-					</div>
-				))}
-			</div>}
-			{/*{props.genres.length > 0 &&*/}
-			{/*<div>*/}
-			{/*	<ListGenres genres={props.genres}/>*/}
-			{/*</div>*/}
-			{/*}*/}
-		</div>)
-}
 
 function Profile({ name, location }) {
 	const [color, setColor] = useState('blue');
@@ -201,7 +58,26 @@ function Profile({ name, location }) {
 const personsAreEqual = (prevProps, nextProps) => {return true}
 const MemoizedProfile = React.memo(Profile,personsAreEqual)
 
+function useTraceUpdate(props) {
+	const prev = useRef(props);
+	useEffect(() => {
+		const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
+			if (prev.current[k] !== v) {
+				ps[k] = [prev.current[k], v];
+			}
+			return ps;
+		}, {});
+		if (Object.keys(changedProps).length > 0) {
+			console.log('Changed props:', changedProps);
+		}else{
+			console.log('no changed props!');
+		}
+		prev.current = props;
+	});
+}
+
 function Stats(props) {
+	// useTraceUpdate(props);
 	let statcontrol = StatControl.useContainer();
 	const [globalState, globalDispatch] = useContext(Context);
 	const [families, selectFamilies] = useState([]);
@@ -210,6 +86,24 @@ function Stats(props) {
 	// const [bubbleData, setBubbleData] = useState([]);
 	const globalUI = useReactiveVar(GLOBAL_UI_VAR);
 	let highlighter = Highlighter.useContainer();
+	let friendscontrol = FriendsControl.useContainer()
+
+	var doc = document.documentElement.style;
+	doc.setProperty(`--pointHighlightGuest`,'red');
+	doc.setProperty(`--pointHighlightUser`,'blue');
+	doc.setProperty(`--pointHighlightShared`,'green');
+	//  function highlightGroup(){
+	// 	console.log("highlightGroup");
+	// 	if(c % 2 === 0){
+	// 		doc.setProperty(`--${"color-nav"}`,"#807878");
+	// 		doc.setProperty(`--${"color-nav-hover"}`,"#dccfcf");
+	// 		c++;
+	// 	}else{
+	// 		doc.setProperty(`--${"color-nav"}`,"darkred");
+	// 		doc.setProperty(`--${"color-nav-hover"}`,"red");
+	// 		c++;
+	// 	}
+	// }
 
 	// useEffect(() => {
 	// 	console.log("componentDidMount | stats");
@@ -235,11 +129,15 @@ function Stats(props) {
 	// 	// setGenres(genres)
 	//
 	// },[statcontrol.stats.name,statcontrol.mode,highlighter.hoverState, JSON.stringify(globalState.node)]);
-	const {bubbleData,pieData,genres} = util.useProduceData()
-	console.log("useProduceData",pieData);
+
+	 const {bubbleData,pieData,genres} = util.useProduceData()
+	//const bubbleData = [];const pieData = [];const genres = []
+
+	// console.log("useProduceData:pieData",pieData);
 	//---------------------------------------------------------------------
 	var options = {rotations:0,deterministic:true}
-	const [view, setView] = React.useState(false);
+	//false = pie, true = bubble
+	const [view, setView] = React.useState(true);
 
 	//todo: doesnt work for playlists yet
 
@@ -327,11 +225,142 @@ function Stats(props) {
 	//but shit doesn't work - not sure what the difference here is
 	//https://kyleshevlin.com/using-react-memo-to-avoid-unnecessary-rerenders
 
+	let bubbleOptions = {
+		tooltip: {
+			useHTML: true,
+			pointFormat: '<b>{point.name}:</b> {point.value}'
+		},
+		legend:{
+			//layout (horizonal, vert, proximate)
+			//itemHoverStyle
+			//symbols
+			//use HTML
+			floating:true,
+			enabled:false
+		},
+		plotOptions: {
+			packedbubble: {
+				minSize: "20%",
+				maxSize: "100%",
+				zMin: 0,
+				zMax: 100,
+				layoutAlgorithm: {
+					gravitationalConstant: 0.05,
+					splitSeries: true,
+					seriesInteraction: false,
+					dragBetweenSeries: true,
+					parentNodeLimit: true
+				},
+				dataLabels: {
+					enabled: true,
+					format: "{point.name}",
+					filter: {
+						property: "y",
+						operator: ">",
+						value: 250
+					},
+					style: {
+						color: "black",
+						textOutline: "none",
+						fontWeight: "normal"
+					}
+				}
+			}
+		},
+		// series:props.data,
+		credits: {
+			enabled: false
+		},
+		// series: [
+		// 	{
+		// 		type: "packedbubble",
+		// 		data: [{name:"1",value:1},{name:"2",value:2}]
+		// 	},
+		// 	{
+		// 		type: "packedbubble",
+		// 		color:"blue",
+		// 		data: [{name:"1",value:1,color:"lightblue"},{name:"2",value:2}]
+		// 	}
+		// ]
+	};
+	let bubbleOptionsGuest = {
+		tooltip: {
+			useHTML: true,
+			pointFormat: '<b>{point.name}:</b> {point.value}'
+		},
+		legend:{
+			//layout (horizonal, vert, proximate)
+			//itemHoverStyle
+			//symbols
+			//use HTML
+			floating:true,
+			enabled:false
+		},
+		plotOptions: {
+			packedbubble: {
+				minSize: "20%",
+				maxSize: "100%",
+				zMin: 0,
+				zMax: 100,
+				layoutAlgorithm: {
+					gravitationalConstant: 0.05,
+					splitSeries: true,
+					seriesInteraction: false,
+					dragBetweenSeries: true,
+					parentNodeLimit: true
+				},
+				dataLabels: {
+					enabled: true,
+					format: "{point.name}",
+					filter: {
+						property: "y",
+						operator: ">",
+						value: 250
+					},
+					style: {
+						color: "black",
+						textOutline: "none",
+						fontWeight: "normal"
+					}
+				}
+			}
+		},
+		// series:props.data,
+		credits: {
+			enabled: false
+		},
+		// series: [
+		// 	{
+		// 		type: "packedbubble",
+		// 		data: [{name:"1",value:1},{name:"2",value:2}]
+		// 	},
+		// 	{
+		// 		type: "packedbubble",
+		// 		color:"blue",
+		// 		data: [{name:"1",value:1,color:"lightblue"},{name:"2",value:2}]
+		// 	}
+		// ]
+	};
 
 	function checkState(){
 		console.log("$globalstate",globalState);
 		console.log("$globalUI",globalUI);
 	}
+	const handleChange = (event) => {
+		friendscontrol.setCompare(event.target.value);
+	};
+
+	const handleChangeMultiple = (event) => {
+		const { options } = event.target;
+		const value = [];
+		for (let i = 0, l = options.length; i < l; i += 1) {
+			if (options[i].selected) {
+				value.push(options[i].value);
+			}
+		}
+		friendscontrol.setFamilies(value);
+	};
+
 	return(
 		<div>
 			<div>
@@ -339,114 +368,159 @@ function Stats(props) {
 			</div>
 
 			<div style={{display:"flex"}}>
-				<div style={{flexGrow:"1"}}></div>
+				{/*<div style={{flexGrow:"1"}}></div>*/}
+				<div style={{display:"flex"}}>
+					<div>
+
+						<Select
+							multiple
+							native
+							value={friendscontrol.families}
+							onChange={handleChangeMultiple}
+							inputProps={{
+								id: 'select-multiple-native',
+							}}
+						>
+							{systemFamilies.map((name) => (
+								<option key={name} value={name}>{name}</option>
+							))}
+						</Select>
+					</div>
+					<div>
+						{/*todo: need to make container smaller, not do relative pos
+					 style={{top: "-5em",right:"2em",position: "relative",height: "21em"}}*/}
+
+						{/*{statcontrol.stats.name !== '123028477' &&*/}
+						<div  style={{top: "-4em",position: "relative",height: "21em",zIndex:1}}>
+							{/*{view && <div>{showCloud(dataset)}</div>}*/}
+							{/*options={{legend:legend}}*/}
+							{view &&
+							<div>
+								{/* testing: */}
+								{statcontrol.stats.name === '123028477' &&
+								<BubbleChart  options={{...bubbleOptionsGuest,series:bubbleData}}/>
+								}
+								{statcontrol.stats.name !== '123028477' &&
+								<BubbleChart  options={{...bubbleOptions,series:bubbleData}}/>
+								}
+							</div>
+							}
+							{!(view) &&
+							//	todo: no idea how this width/height bit works
+							//https://formidable.com/open-source/victory/docs/common-props#style
+							//https://formidable.com/open-source/victory/docs/common-props#width
+							<div style={{width:"23em"}} >
+								<VictoryPie
+									// width={220}
+									// height={220}
+									data={pieData}
+									padAngle={2}
+									innerRadius={80}
+									animate={{
+										duration: 2009, easing: "linear"
+									}}
+									style={{
+										data: {fill: (d) => familyColors[d.slice.data.x]}
+									}}
+									events={[{
+										target: "data",
+										eventHandlers: {
+											onClick: () => {
+												return [{
+													mutation: (props) => {
+														console.log("onClick | ", props.datum);
+														var ret = null;
+														if (families.indexOf(props.datum.x) === -1) {
+															selectFamilies([...families, props.datum.x])
+															ret = {
+																style: Object.assign({}, props.style, {
+																	stroke: "black",
+																	strokeWidth: 2
+																})
+															};
+														} else {
+															selectFamilies(families.filter(f => {
+																return f !== props.datum.x
+															}))
+															ret = {
+																style: Object.assign({}, props.style, {
+																	stroke: "none",
+																	strokeWidth: 2
+																})
+															};
+														}
+														return ret;
+													}
+												}];
+											},
+											onMouseOver: () => {
+												return [{
+													mutation: (props) => {
+														console.log("onMouseOver | control", highlighter.hoverState);
+														console.log(props);
+														//props.datum is the target releated to the event
+														//we happen to be storing the family name as the x value
+														//testing: setting single value in an array for now
+														//maybe increase # of values allowed eventually for some fancy reason...
+
+														highlighter.setHoverState([props.datum['x']])
+														return {
+															style: Object.assign({}, props.style, {stroke: "black", strokeWidth: 2})
+														};
+													}
+												}];
+											},
+											onMouseOut: () => {
+												return [{
+													mutation: () => {
+														console.log("onMouseOut | control", highlighter.hoverState);
+														return null;
+													}
+												}];
+											}
+										}
+									}]}
+								/>
+
+							</div>}
+
+						</div>
+						<div><ContextStats /></div>
+					</div>
+					{/*testing: disable node display, genres*/}
+					{/*<div style={{right:"5em",position: "relative"}}><NodeDisplay/> </div>*/}
+					{/*<div style={{right:"5em",position: "relative"}}><GenresDisplayVertical genres={genres}/> </div>*/}
+				</div>
 				<div style={{zIndex:2}}>
 					<button  onClick={() =>{statcontrol.setMode(!statcontrol.mode)}}>{statcontrol.mode ===  true? 'Context':'Custom'}
 					</button>
 					<button onClick={checkState}>checkState</button>
-
-				<RedoIcon fontSize={'small'}/>
-				<button onClick={() =>{setView(!view)}}>
-					{view ? <PieChartIcon fontSize={'small'}/>:<CloudIcon fontSize={'small'}/>}
-				</button>
-
-				</div>
-			</div>
-			<div style={{display:"flex"}}>
-				<div>
-					{/*todo: need to make container smaller, not do relative pos
-					 style={{top: "-5em",right:"2em",position: "relative",height: "21em"}}*/}
-					<div  style={{top: "-4em",position: "relative",height: "21em",zIndex:1}}>
-						{/*{view && <div>{showCloud(dataset)}</div>}*/}
-						{/*options={{legend:legend}}*/}
-						{view && <div><BubbleChart  data={bubbleData}/></div>}
-						{!(view) &&
-						//	todo: no idea how this width/height bit works
-						//https://formidable.com/open-source/victory/docs/common-props#style
-						//https://formidable.com/open-source/victory/docs/common-props#width
-						<div style={{width:"23em"}} >
-							<VictoryPie
-								// width={220}
-								// height={220}
-								data={pieData}
-								padAngle={2}
-								innerRadius={80}
-								animate={{
-									duration: 2009, easing: "linear"
-								}}
-								style={{
-									data: {fill: (d) => familyColors[d.slice.data.x]}
-								}}
-								events={[{
-									target: "data",
-									eventHandlers: {
-										onClick: () => {
-											return [{
-												mutation: (props) => {
-													console.log("onClick | ", props.datum);
-													var ret = null;
-													if (families.indexOf(props.datum.x) === -1) {
-														selectFamilies([...families, props.datum.x])
-														ret = {
-															style: Object.assign({}, props.style, {
-																stroke: "black",
-																strokeWidth: 2
-															})
-														};
-													} else {
-														selectFamilies(families.filter(f => {
-															return f !== props.datum.x
-														}))
-														ret = {
-															style: Object.assign({}, props.style, {
-																stroke: "none",
-																strokeWidth: 2
-															})
-														};
-													}
-													return ret;
-												}
-											}];
-										},
-										onMouseOver: () => {
-											return [{
-												mutation: (props) => {
-													console.log("onMouseOver | control", highlighter.hoverState);
-													console.log(props);
-													//props.datum is the target releated to the event
-													//we happen to be storing the family name as the x value
-													//testing: setting single value in an array for now
-													//maybe increase # of values allowed eventually for some fancy reason...
-
-													highlighter.setHoverState([props.datum['x']])
-													return {
-														style: Object.assign({}, props.style, {stroke: "black", strokeWidth: 2})
-													};
-												}
-											}];
-										},
-										onMouseOut: () => {
-											return [{
-												mutation: () => {
-													console.log("onMouseOut | control", highlighter.hoverState);
-													return null;
-												}
-											}];
-										}
-									}
-								}]}
-							/>
-
-						</div>}
+					<button  onClick={() =>{friendscontrol.setCompare(!friendscontrol.compare)}}>{friendscontrol.compare ===  true? 'Both':'Difference'}
+					</button>
+					<RedoIcon fontSize={'small'}/>
+					<button onClick={() =>{setView(!view)}}>
+						{view ? <PieChartIcon fontSize={'small'}/>:<CloudIcon fontSize={'small'}/>}
+					</button>
+					<div style={{display:"flex"}}>
+						{/*<VennChart data={vennData}/>*/}
+						<div>
+							<FormControl component="fieldset">
+								{/*<FormLabel component="legend">Gender</FormLabel>*/}
+								<RadioGroup  name="radio1" value={friendscontrol.compare} onChange={handleChange}>
+									<FormControlLabel value="all" control={<Radio />} label="All" />
+									<FormControlLabel value="shared" control={<Radio />} label="Shared" />
+									<FormControlLabel value="user" control={<Radio />} label="User" />
+									<FormControlLabel value="guest" control={<Radio />} label="Guest" />
+								</RadioGroup>
+							</FormControl>
+						</div>
 
 					</div>
-					{/*<div><ContextStats></ContextStats></div>*/}
-					<div><ContextStats /></div>
+
 				</div>
-				{/*testing:*/}
-				{/*<div style={{right:"5em",position: "relative"}}><NodeDisplay/> </div>*/}
-				<div style={{right:"5em",position: "relative"}}><GenresDisplayVertical genres={genres}/> </div>
+
 			</div>
+
 
 
 		</div>

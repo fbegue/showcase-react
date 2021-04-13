@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
-
+import SplitPane from "react-split-pane";
 import 'fontsource-roboto';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
@@ -19,9 +19,11 @@ import logo from './assets/sound_found.png'
 import Store, {Context} from './storage/Store'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import RedirectPage from './RedirectPage';
+// import classnames from 'classnames';
+// import { useContainerQuery } from 'react-container-query';
 //
 import Player,{} from './Player'
-import {Control} from './index'
+import {Control,PaneControl} from './index'
 import withApolloProvider from './storage/withApolloProvider';
 import api from "./api/api";
 
@@ -184,21 +186,22 @@ Delayed.propTypes = {
 
 function App(props) {
 
-    useEffect(() => {
-        console.log("APP | componentDidMount");
-        // Update the document title using the browser API
-        //testing:
-        // document.title = `You clicked ${count} times`;
-        return function cleanup() {
-            console.log("APP | componentWillUnmount");
-        };
-    });
+    // useEffect(() => {
+    //     console.log("APP | componentDidMount");
+    //     // Update the document title using the browser API
+    //     //testing:
+    //     // document.title = `You clicked ${count} times`;
+    //     return function cleanup() {
+    //         console.log("APP | componentWillUnmount");
+    //     };
+    // });
 
 
     const { classes } = props;
     let [filter, setFilter] = useState('active');
     let [selectedTodoId, setSelectedTodoId] = useState();
     let control = Control.useContainer()
+    let paner = PaneControl.useContainer()
 
     const globalUI = useReactiveVar(GLOBAL_UI_VAR);
     console.log("APP | globalUI ",globalUI);
@@ -216,10 +219,10 @@ function App(props) {
             var diff = 0;
 
             if(!(newTime)){
-               // console.log('Checking expiryTime...',globalUI.expiryTime);
+                // console.log('Checking expiryTime...',globalUI.expiryTime);
                 diff = Math.abs(new Date() - new Date(globalUI.expiryTime));
             }else{
-               // console.log('Checking newTime...',newTime);
+                // console.log('Checking newTime...',newTime);
                 diff = Math.abs(new Date() - new Date(newTime));
             }
 
@@ -250,7 +253,7 @@ function App(props) {
                         console.log("refreshAuth finished");
                     }).catch(e =>{console.error(e)})
             }else{
-               // console.log("APP | threshold check passed",diff);
+                // console.log("APP | threshold check passed",diff);
             }
         }, 5000);
         return () => clearInterval(interval);
@@ -313,7 +316,7 @@ function App(props) {
             },
             MuiCardContent:{
                 root: {
-                   padding:"6px",
+                    padding:"6px",
                     //not sure how to go about overriding a last-child condition
                     paddingBottom:"0px !important"
                 }
@@ -321,60 +324,118 @@ function App(props) {
         }
     });
 
+    // const query = {
+    //     'width-between-400-and-599': {
+    //         minWidth: 400,
+    //         maxWidth: 599,
+    //     },
+    //     'width-larger-than-600': {
+    //         minWidth: 600,
+    //     },
+    // };
+    // const [params, containerRef] = useContainerQuery(query);
+
+
+    const paneSizer = (s) =>{
+        //paner.setPane(s)
+       // console.log("paneSizer",s);
+    }
+
+    //-----------------------------------------------------------
+    //testing:
+    // const [code, setCode] = useState('enter code');
+    // var getAuth =  function(code){
+    //     return new Promise(function(done, fail) {
+    //         console.log("code for accessToken fetch",code);
+    //
+    //         fetch('http://localhost:8888/getAuth', {
+    //             method: 'POST', // *GET, POST, PUT, DELETE, etc.
+    //             mode: 'cors', // no-cors, *cors, same-origin
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify({code:code})
+    //         })
+    //             .then(res => res.json())
+    //             .then(function(res){
+    //                 console.log("login response: ",res);
+    //                 done(res)
+    //             })
+    //     })
+    // }
+    //-----------------------------------------------------------
+
     return (
         <MuiThemeProvider theme={muiTheme}>
-        <Store>
+            <Store>
 
-            {/*<TestComp/>*/}
-            <BrowserRouter>
-                <div className="main">
-                    <Switch>
-                        {/*<Route path="/" component={Home} exact={true} />*/}
-                        <Route path="/redirect" component={RedirectPage} />
-                        {/*<Route path="/dashboard" component={Dashboard} />*/}
-                        {/*<Route component={NotFoundPage} />*/}
-                    </Switch>
-                </div>
-            </BrowserRouter>
-            <div>
-                <div style={{position: "sticky",top: "0", padding:"1em 1em 0em 1em", borderBottom: "1px solid black", zIndex: "20",display:'flex',background:"#f0f0f0"}}>
-                    <div><img style={{height:"4em"}} src={logo}/> </div>
-                    <div style={{marginRight:"1em"}}><Profile user={globalUI.user}/></div>
+                {/*<TestComp/>*/}
+                <BrowserRouter>
+                    <div className="main">
+                        <Switch>
+                            {/*<Route path="/" component={Home} exact={true} />*/}
+                            <Route path="/redirect" component={RedirectPage} />
+                            {/*<Route path="/dashboard" component={Dashboard} />*/}
+                            {/*<Route component={NotFoundPage} />*/}
+                        </Switch>
+                    </div>
+                </BrowserRouter>
+                <div>
+                    <div style={{position: "sticky",top: "0", padding:"1em 1em 0em 1em", borderBottom: "1px solid black", zIndex: "20",display:'flex',background:"#f0f0f0"}}>
+                        <div><img style={{height:"4em"}} src={logo}/> </div>
+                        <div style={{marginRight:"1em"}}><Profile user={globalUI.user}/></div>
+                        {/*<input value={code} onChange={(event) =>{setCode(event.target.value)}}  />*/}
+                        {/*<button onClick={() =>{getAuth(code)}}>fake auth </button>*/}
 
-                    {/*todo: broke this player when I set GLOBAL_UI_VAR in refreshAuth*/}
-                    {/*tried to make it wait, but doesn't seem to matter. the tracing says
+                        {/*<div ref={containerRef} className={classnames(params)}>yeah don't work here either</div>*/}
+
+                        {/*todo: broke this player when I set GLOBAL_UI_VAR in refreshAuth*/}
+                        {/*tried to make it wait, but doesn't seem to matter. the tracing says
                     that this is caused by my GLOBAL_UI_VAR set but I can't make sense of it... */}
 
-                    {/*{globalUI.access_token  &&*/}
-                    {/*<div style={playerStyle}>*/}
-                    {/*    <Player token={globalUI.access_token} id={control.id} play={control.play}/></div>*/}
-                    {/*}*/}
+                        {/*{globalUI.access_token  &&*/}
+                        {/*<div style={playerStyle}>*/}
+                        {/*    <Player token={globalUI.access_token} id={control.id} play={control.play}/></div>*/}
+                        {/*}*/}
 
-                    {/*todo: forcing delay until I can figure it out*/}
+                        {/*todo: forcing delay until I can figure it out*/}
 
-                    <Delayed waitBeforeShow={2000}>
-                        {globalUI.access_token  &&
-                        <div style={control.play ? {opacity:1,flexGrow:2}: {opacity:.4,flexGrow:2}}>
-                            <Player token={globalUI.access_token} id={control.id} play={control.play}/></div>
-                        }
-                    </Delayed>
+                        <Delayed waitBeforeShow={2000}>
+                            {globalUI.access_token  &&
+                            <div style={control.play ? {opacity:1,flexGrow:2}: {opacity:.4,flexGrow:2}}>
+                                <Player token={globalUI.access_token} id={control.id} play={control.play}/></div>
+                            }
+                        </Delayed>
 
-                </div>
-                <div className={classes.root} style={{display:"flex",flexDirection:"row"}}>
-                    <div style={{width:"60em"}}>
+                    </div>
+                    {/*todo: just noticed this taking away vertical scroll?*/}
+                    {/*<div className={"Resizer"}>*/}
+                    {/*    <SplitPane split="vertical" defaultSize={'80em'} onChange={(size) => paneSizer(size)}>*/}
+                    {/*        /!*testing:*!/*/}
+                    {/*        <div> {globalUI.access_token &&*/}
+                    {/*        <Tabify></Tabify>*/}
+                    {/*        }*/}
+                    {/*        </div>*/}
+                    {/*        <div>*/}
+                    {/*            <EventsList data={[]} />*/}
+                    {/*        </div>*/}
+                    {/*    </SplitPane>*/}
+                    {/*</div>*/}
+                <div className={classes.root} style={{display:"flex",flexDirection:"row",flexWrap: "nowrap"}}>
+                    <div style={{width:"35em"}}>
                         {/*testing:*/}
                         {globalUI.access_token &&
                         <Tabify></Tabify>
                         }
                     </div>
-                    <div style={{width:"30em"}}>
+                    <div style={{width:"55em"}}>
                         <EventsList data={[]} />
                     </div>
                 </div>
             </div>
         </Store>
-        </MuiThemeProvider>
-    );
+</MuiThemeProvider>
+);
 }
 
 App.propTypes = {

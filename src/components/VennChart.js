@@ -3,6 +3,8 @@ import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import Venn from 'highcharts/modules/venn';
 Venn(Highcharts);
+
+
 function VennChart(props) {
 
 	const options = {
@@ -15,7 +17,7 @@ function VennChart(props) {
 		},
 		title:{text:"",margin:0},
 		credits: {enabled: false},
-		series: props.data
+		series:props.data
 	};
 
 	return(<div>
