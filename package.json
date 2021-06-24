@@ -58,7 +58,7 @@
     "luxon": "^1.26.0",
     "material-table": "^1.69.2",
     "moment": "^2.29.1",
-    "node-sass": "^5.0.0",
+    "node-sass": "^6.0.1",
     "node-sass-chokidar": "^1.5.0",
     "normalizr": "^3.6.1",
     "notistack": "^0.4.3",
